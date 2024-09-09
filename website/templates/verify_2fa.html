@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2FA Verification</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/verify_2fa.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <div class="form-container">
+      <div class="col col-1">
+        <div class="black-box">
+          <i class="bx bx-left-arrow-alt left-arrow" aria-label="Previous"></i>
+          <i class="bx bx-right-arrow-alt right-arrow" aria-label="Next"></i>
+          <div class="main-info">
+            <p>Arrange. Streamline. Simplify</p>
+          </div>
+          <div id="notepad-info">
+            <div class="info-section">
+              <h3>Create, edit, and save</h3>
+              <p>Your notes online with our easy-to-use online notepad.</p>
+            </div>
+            <div class="info-section">
+              <h3>Access anytime, anywhere</h3>
+              <p>Your notes from anywhere, anytime, on any device.</p>
+            </div>
+            <div class="info-section">
+              <h3>Collaborate in real-time</h3>
+              <p>
+                With others by sharing your notes and working together in
+                real-time.
+              </p>
+            </div>
+          </div>
+          <div class="indicator-container">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col col-2">
+        <div class="logo">
+          <p>Note<span>wave.</span></p>
+        </div>
+
+        <form method="post" id="form-authentication">
+          <div class="form-authentication">
+            <div class="form-title">
+              <p>Two-Factor Authentication Verification</p>
+            </div>
+            <div class="form-inputs">
+              <div class="input-box">
+                <label for="token" class="form-label"
+                  ><i class="bx bxs-check-circle"></i> Enter your 2FA
+                  token</label
+                >
+                <input
+                  type="text"
+                  id="token"
+                  name="token"
+                  class="input-field"
+                />
+              </div>
+
+              <div class="input-box">
+                <button type="submit" id="verify-btn" class="submit">
+                  <span id="btn-text">Verify</span>
+                  <i class="bx bx-right-arrow-alt"></i>
+                </button>
+              </div>
+              <div class="error-msg" id="error">Token is required</div>
+            </div>
+            <div class="messages-container">
+              {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %} {% for category, message in messages %}
+              <div
+                class="alert alert-{{ category }} alert-dismissible fade show"
+                role="alert"
+              >
+                {% if category == 'success' %}
+                <i class="fas fa-check-circle"></i>
+                {% else %}
+                <i class="fas fa-times-circle"></i>
+                {% endif %} {{ message }}
+              </div>
+              {% endfor %} {% endif %} {% endwith %}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/verify_2fa.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const verifyBtn = document.getElementById("verify-btn");
+        const btnText = document.getElementById("btn-text");
+
+        verifyBtn.addEventListener("click", function () {
+          btnText.textContent = "Verifying";
+          verifyBtn.classList.add("verifying");
+
+          setTimeout(() => {
+            btnText.textContent = "Verify";
+            verifyBtn.classList.remove("verifying");
+          }, 5000);
+        });
+      });
+    </script>
+  </body>
+</html>

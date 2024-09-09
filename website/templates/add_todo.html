@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add To-Do</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/add_todo.css') }}"
+    />
+    <link
+    rel="icon"
+    href="{{ url_for('static', filename='img/notewave.ico') }}"
+    type="image/x-icon"
+  />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <div class="left-container">
+        <div class="close-left-container" id="closeLeftContainer">
+          <i
+            class="bx bx-sidebar"
+            data-tooltip="Close sidebar"
+            style="--background-: {{ current_user.generated_color }}"
+          ></i>
+        </div>
+        <div class="all">
+          <div class="profile">
+            <div class="cover-photo">
+              {% if current_user.cover_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.cover_picture }}"
+                alt="Cover Photo"
+                class="cover-image"
+              />
+              {% else %}
+              <div class="default-cover">
+                <p>Default Cover Photo</p>
+              </div>
+              {% endif %}
+            </div>
+            <div class="profile-pic">
+              {% if current_user.profile_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.profile_picture }}"
+                alt="Profile Picture"
+                class="profile-image"
+              />
+              {% else %}
+              <i
+                class="fas fa-5x"
+                style="--background-: {{ current_user.generated_color }}"
+                >{{ current_user.first_name[0] }}</i
+              >
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <p class="username">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </p>
+          </div>
+          <hr class="separation" />
+        </div>
+        <div class="nav-links">
+          <a href="/user_home" class="nav-item">
+            <i class="bx bx-home"></i>Home
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="bx bxs-cog"></i>Settings
+          </a>
+          <form
+            action="{{ url_for('auth.logout') }}"
+            method="post"
+            class="logout-form"
+          >
+            <button type="submit" class="log-item">
+              <i class="bx bx-log-out-circle"></i> Logout
+            </button>
+          </form>
+        </div>
+        <div class="quick-access">
+          <button class="quick-btn" id="createNoteBtn">Create Todo</button>
+          <button class="quick-btn" id="notificationBtn">Notification</button>
+        </div>
+        <div class="user-stats">
+          <p
+            class="stat-item"
+            style="--background: {{ current_user.generated_color }}"
+          >
+            Total Notes: <span>({{ current_user.notes | length }})</span>
+          </p>
+          <p
+            class="stat-item"
+            style="--background: {{ current_user.generated_color }}"
+          >
+            Tags Used: <span>({{ current_user.note_tags | length }})</span>
+          </p>
+          <p
+            class="stat-item"
+            style="--background: {{ current_user.generated_color }}"
+          >
+            To-dos: <span>({{ current_user.todos | length }})</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="right-container">
+        <div
+          class="return-left-container"
+          id="returnLeftContainer"
+          style="--background-: {{ current_user.generated_color }}"
+        >
+          <i class="bx bx-sidebar" data-tooltip="Open sidebar"></i>
+        </div>
+        <div class="content">
+          <div class="container_title">
+            <h1 style="--background-: {{ current_user.generated_color }}">
+              <span class="back-arrow"><i class="fas fa-arrow-left"></i></span>
+              Add New To-Do
+            </h1>
+          </div>
+          <div class="form_container">
+            <!-- Add To-Do Form -->
+            <form method="post" action="{{ url_for('views.add_todo_page') }}">
+              <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                class="inputs"
+                placeholder="To-do title"
+              />
+              <br /><br />
+              <input
+                type="date"
+                id="due_date"
+                name="due_date"
+                class="inputs"
+                placeholder="Due date (optional)"
+              />
+              <br /><br />
+              <div id="quillEditor"></div>
+              <input name="content" id="content" type="hidden" />
+              <br />
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Add To-Do
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="{{ url_for('static', filename='js/add_todos.js') }}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const quill = new Quill("#quillEditor", {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ["bold", "italic", "underline", "strike"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["link", "image"],
+            [{ color: [] }, { background: [] }],
+            [{ align: [] }],
+            [{ font: [] }],
+            [{ size: ["small", "medium", "large", "huge"] }],
+            [{ indent: "-1" }, { indent: "+1" }],
+            ["clean"],
+          ],
+        },
+      });
+
+      const contentField = document.getElementById("content");
+
+      quill.on("text-change", () => {
+        const html = quill.root.innerHTML;
+        contentField.value = cleanUpContent(html);
+      });
+
+      const initialContent = contentField.value;
+      if (initialContent) {
+        quill.root.innerHTML = initialContent;
+      }
+
+      function cleanUpContent(content) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = content;
+
+        // Remove all <p> tags and replace them with <br> tags
+        const paragraphs = tempDiv.querySelectorAll("p");
+        paragraphs.forEach(p => {
+          if (p.innerHTML.trim()) {
+            const br = document.createElement("br");
+            p.replaceWith(...Array.from(p.childNodes).map(node => {
+              if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR") {
+                return node;
+              } else {
+                return node;
+              }
+            }).concat(br));
+          }
+        });
+
+        return tempDiv.innerHTML;
+      }
+    });
+
+    document.getElementById("createNoteBtn").addEventListener("click", () => {
+      window.history.back();
+    });
+
+    document
+      .getElementById("notificationBtn")
+      .addEventListener("click", () => {
+        window.location.href = "/notifications";
+      });
+    </script>
+  </body>
+</html>

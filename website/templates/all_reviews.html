@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Reviews</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all_review.css') }}">
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+  rel="icon"
+  href="{{ url_for('static', filename='img/notewave.ico') }}"
+  type="image/x-icon"
+/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+    rel="stylesheet"
+  />
+
+</head>
+<body>
+    <section class="all-reviews">
+        <h2>All Reviews</h2>
+        <div id="all-user-ratings"></div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const ratings = [
+                    {% for rating in all_ratings %}
+                    {
+                        username: "{{ rating.username }}",
+                        rating: {{ rating.rating }},
+                        comments: "{{ rating.comments }}"
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ];
+
+                function generateStars(rating) {
+                    let starsHTML = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= rating) {
+                            starsHTML += '<i class="fas fa-star"></i>'; 
+                        } else {
+                            starsHTML += '<i class="far fa-star"></i>'; 
+                        }
+                    }
+                    return starsHTML;
+                }
+
+                const userRatingsContainer = document.getElementById('all-user-ratings');
+                userRatingsContainer.innerHTML = '';
+
+                ratings.forEach(rating => {
+                    const ratingElement = document.createElement('div');
+                    ratingElement.className = 'rating';
+                    ratingElement.innerHTML = `
+                        <p class="username">${rating.username}</p>
+                        <p class="comment">- ${rating.comments}</p>
+                        <div class="stars">${generateStars(rating.rating)}</div>
+                    `;
+                    userRatingsContainer.appendChild(ratingElement);
+
+                    
+                });
+            });
+        </script>
+    </section>
+</body>
+</html>

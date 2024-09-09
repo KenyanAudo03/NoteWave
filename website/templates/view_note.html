@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ note.title }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/view_note.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/6.2.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <style>
+      #editor {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <div class="page">
+      <div class="left-container">
+        <div class="tab">
+          <div class="tab-header">
+            <h2 style="--background-: {{ current_user.generated_color }}">
+              Other Notes
+            </h2>
+            <div class="return">
+              <a
+                href="{{url_for('views.tag_notes', tag_id=tag.id, note_id=note.id)}}"
+                ><i
+                  class="fas fa-arrow-left"
+                  style="--background-: {{ current_user.generated_color }}"
+                ></i
+              ></a>
+            </div>
+            <div class="close-left-container" id="closeLeftContainer">
+              <i
+                class="bx bx-sidebar"
+                data-tooltip="Close sidebar"
+                style="--background-: {{ current_user.generated_color }}"
+              ></i>
+            </div>
+          </div>
+          <div class="search">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search notes..."
+              data-tag-id="{{ tag.id }}"
+              style="--background-: {{ current_user.generated_color }}"
+              class="input-search"
+            />
+          </div>
+        </div>
+
+        <div class="notes-section">
+          <ul id="notesList">
+            {% if notes %} {% for note in notes %}
+            <li
+              class="note-item"
+              data-note-id="{{ note.id }}"
+              data-tag-color="{{ note.tag.color }}"
+            >
+              <h3 style="--bookmark-: {{ note.tag.color }}">
+                {{ note.title.split('\t')[0][:10] }}
+              </h3>
+              <p id="noteContent">
+                {{ note.content.split('\n')[0][:60] | safe |striptags}}
+              </p>
+
+              <hr />
+            </li>
+            {% endfor %} {% else %}
+            <p class="no-notes" style="--bookmark-: {{ tag.color }}">
+              No Available notes In this Bookmark
+            </p>
+            {% endif %}
+          </ul>
+          <div class="add-note-toggle">
+            <a
+              href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
+              class="toggle-add-note"
+              style="--background-: {{ current_user.generated_color }}"
+              >+</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="right-container">
+        <div
+          class="return-left-container"
+          id="returnLeftContainer"
+          style="--background-: {{ current_user.generated_color }}"
+        >
+          <i class="bx bx-sidebar" data-tooltip="Open sidebar"></i>
+        </div>
+        <div class="edit">
+          <a
+            href="{{ url_for('views.edit_note', note_id=note.id) }}"
+            data-tooltip="Edit note"
+          >
+            <i
+              class="fas fa-edit"
+              style="--background-: {{ current_user.generated_color }}"
+            ></i>
+          </a>
+        </div>
+
+        <div class="note-view">
+          {% if current_user.email_verified %}
+          <div class="menu">
+            <i
+              class="fas fa-bars"
+              id="openModalBtn"
+              style="--background-: {{ current_user.generated_color }}"
+            ></i>
+          </div>
+          {% endif %}
+
+          <div class="not-moving">
+            <p class="note-time">
+              {% if note.updated_at %} Updated at: {{
+              note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %} Created
+              at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }} {% endif %}
+            </p>
+
+            <div class="favorite">
+              <button
+                id="favoriteButton{{ note.id }}"
+                class="favorite-btn {{ 'favorite' if note.is_favorite else 'not-favorite' }}"
+                data-note-id="{{ note.id }}"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                {% if note.is_favorite %}
+                <i class="bx bxs-star"></i>
+                {% else %}
+                <i class="bx bx-star"></i>
+                {% endif %}
+              </button>
+            </div>
+
+            <h1 id="noteTitle" style="--bookmark-: {{ note.tag.color }}">
+              <span>Title: </span> {{ note.title }}
+            </h1>
+          </div>
+          <p style="--bookmark-: {{ note.tag.color }}">Content:</p>
+          <pre id="noteContent">{{ note.content | safe }}</pre>
+          <div id="editor">{{ note.content | safe}}</div>
+          <i class="fa-solid fa-sidebar-flip" id="returnIcon"></i>
+        </div>
+      </div>
+    </div>
+
+    <div id="menuModal" class="modal">
+      <div class="modal-content">
+        <span
+          class="close"
+          style="--background-: {{ current_user.generated_color }}"
+          >&times;</span
+        >
+        <ul>
+          <li>
+            <button
+              id="addFavoriteButton"
+              style="--background-: {{ current_user.generated_color }}"
+              data-note-id="{{ note.id }}"
+            >
+              <i class="bx bxs-star"></i> ADD FAVORITE
+              <i class="bx bxs-star"></i>
+            </button>
+          </li>
+          <li>
+            <a
+              href="{{ url_for('views.edit_note', note_id=note.id) }}"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              <i class="bx bxs-edit"></i> EDIT NOTE <i class="bx bxs-edit"></i>
+            </a>
+          </li>
+          <li>
+            <form
+              action="{{ url_for('views.delete_note', note_id=note.id) }}"
+              method="post"
+              onsubmit="return confirm('Are you sure you want to delete this note?');"
+            >
+              <button
+                class="del"
+                style="--background-: {{ current_user.generated_color }}"
+                type="submit"
+              >
+                <i class="bx bx-trash"></i> DELETE <i class="bx bx-trash"></i>
+              </button>
+            </form>
+          </li>
+          <li>
+            <button
+              id="addToDoButton"
+              style="--background-: {{ current_user.generated_color }}"
+              data-note-id="{{ note.id }}"
+            >
+              <i class="bx bxs-check-circle"></i> Add to To-Dos
+              <i class="bx bxs-check-circle"></i>
+            </button>
+          </li>
+          <li>
+            <button
+              style="--background-: {{ current_user.generated_color }}"
+              id="downloadTextButton"
+            >
+              <i class="bx bxs-share-alt"></i> SHARE
+              <i class="bx bxs-share-alt"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Download Format -->
+    <div id="fileTypeModal" class="modal2" style="display: none">
+      <div class="modal-content2">
+        <span
+          class="close2"
+          id="span"
+          style="--background-: {{ current_user.generated_color }}"
+          >&times;</span
+        >
+        <ul>
+          <li><label for="fileTypeSelect">CHOOSE FILE TYPE:</label></li>
+          <select id="fileTypeSelect">
+            <option value="txt">Text (.txt)</option>
+            <option value="docx">Word (.docx)</option>
+            <option value="pdf">PDF (.pdf)</option>
+            <option value="html">HTML (.html)</option>
+          </select>
+          <br /><br />
+          <li>
+            <button
+              id="downloadFileButton"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              DOWNLOAD
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/view_note.js') }}"></script>
+  </body>
+</html>

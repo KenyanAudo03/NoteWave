@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy | NoteWave</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/privacy.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+    />
+    <link
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="header-content-wrapper">
+      <header id="head">
+        <nav class="navbar">
+          <a href="/" class="logo"
+            ><p>Note<span>wave.</span></p></a
+          >
+          <ul class="menu-links">
+            <li><a href="/" type="menu">Home</a></li>
+            <li><a href="#" type="menu">About Us</a></li>
+            <li><a href="#" type="menu">Our Blog</a></li>
+            <li><a href="/contact" type="menu">Contact Us</a></li>
+          </ul>
+        </nav>
+      </header>
+      <section id="privacy-policy">
+        <div class="content-wrapper">
+          <div class="policy-section">
+            <h2 class="section-title">How is my data protected?</h2>
+            <div class="section-content">
+              <p>
+                We prioritize your data security by using advanced encryption
+                protocols and secure servers to protect your information. We use
+                TLS (Transport Layer Security) to ensure that your data is
+                transmitted securely. Our servers are regularly updated and
+                monitored to safeguard against unauthorized access.
+              </p>
+              <p>For more details, please review our full Privacy Policy.</p>
+            </div>
+          </div>
+          <div class="policy-section">
+            <h2 class="section-title">
+              Do you share my personal information with third parties?
+            </h2>
+            <div class="section-content">
+              <p>
+                We do not share your personal information with third parties
+                without your explicit consent. We may share information with
+                trusted partners who assist us in operating our website or
+                conducting our business, but only under strict confidentiality
+                agreements.
+              </p>
+              <p>For more details, please see our full Privacy Policy.</p>
+            </div>
+          </div>
+          <div class="policy-section">
+            <h2 class="section-title">Do you support 2FA?</h2>
+            <p style="margin-top: 10px;">
+              Yes, we support Two-Factor Authentication (2FA) to enhance your
+              account security. Follow these steps to enable 2FA:
+            </p>
+            <div class="fa-content">
+              <ol class="steps-list">
+                <li>
+                  <strong>Go to Settings Page</strong>
+                  <p>
+                    Navigate to the settings page from your account dashboard.
+                  </p>
+                  <img
+                    src="static/img/step1.png"
+                    alt="Settings Page"
+                    class="step-image"
+                  />
+                </li>
+                <li>
+                  <strong>Select Privacy Section</strong>
+                  <p>
+                    Click on the 'Privacy Setting' section in the settings menu.
+                  </p>
+                  <img
+                    src="static/img/step5.png"
+                    alt="Privacy Section"
+                    class="step-image"
+                  />
+                </li>
+                <li>
+                  <strong>Enable 2FA</strong>
+                  <p>
+                    Click on the 'Enable 2FA' option. You will be given two
+                    methods to set up 2FA.
+                  </p>
+                  <img
+                    src="static/img/step2.png"
+                    alt="Enable 2FA"
+                    class="step-image"
+                  />
+                  <ul>
+                    <li>
+                      <div>
+                        <strong>Using an Authenticator App</strong>
+                        <p>
+                          Scan the QR code displayed on the screen using an
+                          authenticator app like Google Authenticator or Authy.
+                        </p>
+                      </div>
+                      <img
+                        src="static/img/step3.png"
+                        alt="QR Code"
+                        class="step-image"
+                      />
+                    </li>
+                    <li>
+                      <div>
+                        <strong>Using Email</strong>
+                        <p>
+                          Select the email option, and an OTP (One-Time
+                          Password) will be sent to your registered email
+                          address. Enter this OTP to complete the setup.
+                        </p>
+                      </div>
+                      <img
+                        src="static/img/step4.png"
+                        alt="Email OTP"
+                        class="step-image"
+                      />
+                    </li>
+                  </ul>
+                </li>
+              </ol>
+              <p>
+                If you encounter any issues, please contact our support team.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <p>Note<span>wave.</span></p>
+          <div class="name">
+            <h2 class="web">NoteWave</h2>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul class="links">
+            <li><a href="/">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <div class="contact">
+            <p>
+              <i class="bx bx-current-location"></i> 0020, 002, Nairobi,
+              Lang'ata District
+            </p>
+            <p><i class="bx bxs-phone-incoming"></i> +254 703 853 259</p>
+            <p><i class="bx bx-envelope"></i> owinovictor933@gmail.com</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <h4>Follow Us</h4>
+          <div class="social-icons">
+            <a href="https://wa.me/254703853259" target="_blank"
+              ><i class="bx bxl-whatsapp"></i
+            ></a>
+            <a href="https://twitter.com/AudoWrld" target="_blank"
+              ><i class="bx bxl-twitter"></i
+            ></a>
+            <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
+              ><i class="bx bxl-instagram"></i
+            ></a>
+            <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
+              ><i class="bx bxl-linkedin"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 NoteWave. All rights reserved.</p>
+        <p>
+          Designed by
+          <a href="https://kenyanaudo03.github.io/Portfolio/" target="_blank"
+            >Victor Owino</a
+          >
+        </p>
+      </div>
+      <a href="#section1" class="scroll-up-arrow">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+    </footer>
+  </body>
+</html>

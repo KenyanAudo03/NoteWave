@@ -1,0 +1,16 @@
+.page1 h1 {
+  color: white;
+  padding: 25px;
+}
+
+.notification-item {
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.notification-item.read {
+  background-color: var(--background-);
+}

@@ -1,0 +1,1492 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.messages-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 20px;
+  text-align: center;
+}
+
+.alert {
+  display: inline-block;
+  width: auto;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.alert-success {
+  background-color: green;
+  color: white;
+}
+
+.alert-danger {
+  background-color: red;
+  color: white;
+}
+.alert-warning {
+  background-color: orange;
+  color: #fff;
+}
+.close {
+  outline: none;
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+.alert {
+  transition: opacity 0.15s linear;
+}
+.alert.fade {
+  opacity: 1;
+}
+.alert .fas {
+  margin-right: 8px;
+  color: #fff;
+}
+.page {
+  margin: 10px;
+  border: 1px solid #ff7f50;
+  padding: 10px;
+  display: flex;
+  height: calc(100vh - 20px);
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.left-container {
+  width: 20%;
+  background-color: #1b1b1b;
+  padding: 10px;
+  border: 1px solid darkgreen;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+.all {
+  position: sticky;
+  background: #1b1b1b;
+  z-index: 1;
+}
+
+.profile {
+  margin-bottom: 5px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cover-photo {
+  width: 100%;
+  height: 150px;
+  margin-bottom: -50px;
+  position: relative;
+}
+
+.cover-photo .cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.cover-photo .default-cover {
+  width: 100%;
+  height: 100%;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.profile-pic {
+  position: relative;
+  z-index: 1;
+}
+
+.profile-pic .profile-image {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+}
+
+.profile-pic i {
+  color: #fff;
+  background: var(--background-);
+  height: 110px;
+  width: 110px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  border: 3px solid white;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  margin-top: 0;
+  display: flex;
+}
+
+.profile-info .username {
+  font-size: 0.9em;
+  color: gray;
+  margin: 3px 0;
+  font-size: 1.1em;
+  font-weight: bolder;
+}
+
+.profile-info p {
+  margin-left: 20px;
+}
+
+.right-container {
+  width: 80%;
+  background: #1b1b1b;
+  padding: 10px;
+  margin-left: 1%;
+  border: 1px solid darkcyan;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-menu {
+  padding: 20px;
+  position: relative;
+}
+
+.settings-menu .divider {
+  border: 1px solid #fff;
+  margin: 10px 0;
+}
+
+.settings-menu i {
+  margin-right: 5px;
+}
+
+.settings-menu ul {
+  list-style-type: none;
+  padding: 0;
+  font-size: 16px;
+}
+
+.settings-menu ul li {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.settings-menu ul li a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.settings-menu ul li a:hover {
+  background-color: #444;
+}
+
+.dropdown-content {
+  display: none;
+  left: 0;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: -1;
+  margin-left: 30px;
+}
+
+.dropdown-content li {
+  border-bottom: 1px solid #ccc;
+}
+
+.dropdown-content li:last-child {
+  border-bottom: none;
+}
+
+.dropdown-content li a {
+  padding: 10px;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+}
+
+.dropdown-content li a:hover,
+.dropdown-content i:hover {
+  color: #fff;
+}
+
+#accountLink,
+#privacyLink,
+#appearanceLink,
+#notificationsLink,
+#helpLink,
+#accountManagementLink,
+#dataManagementLink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+}
+
+#accountLink i {
+  margin-left: auto;
+}
+
+.settings-menu a .bx-chevron-down {
+  margin-left: auto;
+  transition: transform 0.3s;
+}
+
+.settings-menu a.active .bx-chevron-down {
+  transform: rotate(180deg);
+}
+
+.settings-content section {
+  display: none;
+}
+
+.settings-content section:target {
+  display: block !important;
+}
+#profilePicFormSection {
+  display: none;
+}
+
+#usernameFormSection,
+#nameFormSection,
+#passwordFormSection,
+#profilePicFormSection,
+#phoneNumberFormSection,
+#dobFormSection,
+#timeZoneFormSection,
+#bioFormSection,
+#generatedColorFormSection,
+#genderFormSection,
+#privacySettings,
+#logoutAccount,
+#deleteAccount,
+#deactivateAccount,
+#exportData,
+#importData,
+#emailNotifications,
+#pushNotifications,
+#themeSettings,
+#fontSizeSettings,
+#contactSupport,
+#verifySection,
+#helpCenter {
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100vw;
+}
+
+#usernameFormSection h2,
+#dobFormSection h2,
+#nameFormSection h2,
+#passwordFormSection h2,
+#profilePicFormSection h2,
+#phoneNumberFormSection h2,
+#timeZoneFormSection h2,
+#bioFormSection h2,
+#generatedColorFormSection h2,
+#genderFormSection h2,
+#privacySettings h2,
+#deleteAccount h2,
+#logoutAccount h2,
+#deactivateAccount h2,
+#exportData h2,
+#importData h2,
+#pushNotifications h2,
+#emailNotifications h2,
+#fontSizeSettings h2,
+#themeSettings h2,
+#contactSupport h2,
+#verifySection h2,
+#helpCenter h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+}
+
+#usernameForm h3,
+#nameForm h3,
+#passwordForm,
+#profilePicFormSection,
+#phoneNumberFormSection h3,
+#dobFormSection h3,
+#timeZoneFormSection,
+#bioFormSection h3,
+#generatedColorFormSection h3,
+#genderFormSection h3,
+#privacySettings h3,
+#deleteAccount h3,
+#logoutAccount h3,
+#deactivateAccount h3,
+#exportData h3,
+#importData h3,
+#emailNotifications h3,
+#pushNotifications h3,
+#themeSettings h3,
+#fontSizeSettings h3,
+#contactSupport h3,
+#verifySection h3,
+#helpCenter h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+#usernameForm label,
+#nameForm label,
+#passwordForm label,
+#verifySection label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+#passwordForm .input-container {
+  position: relative;
+  width: 100%;
+}
+
+#usernameForm input[type="text"],
+#nameForm input[type="text"],
+#passwordForm input[type="password"],
+#passwordForm input[type="text"],
+#importData input[type="file"],
+#verifySection input[type="email"],
+.formBox input[type="text"],
+.formBox input[type="email"],
+.formBox input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+#passwordForm .toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-90%);
+  cursor: pointer;
+  color: #ccc;
+  font-size: 16px;
+}
+#usernameForm input[type="text"]:focus,
+#nameForm input[type="text"]:focus,
+#passwordForm input[type="password"]:focus,
+.formBox input[type="text"]:focus,
+.formBox input[type="email"]:focus,
+#verifySection input[type="email"]:focus,
+.formBox input[type="number"]:focus,
+.formBox textarea:focus {
+  border-color: var(--background-);
+}
+
+#usernameForm button[type="submit"],
+#nameForm button[type="submit"],
+#passwordForm button[type="submit"],
+#importData button[type="submit"],
+#pushNotifications button[type="submit"],
+#emailNotifications button[type="submit"],
+#verifySection button[type="submit"],
+.formBox button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--background-);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+#usernameForm button[type="submit"]:hover,
+#nameForm button[type="submit"]:hover,
+#passwordForm button[type="submit"]:hover,
+#importData button[type="submit"]:hover,
+#pushNotifications button[type="submit"]:hover,
+#verifySection button[type="submit"]:hover,
+#emailNotifications button[type="submit"]:hover,
+.formBox button:hover {
+  border: 1px solid var(--background-);
+  color: #fff;
+  background: transparent;
+}
+.formBox p {
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.1em;
+  text-align: center;
+}
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 1rem;
+  display: none;
+}
+#profilePicFormSection h2 {
+  margin-top: -15px;
+}
+
+#mainContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+#pictureUpdateContainer {
+  position: relative;
+  margin-bottom: 5px;
+  flex-direction: column;
+  align-items: center;
+  flex-direction: column;
+}
+#coverPicContainer {
+  width: 100%;
+  height: 150px;
+  margin-bottom: -50px;
+  position: relative;
+}
+#coverPicContainer .cover-pic {
+  width: 500px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+#editCoverPicButton {
+  position: absolute;
+  bottom: -148px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+}
+#editCoverPicButton:hover {
+  background: var(--background-);
+}
+#coverPicContainer .default-cover {
+  width: 500px;
+  height: 300px;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #000;
+}
+#profilePicContainer {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-top: -75px;
+}
+#profilePicContainer .profile-pic {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+}
+
+#profilePicContainer #editProfilePicButton {
+  position: absolute;
+  bottom: 10px;
+  right: 18px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#profilePicContainer #editProfilePicButton:hover {
+  background: var(--background-);
+}
+
+#profilePicContainer .fa-5x {
+  color: #fff;
+  background: var(--background-);
+  height: 150px;
+  width: 150px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  border: 3px solid white;
+}
+
+#userDetails {
+  width: 45%;
+  margin-left: 3%;
+  padding: 20px;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-item {
+  margin-bottom: 7px;
+  border-bottom: 1px solid #444;
+}
+
+.detail-item label {
+  font-weight: bold;
+  color: #ecf0f1;
+  flex: 1;
+}
+
+.detail-item span {
+  margin-left: 30px;
+  color: #ecf0f1;
+}
+
+.detail-item a {
+  color: darkgrey;
+  text-decoration: none;
+  text-decoration: none;
+}
+
+.detail-item a:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+.detail-item button {
+  padding: 6px 10px;
+  color: #aaa;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.detail-item button:hover {
+  background: transparent;
+}
+
+.form-section {
+  display: none;
+  padding: 20px;
+  background-color: #34495e;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+#croppingContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #1b1b1b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#cropperWrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#imageToCrop {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cropper-crop-box {
+  position: absolute;
+  border: none;
+  color: transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  width: 400px;
+  height: 400px;
+  cursor: move;
+}
+
+.buttons {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.buttons button {
+  margin: 0 10px;
+  background-color: var(--background-);
+  border-radius: 10px;
+  border: none;
+  color: #fff;
+  padding: 13px 15px;
+  cursor: pointer;
+  gap: 50px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.buttons button:hover {
+  border: 1px solid var(--background-);
+  color: #000;
+  background: none;
+}
+.attention-section {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+.attention-section h3 {
+  color: #aaa;
+}
+
+.attention-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.attention-section li {
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.attention-section li a {
+  text-decoration: none;
+  color: darkgrey;
+}
+.attention-section li a:hover {
+  text-decoration: underline;
+}
+.contact-button {
+  background-color: darkgray;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.contact-button:hover {
+  background-color: darkkhaki;
+}
+
+/* Phone */
+#phoneNumberFormSection span,
+#dobFormSection span,
+#timeZoneFormSection span,
+#bioFormSection span,
+#generatedColorFormSection span,
+#genderFormSection span {
+  color: #fff;
+  font-size: 17px;
+}
+#phoneNumberContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  position: relative;
+}
+
+#countryCode {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-right: 10px;
+  appearance: none;
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+  color: #fff;
+}
+#countryCode option {
+  background: #1b1b1b;
+}
+#countryCode:focus,
+#phoneNumber:focus {
+  border: 1px solid var(--background-);
+}
+#phoneNumber {
+  padding: 10px;
+  padding-left: 40px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  outline: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+#editPhoneNumberButton {
+  position: absolute;
+  left: calc(100% - 40px);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+}
+#editPhoneNumberButton i {
+  color: #fff;
+}
+
+#savePhoneNumberButton,
+#saveDobButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+#savePhoneNumberButton:hover,
+#saveDobButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+
+/* DOB */
+#dobFormSection span {
+  margin-bottom: 15px;
+}
+#dobContainer label {
+  display: block;
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+#dobInput {
+  background-color: transparent;
+  width: 100%;
+  padding: 10px;
+  font-size: 17px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+  color: #fff;
+  outline: none;
+}
+
+#dobInput:focus {
+  border: 1px solid var(--background-);
+}
+.flatpickr-calendar {
+  font-family: Arial, sans-serif;
+}
+.flatpickr-calendar .flatpickr-month {
+  color: #000;
+}
+.flatpickr-calendar .flatpickr-day {
+  color: #000;
+}
+.flatpickr-calendar .flatpickr-day:hover {
+  background-color: #007bff;
+  color: #000;
+}
+.flatpickr-calendar .flatpickr-prev-month,
+.flatpickr-calendar .flatpickr-next-month {
+  color: #007bff;
+}
+
+/* Timezone */
+#timeZoneContainer {
+  margin-top: 1rem;
+}
+
+#timeZoneSearch {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+#timeZoneSearch:focus {
+  border: 1px solid var(--background-);
+}
+
+#timeZoneList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  position: absolute;
+  background-color: #1b1b1b;
+  width: 50%;
+  display: block;
+  display: none;
+}
+
+#timeZoneList li {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+#timeZoneList li:hover {
+  background-color: #aaa;
+  color: #000;
+}
+#saveTimeZoneButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+#saveTimeZoneButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.3s ease;
+  resize: none;
+  margin-top: 5px;
+  box-sizing: border-box;
+  position: relative;
+}
+.view-bio {
+  position: relative;
+  display: inline;
+}
+.view-bio #editBioButton {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: #fff;
+  position: absolute;
+  bottom: 27px;
+  right: 10px;
+  cursor: pointer;
+}
+#bioFormSection textarea:focus {
+  border: 1px solid var(--background-);
+}
+#saveBioButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+  display: none;
+}
+#saveBioButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+/* Color */
+#colorOptionContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 7px;
+  margin-bottom: 1rem;
+  margin-left: 12%;
+  border: 2px solid var(--background-);
+  margin-right: 18%;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border 0.3s ease;
+}
+
+.color-option.selected {
+  border-color: black;
+}
+#saveGeneratedColorButton {
+  padding: 10px 23px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+  display: none;
+}
+
+#saveGeneratedColorButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+
+#genderSelect {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin-top: 7px;
+}
+#genderSelect:focus {
+  border: 1px solid var(--background-);
+}
+#saveGenderButton {
+  padding: 10px 23px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+  display: none;
+}
+#saveGenderButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+#genderFormSection option {
+  background: #1b1b1b;
+}
+
+#privacySettings p {
+  color: #fff;
+}
+
+#disable2FAButton,
+#enable2FAButton {
+  padding: 10px 23px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--background-);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+#disable2FAButton:hover,
+#enable2FAButton:hover {
+  background-color: transparent;
+  border: 1px solid var(--background-);
+}
+
+#accountActivity table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#accountActivity th,
+#accountActivity td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+  color: #000;
+}
+
+#accountActivity th {
+  background-color: #f4f4f4;
+  color: #000;
+}
+
+#accountActivity tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#accountActivity tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+#accountActivity tr:hover {
+  background-color: #f1f1f1;
+}
+
+#accountActivity tr:hover td {
+  color: #000;
+}
+
+#emailPreferences {
+  margin-top: 15px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#emailPreferences h3 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#emailPreferencesForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#emailPreferencesForm label,
+#pushNotificationsForm label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #555;
+}
+
+#emailPreferencesForm label input[type="checkbox"],
+#pushNotificationsForm label input[type="checkbox"] {
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+}
+
+#emailPreferencesForm button {
+  align-self: center;
+  padding: 10px 20px;
+  font-size: 16px;
+  width: 100%;
+  color: #fff;
+  background-color: var(--background-, #007bff);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#emailPreferencesForm button:hover {
+  border: 1px solid var(--background-, #0056b3);
+  color: #000;
+  background: transparent;
+}
+
+/* Delete Account */
+.delete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.delete-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #ff3333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+.delete-btn i {
+  margin-right: 8px;
+}
+.delete-btn:hover {
+  background-color: #5c0505;
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  margin-top: 15%;
+  text-align: center;
+  border-radius: 10px;
+  max-height: 90vh;
+  overflow: auto;
+  color: #fff;
+}
+
+.close {
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 50px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-btn {
+  margin: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.confirm-btn {
+  background-color: #ff4d4d;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #ccc;
+  color: black;
+}
+/* Logout */
+.logout-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: red;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+.logout-btn:hover {
+  background-color: darkred;
+  color: #fff;
+}
+/* User Management */
+#activateUsers {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#activateUsers h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+form {
+  display: inline;
+}
+
+i {
+  font-size: 18px;
+}
+/* Deactivate */
+.deactivate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+#deactivateAccount p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.deactivate-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+#deactivateAccount .btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin: 5px;
+}
+
+#deactivateAccount .btn-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+#deactivateAccount .btn-danger:hover {
+  background-color: #c9302c;
+}
+
+#deactivateAccount .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+#deactivateAccount .btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Export Data */
+.export {
+  margin-top: 10px;
+}
+.export p {
+  color: #fff;
+}
+.export ul {
+  list-style-type: lower-roman;
+  color: #fff;
+  font-size: 19px;
+  margin-left: 30px;
+}
+.export ul li {
+  margin-bottom: 10px;
+}
+.export ul li a {
+  text-decoration: none;
+  color: darkcyan;
+  font-size: 19px;
+  font-weight: bold;
+}
+.export ul li a:hover {
+  color: #fff;
+}
+.export ul li a i {
+  margin-right: 10px;
+}
+#emailNotifications .emailPreferences {
+  background: transparent;
+}
+
+.faq-category {
+  margin-bottom: 20px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: #1e1e1e;
+}
+
+.faq-category h3 {
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: #f0f0f0;
+}
+
+.faq-item {
+  margin-bottom: 10px;
+}
+
+.faq-item h4 {
+  margin-bottom: 5px;
+  color: #f0f0f0;
+}
+
+.faq-item p {
+  margin-bottom: 10px;
+  color: darkgrey;
+}
+
+a {
+  color: #64b5f6;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+/* Progress Circle Styles */
+#progressContainer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.progress-circle {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 100%;
+  border: 10px solid #ddd;
+  border-radius: 50%;
+  border-top-color: green;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: transform 0.4s;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: bold;
+}

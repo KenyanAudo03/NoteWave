@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes for {{ tag.name }}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+    rel="icon"
+    href="{{ url_for('static', filename='img/notewave.ico') }}"
+    type="image/x-icon"
+  />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/user_home.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tag_notes.css') }}"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <div class="page">
+      <div class="left-container">
+        <div class="all">
+          <div class="profile">
+            <div class="cover-photo">
+              {% if current_user.cover_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.cover_picture }}"
+                alt="Cover Photo"
+                class="cover-image"
+              />
+              {% else %}
+              <div class="default-cover">
+                <p>Default Cover Photo</p>
+              </div>
+              {% endif %}
+            </div>
+            <div class="profile-pic">
+              {% if current_user.profile_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.profile_picture }}"
+                alt="Profile Picture"
+                class="profile-image"
+              />
+              {% else %}
+              <i
+                class="fas fa-5x"
+                style="--background-: {{ current_user.generated_color }}"
+                >{{ current_user.first_name[0] }}</i
+              >
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="profile-info">
+          <p class="username">
+            {{ current_user.full_name }} {% if current_user.email_verified %}
+            <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="notes">
+          <p class="section-title">
+            NOTES
+            {% if  current_user.email_verified %}
+            <a href="" class="edit-notes"><i class="bx bxs-edit"></i></a>
+            {% endif %}
+          </p>
+          <div class="notes-content">
+            <a href="/user_home" class="notes-link">
+              <p>
+                <i class="far fa-file-alt"></i> All notes
+                <span style="--background-: {{ current_user.generated_color }}">
+                  ({{ current_user.notes|length }})
+                </span>
+              </p>
+            </a>
+            <a href="{{ url_for('views.show_todo_page') }}" class="notes-link">
+              <p style="--background-: {{ current_user.generated_color }}">
+                <i class="far fa-check-circle"></i> To-dos
+                <span> (<span id="todoCount">0</span>)</span>
+              </p>
+            </a>
+            <hr />
+          </div>
+
+          <div class="favorite">
+            <a href="/favorites" class="favorite-link" id="favoriteLink">
+              <p style="--background-: {{ current_user.generated_color }}">
+                <i class="far fa-star"></i> My favorites
+                <span> (<span id="favoriteCount">0</span>) </span>
+              </p>
+            </a>
+          </div>
+        </div>
+
+        <div class="tags">
+          <p class="section-title">BOOKMARKS</p>
+          {% for tag in tags %}
+          <a
+            href="{{ url_for('views.tag_notes', tag_id=tag.id) }}"
+            class="tag"
+            data-tag-id="{{ tag.id }}"
+          >
+            <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
+            {{ tag.name }}
+            <span
+              class="note-count"
+              style="--background-: {{ current_user.generated_color }}"
+              >({{ tag.note_count }})</span
+            >
+          </a>
+
+          <hr class="tag-divider" />
+          {% endfor %}
+        </div>
+
+        <div class="settings" id="settingsLink">
+          <a href="{{url_for('views.settings')}}">
+            <p><i class="fas fa-cog"></i> Settings</p>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="right-container"
+        data-user-timezone="{{ current_user.time_zone }}"
+        data-user-fullname="{{ current_user.full_name }}"
+      >
+        <div class="header">
+          <div class="the-header">
+            <div
+              class="left"
+              style="--background-: {{ current_user.generated_color }}"
+            ></div>
+            <div
+              class="right"
+              style="--background-: {{ current_user.generated_color }}"
+            ></div>
+          </div>
+          <div class="search">
+            <input
+              style="--background-: {{ current_user.generated_color }}"
+              type="text"
+              data-tag-id="{{ tag.id }}"
+              id="searchInput"
+              placeholder="Search notes..."
+              class="input-search"
+            />
+          </div>
+        </div>
+
+        <div class="notes-section">
+          <h2 style="--bookmark-: {{ tag.color }}">Notes for {{ tag.name }}</h2>
+          <ul id="notesList">
+            {% if notes %} {% for note in notes %}
+            <li
+              class="note-item"
+              data-note-id="{{ note.id }}"
+              data-tag-color="{{ note.tag.color }}"
+            >
+              <h3 style="--bookmark-: {{ note.tag.color }}">
+                {{ note.title.split('\n')[0][:20] }}....
+              </h3>
+              <pre class="note-preview">
+{{ note.content.split('\n')[0][:60] | safe |striptags}}..</pre
+              >
+              <p class="note-time">
+                {% if note.updated_at %} Updated at: {{
+                note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %} Created
+                at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }} {% endif %}
+              </p>
+              <hr style="--background-: {{ current_user.generated_color }}" />
+            </li>
+            {% endfor %} {% else %}
+            <p class="no-notes" style="--bookmark-: {{ tag.color }}">
+              No Available notes In this Bookmark
+            </p>
+            {% endif %}
+          </ul>
+
+          <div class="add-note-toggle">
+            <a
+              href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
+              class="toggle-add-note"
+              style="--background-: {{ current_user.generated_color }}"
+              >+</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="editTagsModal" class="modal">
+      <div class="modal-content">
+        <span
+          class="close-modal"
+          style="--background-: {{ current_user.generated_color }}"
+          >&times;</span
+        >
+        <h2>EDIT TAGS</h2>
+        <ul id="tagList">
+          {% for tag in tags %}
+          <li class="tag-item" data-tag-id="{{ tag.id }}">
+            <div class="color-picker" style="--tag-color: {{tag.color}}"></div>
+            <input
+              type="text"
+              class="tag-name"
+              value="{{ tag.name }}"
+              readonly
+            />
+            <button class="edit-pen"><i class="fas fa-pen"></i></button>
+            <button class="save-tag" style="display: none">
+              <i class="fas fa-check"></i>
+            </button>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div id="colorPickerModal" class="modal">
+      <div class="modal-content">
+        <span
+          class="close-color-modal"
+          style="--background-: {{ current_user.generated_color }}"
+          >&times;</span
+        >
+        <h2>SELECT COLOR</h2>
+        <div class="color-options">
+          <div
+            class="color-option"
+            style="background-color: #ff0000"
+            data-color="#FF0000"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #00ff00"
+            data-color="#00FF00"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #0000ff"
+            data-color="#0000FF"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #ffff00"
+            data-color="#FFFF00"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #ff00ff"
+            data-color="#FF00FF"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #00ffff"
+            data-color="#00FFFF"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #3498db"
+            data-color="#3498db"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #2ecc71"
+            data-color="#2ecc71"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #e67e22"
+            data-color="#e67e22"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #95a5a6"
+            data-color="#95a5a6"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #9b59b6"
+            data-color="#9b59b6"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #123456"
+            data-color="#123456"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/tag_notes.js') }}"></script>
+  </body>
+</html>

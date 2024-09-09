@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | NoteWave</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/contact.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+    />
+
+    <link
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <div class="header-content-wrapper">
+      <header id="head">
+        <nav class="navbar">
+          <a href="/" class="logo"
+            ><p>Note<span>wave.</span></p></a
+          >
+          <ul class="menu-links">
+            <li><a href="/" type="menu">Home</a></li>
+            <li><a href="#" type="menu">About Us</a></li>
+            <li><a href="#" type="menu">Our Blog</a></li>
+            <li><a href="/contact" type="menu">Contact Us</a></li>
+            <li><a href="/auth/login" type="menu" target="_blank">Login</a></li>
+            <li><a type="started" href="/auth/sign_up">Get Started</a></li>
+          </ul>
+        </nav>
+      </header>
+      <div class="container">
+        <div class="formBox">
+          <h2 class="title">Contact Us</h2>
+          <br />
+
+          <p class="time">You will hear from us at the earliest!</p>
+          <form
+            id="contactForm"
+            action="{{ url_for('views.send_email_contact') }}"
+            method="post"
+          >
+            <div class="nameInp">
+              <i class="fa fa-user icon"></i>
+              <input
+                type="text"
+                placeholder="Full Name"
+                name="name"
+                id="name"
+                required
+              />
+            </div>
+            <div class="mailInp">
+              <i class="fa fa-envelope"></i>
+              <input
+                type="email"
+                name="mail"
+                id="mail"
+                placeholder="Email"
+                required
+              />
+            </div>
+            <div class="phoneInp">
+              <i class="bx bxs-phone-call"></i>
+              <input
+                type="text"
+                name="phone"
+                id="phone"
+                placeholder="Phone"
+                required
+              />
+            </div>
+            <div class="queryInp">
+              <textarea
+                name="query"
+                id="query"
+                cols="30"
+                rows="5"
+                placeholder="Any comment or your query"
+                required
+              ></textarea>
+            </div>
+            <div class="submitBtn">
+              <button id="btn" type="submit">Send</button>
+              <div class="spinner"></div>
+            </div>
+          </form>
+
+          <p class="extra">You can also contact us at +254-703-853-259</p>
+        </div>
+        <div class="rightSide">
+          <p class="heading">Contact</p>
+          <h2 class="touch">Get in <span>Touch</span></h2>
+
+          <div class="more">
+            <p>
+              We are here to assist you with any inquiries you may have. Whether
+              you need information about our services, have questions about our
+              products, or require support, our dedicated team is ready to help.
+              Feel free to reach out to us through the contact details provided
+              below. We strive to respond to all inquiries promptly and look
+              forward to hearing from you. Thank you for choosing NoteWave, and
+              we are excited to connect with you. If you encounter any issues or
+              bugs while using our services, please report them to us so we can
+              improve your experience.
+            </p>
+
+            <div class="links">
+              <ul>
+                <li>
+                  <i class="bx bx-current-location"></i> 0020, 002, nairobi,
+                  Lang'ata District
+                </li>
+                <li><i class="bx bxs-phone-incoming"></i> +254-703-853-259</li>
+                <li><i class="bx bx-envelope"></i> owinovictor933@gmail.com</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-down-arrow">
+        <a href="#section2"><i class="bx bxs-down-arrow"></i></a>
+      </div>
+    </div>
+    <div id="section2">
+      <h2>Our Location</h2>
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.771883029227!2d36.82554707413565!3d-1.3122819986752587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f11aa51436975%3A0xd9b3c93d8ffbe5df!2sKongoni%20Primary%20School!5e0!3m2!1sen!2ske!4v1722758037234!5m2!1sen!2ske"
+        width="600"
+        height="450"
+        style="border: 0"
+        allowfullscreen=""
+        loading="lazy"
+        class="google-map"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <p>Note<span>wave.</span></p>
+          <div class="name">
+            <h2 class="web">NoteWave</h2>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul class="links">
+            <li><a href="/">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <div class="contact">
+            <p>
+              <i class="bx bx-current-location"></i> 0020, 002, nairobi,
+              Lang'ata District
+            </p>
+            <p><i class="bx bxs-phone-incoming"></i> +254 703 853 259</p>
+            <p><i class="bx bx-envelope"></i> owinovictor933@gmail.com</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <h4>Follow Us</h4>
+          <div class="social-icons">
+            <a href="https://wa.me/254703853259" target="_blank">
+              <i class="bx bxl-whatsapp"></i
+            ></a>
+            <a href="https://twitter.com/AudoWrld" target="_blank"
+              ><i class="bx bxl-twitter"></i
+            ></a>
+            <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
+              ><i class="bx bxl-instagram"></i
+            ></a>
+            <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
+              ><i class="bx bxl-linkedin"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 NoteWave. All rights reserved.</p>
+        <p>
+          Designed by
+          <a href="https://kenyanaudo03.github.io/Portfolio/" target="_blank"
+            >Victor Owino</a
+          >
+        </p>
+      </div>
+      <a href="#section1" class="scroll-up-arrow">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+    </footer>
+    <script src="{{ url_for('static', filename='js/contact.js') }}"></script>
+  </body>
+</html>

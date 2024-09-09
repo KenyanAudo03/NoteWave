@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Homepage | NoteWave</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/home.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+  </head>
+  <body>
+    <div class="header-content-wrapper">
+      <header id="head">
+        <nav class="navbar">
+          <a href="/" class="logo"
+            ><p>Note<span>wave.</span></p></a
+          >
+          <ul class="menu-links">
+            <li><a href="/" type="menu">Home</a></li>
+            <li><a href="#" type="menu">About Us</a></li>
+            <li><a href="#" type="menu">Our Blog</a></li>
+            <li><a href="/contact" type="menu">Contact Us</a></li>
+            <li><a href="/auth/login" type="menu" target="_blank">Login</a></li>
+            <li><a type="started" href="/auth/sign_up">Get Started</a></li>
+          </ul>
+        </nav>
+      </header>
+      <section class="main-content" id="section1">
+        <img
+          src="static/img/notepad.jpg"
+          alt="Notepad Image"
+          class="notepad-image"
+        />
+        <div class="content">
+          <h4><span>|</span>Victor Owino<span>|</span></h4>
+          <p>
+            "Welcome to NoteWave! Our notepad is designed to simplify your life,
+            offering a completely free and intuitive way to capture your
+            thoughts. Whether you're a student, professional, or hobbyist,
+            NoteWave is for you. Our user-friendly interface lets you start
+            writing instantly, with no complicated setups. We believe in free
+            access, promoting creativity and productivity without financial
+            barriers. Your security and privacy are our top priorities. Your
+            notes are securely stored, ensuring your data is always protected.
+            Thank you for choosing NoteWave. We’re here to help you organize
+            your ideas effortlessly. Happy noting! "
+          </p>
+          <br />
+          <a href="#" class="how-it-works">See how it works</a>
+        </div>
+      </section>
+      <div class="scroll-down-arrow">
+        <a href="#section2"><i class="fas fa-chevron-down"></i></a>
+      </div>
+    </div>
+
+    <section id="section2" class="features">
+      <h2>Our NoteWave Features</h2>
+      <span class="mu-title-dot"></span>
+      <p type="featureP">
+        NoteWave is your all-in-one solution for organizing your notes and
+        ideas. With NoteWave, you can store all your thoughts in one place,
+        marking them as to-dos, completed tasks, or ideas for later. Whether
+        it's for work, school, or personal use, NoteWave helps you keep
+        everything organized and easily accessible.
+      </p>
+      <br /><br />
+      <div class="feature-container">
+        <div class="feature-details">
+          <img
+            src="static/img/pexels-thepaintedsquare-606541.jpg"
+            alt="Feature Image"
+          />
+        </div>
+        <div class="features-list">
+          <div class="features-list">
+            <div class="feature">
+              <i class="fas fa-cubes"></i>
+              <div class="feature-content">
+                <h3>All-in-One Organization</h3>
+                <p>
+                  NoteWave is your all-in-one solution for organizing your notes
+                  and ideas. Keep everything in one place, whether it's for
+                  work, school, or personal use.
+                </p>
+              </div>
+            </div>
+            <hr />
+            <div class="feature">
+              <i class="fas fa-lock"></i>
+              <div class="feature-content">
+                <h3>Secure Storage</h3>
+                <p>
+                  Your notes are encrypted and securely stored, ensuring the
+                  privacy and protection of your data at all times.
+                </p>
+              </div>
+            </div>
+            <hr />
+            <div class="feature">
+              <i class="fas fa-sync-alt"></i>
+              <div class="feature-content">
+                <h3>Seamless Sync</h3>
+                <p>
+                  Access your notes on any device, anytime, anywhere. Sync your
+                  data seamlessly across all your devices for uninterrupted
+                  workflow.
+                </p>
+              </div>
+            </div>
+            <hr />
+            <div class="feature">
+              <i class="fas fa-user-friends"></i>
+              <div class="feature-content">
+                <h3>User-Friendly Interface</h3>
+                <p>
+                  Capture your thoughts quickly and easily with NoteWave's
+                  intuitive interface. Start writing instantly with no
+                  complicated setups.
+                </p>
+              </div>
+            </div>
+            <hr />
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="section4" class="users">
+      <div class="no-users">
+        <h2>Number Of Users</h2>
+        <p>Number of Users who have created accounts in NoteWave</p>
+        <div class="user-count-container">
+          <i class="fas fa-users"></i>
+          <span class="user-count">{{ user_count }}</span>
+        </div>
+      </div>
+    </section>
+    <section class="QnA" id="section5">
+      <div class="questions">
+        <h2>FAQ</h2>
+        <br /><br />
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <i class="fas fa-plus"></i>
+            <span>What makes NoteWave an all-in-one organization tool?</span>
+          </div>
+          <div class="faq-answer">
+            <hr />
+            <p>
+              NoteWave is designed to be your comprehensive solution for
+              organizing notes and ideas. Whether for work, school, or personal
+              use, it allows you to keep everything in one place, ensuring easy
+              access and efficient management of your information.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <i class="fas fa-plus"></i>
+            <span>How secure is my data on NoteWave?</span>
+          </div>
+          <div class="faq-answer">
+            <hr />
+            <p>
+              NoteWave prioritizes the security and privacy of your data. Your
+              notes are encrypted and securely stored, ensuring that your
+              information is protected at all times from unauthorized access.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <i class="fas fa-plus"></i>
+            <span>Can I access my notes on multiple devices?</span>
+          </div>
+          <div class="faq-answer">
+            <hr />
+            <p>
+              Yes, you can. NoteWave offers seamless synchronization across all
+              your devices. This means you can access your notes anytime,
+              anywhere, ensuring your workflow remains uninterrupted, whether
+              you're on your phone, tablet, or computer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ratings" id="section6">
+      <h2>Ratings</h2>
+      <div class="ratings-container">
+        <div class="ratings-left">
+          <h3>User Ratings</h3>
+          {% if latest_ratings %}
+          <div id="user-ratings"></div>
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                       const ratings = [
+                           {% for rating in latest_ratings %}
+                           {
+                               username: "{{ rating.username }}",
+                               rating: {{ rating.rating }},
+                               comments: "{{ rating.comments }}"
+                           }{% if not loop.last %},{% endif %}
+                           {% endfor %}
+                       ];
+
+                       function generateStars(rating) {
+                           let starsHTML = '';
+                           for (let i = 1; i <= 5; i++) {
+                               if (i <= rating) {
+                                   starsHTML += '<i class="fas fa-star"></i>';
+                               } else {
+                                   starsHTML += '<i class="far fa-star"></i>';
+                               }
+                           }
+                           return starsHTML;
+                       }
+
+                       const userRatingsContainer = document.getElementById('user-ratings');
+                       userRatingsContainer.innerHTML = '';
+
+                       ratings.forEach((rating, index) => {
+                           const ratingElement = document.createElement('div');
+                           ratingElement.className = 'rating';
+                           ratingElement.innerHTML = `
+                               <p class="username">${rating.username}</p>
+                               <p class="comment">- ${rating.comments}</p>
+                               <div class="stars">${generateStars(rating.rating)}</div>
+                           `;
+                           userRatingsContainer.appendChild(ratingElement);
+
+                           // Add horizontal rule after each rating, except the last one
+                           if (index < ratings.length - 1) {
+                               const hrElement = document.createElement('hr');
+                               userRatingsContainer.appendChild(hrElement);
+                           }
+                       });
+                   });
+                       document.addEventListener("DOMContentLoaded", function() {
+                           const ratings = [
+                               {% for rating in latest_ratings %}
+                               {
+                                   username: "{{ rating.username }}",
+                                   rating: {{ rating.rating }},
+                                   comments: "{{ rating.comments }}"
+                               }{% if not loop.last %},{% endif %}
+                               {% endfor %}
+                           ];
+
+                           function generateStars(rating) {
+                               let starsHTML = '';
+                               for (let i = 1; i <= 5; i++) {
+                                   if (i <= rating) {
+                                       starsHTML += '<i class="fas fa-star"></i>';
+                                   } else {
+                                       starsHTML += '<i class="far fa-star"></i>';
+                                   }
+                               }
+                               return starsHTML;
+                           }
+
+                           const userRatingsContainer = document.getElementById('user-ratings');
+                           userRatingsContainer.innerHTML = '';
+
+                           ratings.forEach((rating, index) => {
+                               const ratingElement = document.createElement('div');
+                               ratingElement.className = 'rating';
+                               ratingElement.innerHTML = `
+                                   <p class="username">${rating.username}</p>
+                                   <p class="comment">- ${rating.comments}</p>
+                                   <div class="stars">${generateStars(rating.rating)}</div>
+                               `;
+                               userRatingsContainer.appendChild(ratingElement);
+
+                               // Add horizontal rule after each rating, except the last one
+                               if (index < ratings.length - 1) {
+                                   const hrElement = document.createElement('hr');
+                                   userRatingsContainer.appendChild(hrElement);
+                               }
+                           });
+                       });
+          </script>
+          <p>
+            Based on {{ total_reviews_count }} reviews
+            <a
+              href="{{ url_for('views.all_reviews') }}"
+              class="show-all-link"
+              style="text-decoration: none; color: #e76e3b"
+              >Show all</a
+            >
+          </p>
+          {% else %}
+          <p>No ratings found.</p>
+          {% endif %}
+        </div>
+
+        <div class="ratings-right">
+          <h3>Submit Your Rating</h3>
+          <form
+            id="rating-form"
+            method="POST"
+            action="{{ url_for('views.home') }}"
+          >
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              autocomplete="off"
+              placeholder="Username"
+            />
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="off"
+              placeholder="Enter Email"
+            />
+
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating" required>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+
+            <textarea
+              id="comments"
+              name="comments"
+              rows="4"
+              maxlength="30"
+              oninput="updateCharacterCount()"
+              placeholder="Comment"
+            ></textarea>
+            <p id="char-count" style="display: flex; align-items: flex-start">
+              0/30 characters used
+            </p>
+
+            <button type="submit">Submit</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div class="social-fixed">
+      <div class="social-icons2">
+        <a href="https://wa.me/254703853259" target="_blank"
+          ><i class="fab fa-whatsapp whatsapp"></i
+        ></a>
+        <a href="https://twitter.com/AudoWrld" target="_blank"
+          ><i class="fab fa-twitter"></i
+        ></a>
+        <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
+          ><i class="fab fa-instagram"></i
+        ></a>
+        <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
+          ><i class="fab fa-linkedin-in"></i
+        ></a>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <p>Note<span>wave.</span></p>
+          <div class="name">
+            <h2 class="web">NoteWave</h2>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul class="links">
+            <li><a href="/">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <div class="contact">
+            <p>
+              <i class="fas fa-map-marker-alt"></i> 0020, 002, nairobi, Lang'ata
+              District
+            </p>
+            <p><i class="fas fa-phone-alt"></i> +254 703 853 259</p>
+            <p><i class="fas fa-envelope"></i> owinovictor933@gmail.com</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <h4>Follow Us</h4>
+          <div class="social-icons">
+            <a href="https://wa.me/254703853259" target="_blank">
+              <i class="fab fa-whatsapp whatsapp"></i
+            ></a>
+            <a href="https://twitter.com/AudoWrld" target="_blank"
+              ><i class="fab fa-twitter"></i
+            ></a>
+            <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
+              ><i class="fab fa-instagram"></i
+            ></a>
+            <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
+              ><i class="fab fa-linkedin-in"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 NoteWave. All rights reserved.</p>
+        <p>
+          Designed by
+          <a href="https://kenyanaudo03.github.io/Portfolio/" target="_blank"
+            >Victor Owino</a
+          >
+        </p>
+      </div>
+      <a href="#section1" class="scroll-up-arrow">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+    </footer>
+
+    <div id="chat-icon" onclick="toggleChat()">
+      <i class="fas fa-comments"></i>
+    </div>
+
+    <div id="chat-window" class="chat-window">
+      <div class="chat-header">
+        <h4>Chat with us!</h4>
+        <span id="chat-close" onclick="toggleChat()">&times;</span>
+      </div>
+      <div class="chat-body">
+        <div id="chat-messages" class="chat-messages"></div>
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Type your message..."
+          onkeydown="if(event.key === 'Enter') sendMessage()"
+        />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+  </body>
+</html>

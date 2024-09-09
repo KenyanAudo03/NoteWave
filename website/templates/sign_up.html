@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignUp | NoteWave</title>
+    <meta
+      name="description"
+      content="Sign up for NoteWave to start creating and managing your notes efficiently."
+    />
+    <meta name="keywords" content="NoteWave, SignUp, Notes, Productivity, Create Account" />
+    <meta name="author" content="NoteWave Team" />
+    <!-- Meta Tags for Social Media -->
+    <meta property="og:title" content="SignUp | NoteWave" />
+    <meta
+      property="og:description"
+      content="Sign up for NoteWave to start creating and managing your notes efficiently."
+    />
+    <meta
+      property="og:image"
+      content="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <meta property="og:url" content="https://www.notewave.com/signup" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SignUp | NoteWave" />
+    <meta
+      name="twitter:description"
+      content="Sign up for NoteWave to start creating and managing your notes efficiently."
+    />
+    <meta
+      name="twitter:image"
+      content="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+      type="image/x-icon"
+    />
+    <!-- Stylesheets -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/sign_up.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <link
+    rel="icon"
+    href="{{ url_for('static', filename='img/notewave.ico') }}"
+    type="image/x-icon"
+  />
+    <style>
+       .swal2-popup {
+            font-size: 1rem; /* Adjust font size */
+            margin-top: 5px; 
+        }
+
+        .swal2-title {
+            color: #e74c3c; /* Adjust title color */
+            font-size: 1.5rem; /* Adjust title font size */
+        }
+    </style>
+</head>
+
+  <body>
+    <div class="form-container">
+      <div class="col col-1">
+        <div class="black-box">
+          <i class="bx bx-left-arrow-alt left-arrow" aria-label="Previous"></i>
+          <i class="bx bx-right-arrow-alt right-arrow" aria-label="Next"></i>
+          <div class="main-info">
+            <p>Arrange. Streamline. Simplify</p>
+          </div>
+          <div id="notepad-info">
+            <div class="info-section">
+              <h3>Create, edit, and save</h3>
+              <p>Your notes online with our easy-to-use online notepad.</p>
+            </div>
+            <div class="info-section">
+              <h3>Access anytime, anywhere</h3>
+              <p>Your notes from anywhere, anytime, on any device.</p>
+            </div>
+            <div class="info-section">
+              <h3>Collaborate in real-time</h3>
+              <p>
+                With others by sharing your notes and working together in
+                real-time.
+              </p>
+            </div>
+          </div>
+          <div class="indicator-container">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col col-2">
+        <div class="logo">
+          <p>Note<span>wave.</span></p>
+        </div>
+        <form id="form-signup" method="POST" action="/auth/sign_up">
+          <div class="form-signup">
+            <div class="form-title">
+              <p>Welcome to NoteWave.</p>
+            </div>
+            <div class="form-inputs">
+              <div class="input-row">
+                <div class="input-box">
+                  <label for="firstName" class="form-label">
+                    <i class="bx bx-user icon"></i> FirstName
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    class="input-field"
+                    aria-required="true"
+                    aria-label="FirstName"
+                    type="text"
+                    autocomplete="new-name"
+                    
+                  />
+                </div>
+                <div class="input-box">
+                  <label for="secondName" class="form-label">
+                    <i class="bx bx-user icon"></i> SecondName
+                  </label>
+                  <input
+                    id="secondName"
+                    name="secondName"
+                    class="input-field"
+                    aria-required="true"
+                    aria-label="SecondName"
+                    type="text"
+                    autocomplete="new-secondname"
+                   
+                  />
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-box">
+                  <label for="email" class="form-label">
+                    <i class="bx bx-envelope icon"></i> Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    class="input-field"
+                    aria-required="true"
+                    aria-label="Email"
+                    autocomplete="new-email"
+                   
+                  />
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-box">
+                  <label for="password" class="form-label">
+                    <i class="bx bx-lock-alt icon"></i> Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="input-field"
+                    aria-required="true"
+                    aria-label="Password"
+                    autocomplete="new-password"
+                   
+                  />
+                  <div id="passwordStrength" class="password-strength"></div>
+                </div>
+
+                <div class="input-box">
+                  <label for="confirm-password" class="form-label">
+                    <i class="bx bx-lock-alt icon"></i> Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    id="confirm-password"
+                    name="confirm-password"
+                    class="input-field"
+                    aria-required="true"
+                    aria-label="Confirm Password"
+                    autocomplete="new-password"
+                    
+                  />
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-box1">
+                  <input
+                    type="checkbox"
+                    id="agree-terms"
+                    name="agree-terms"
+                    class="input-field-checkbox"
+                    aria-label="Agree to Terms"
+                    checked="on"
+                  />
+                  <label for="agree-terms" class="form-label-checkbox">
+                    I agree to the
+                    <a href="/auth/terms" target="_blank">Terms and Conditions</a>
+                  </label>
+                </div>
+              </div>
+
+              <div class="container1">
+                <div class="show-pass">
+                  <input type="checkbox" id="show-pass-checkbox" />
+                  <label for="show-pass-checkbox">Show Password</label>
+                </div>
+                <div class="forgot-password">
+                  <a href="/auth/forgot-password">Forgot Password?</a>
+                </div>
+              </div>
+              <div class="login">
+                <p>
+                  Already have an account?
+                  <a href="/auth/login">Click here</a>
+                </p>
+              </div>
+              <div class="input-box">
+                <button class="submit" id="signup" type="submit" name="signup">
+                  <span>Sign Up</span>
+                  <i class="bx bx-right-arrow-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="{{ url_for('static', filename='js/sign_up.js') }}"></script>
+  </body>
+</html>

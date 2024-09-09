@@ -1,0 +1,251 @@
+{
+    "intents": [
+      {
+        "tag": "greeting",
+        "patterns": [
+          "Hi there",
+          "How are you",
+          "Is anyone there?",
+          "Hey",
+          "Hola",
+          "Hello",
+          "Good day",
+          "Helo",
+          "Good morning",
+          "good afternoon",
+          "good evening",
+          "good night"
+        ],
+        "responses": [
+          "Hello! How can I assist you today on NoteWave?",
+          "Good to see you! How can I help with your notes?",
+          "Hi there, what can I do for you today on NoteWave?"
+        ]
+      },
+      {
+        "tag": "goodbye",
+        "patterns": [
+          "Bye",
+          "See you later",
+          "Goodbye",
+          "Nice chatting to you, bye",
+          "who are you",
+          "Till next time"
+        ],
+        "responses": [
+          "See you!",
+          "Have a nice day!",
+          "Bye! Come back again soon to NoteWave."
+        ]
+      },
+      {
+        "tag": "name",
+        "patterns": [
+          "what is your name",
+          "what is your responsibility",
+          "can I know your name",
+          "name"
+        ],
+        "responses": [
+          "I am your NoteWave Assistant. You can call me the NoteBot."
+        ]
+      },
+      {
+        "tag": "thanks",
+        "patterns": [
+          "Thanks",
+          "Thank you",
+          "That's helpful",
+          "Awesome, thanks",
+          "Thanks for helping me"
+        ],
+        "responses": ["My pleasure!", "You're welcome!"]
+      },
+      {
+        "tag": "invalid",
+        "patterns": ["", "gvsd", "asbhk"],
+        "responses": [
+          "Sorry, I can't understand you.",
+          "Please give me more info.",
+          "Not sure I understand. Can you rephrase?"
+        ]
+      },
+      {
+        "tag": "product_info",
+        "patterns": [
+          "Can you provide more information about NoteWave?",
+          "What is NoteWave?",
+          "Tell me about your products",
+          "What can I do on NoteWave?",
+          "Features of NoteWave"
+        ],
+        "responses": [
+          "NoteWave allows users to take and store notes easily, whether for personal, organizational, or academic purposes. Learn more at <a href=\"https://yourwebsite.com/about\">About NoteWave</a>."
+        ]
+      },
+      {
+        "tag": "reset_password",
+        "patterns": [
+          "How do I reset my password?",
+          "Forgot password",
+          "Reset my password",
+          "Can't remember my password"
+        ],
+        "responses": [
+          "To reset your password, click on <a href=\"/auth/forgot-password\">Forgot Password</a> at the login screen and follow the instructions."
+        ]
+      },
+      {
+        "tag": "login",
+        "patterns": ["How do I login?", "Login", "Can't login", "Sign in"],
+        "responses": [
+          "You can log in using your username and password on the <a href=\"/auth/login\">Login Page</a>."
+        ]
+      },
+      {
+        "tag": "contact",
+        "patterns": [
+          "How can I contact support?",
+          "Contact",
+          "Support contact",
+          "Help",
+          "Support"
+        ],
+        "responses": [
+          "You can contact our support team via email at support@notewave.com or call us at +254703853259. More details can be found on our <a href=\"/contact\">Contact Page</a>."
+        ]
+      },
+      {
+        "tag": "pricing",
+        "patterns": [
+          "What are the pricing plans?",
+          "Pricing",
+          "Cost",
+          "Subscription plans"
+        ],
+        "responses": [
+          "For information about pricing plans, please visit our <a href=\"https://yourwebsite.com/pricing\">Pricing Page</a>."
+        ]
+      },
+      {
+        "tag": "features",
+        "patterns": [
+          "Tell me about the features",
+          "What features do you offer?",
+          "Features",
+          "What can I do with NoteWave?"
+        ],
+        "responses": [
+          "To learn about our features, check out our <a href=\"https://yourwebsite.com/features\">Features Page</a>."
+        ]
+      },
+      {
+        "tag": "feedback",
+        "patterns": [
+          "How can I give feedback?",
+          "Feedback",
+          "Suggestions",
+          "Comments"
+        ],
+        "responses": [
+          "We appreciate your feedback! Please send us your thoughts at feedback@notewave.com or visit our <a href=\"https://yourwebsite.com/feedback\">Feedback Page</a>."
+        ]
+      },
+      {
+        "tag": "faq",
+        "patterns": [
+          "FAQ",
+          "Frequently asked questions",
+          "Help section",
+          "Common questions"
+        ],
+        "responses": [
+          "You can find answers to common questions on our <a href=\"https://yourwebsite.com/faq\">FAQ Page</a>."
+        ]
+      },
+      {
+        "tag": "note_management",
+        "patterns": [
+          "How do I create a note?",
+          "Creating notes",
+          "Note management",
+          "How to manage my notes?",
+          "Managing notes on NoteWave"
+        ],
+        "responses": [
+          "To create and manage your notes, simply log in and navigate to the <a href=\"https://yourwebsite.com/notes\">Notes Section</a>. There, you can create, edit, and organize your notes efficiently."
+        ]
+      },
+      {
+        "tag": "security",
+        "patterns": [
+          "Is NoteWave secure?",
+          "How secure is NoteWave?",
+          "Security features",
+          "Data protection on NoteWave"
+        ],
+        "responses": [
+          "NoteWave takes your security seriously. We use industry-standard encryption and security protocols to protect your data. Learn more on our <a href=\"https://yourwebsite.com/security\">Security Page</a>."
+        ]
+      },
+      {
+        "tag": "privacy",
+        "patterns": [
+          "Privacy policy",
+          "How is my data used?",
+          "Data privacy",
+          "User data protection"
+        ],
+        "responses": [
+          "You can read about our data practices and policies in our <a href=\"https://yourwebsite.com/privacy\">Privacy Policy</a>."
+        ]
+      },
+  
+      {
+        "tag": "signup",
+        "patterns": [
+          "How do I signuo?",
+          "SignUp",
+          "Can't signup",
+          "Sign up",
+          "Create account",
+          "Create an account"
+        ],
+        "responses": [
+          "You can create an account using an active email on the <a href=\"/auth/sign_up\">Sign_Up Page</a>."
+        ]
+      },
+  
+      {
+        "tag": "agree",
+        "patterns": [
+          "Yes", 
+          "That's right",
+          "Correct",
+          "I agree",
+          "sure"
+        ],
+        "responses":[
+          "Good if you've managed with this."
+  
+        ]
+      },
+      {
+        "tag": "speak_to_agent",
+        "patterns": [
+          "I want to speak to an agent",
+          "Can I talk to someone?",
+          "Connect me to a human"
+        ],
+        "responses": [
+          "Sure! Please hold on while I notify an agent. You can also reach us via the <a href=\"https://yourwebsite.com/contact\">Contact Page</a>."
+        ]
+      }
+    ]
+  }
+
+
+
+
+
+  

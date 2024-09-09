@@ -1,0 +1,91 @@
+.notes-section {
+  padding: 20px;
+}
+h2 {
+  color: var(--bookmark-);
+  font-size: 24px;
+}
+.note-item {
+  cursor: pointer;
+  transition: background-color 0.3s;
+  list-style-type: none;
+  position: relative;
+  padding-left: 20px;
+}
+
+.note-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 1.2em;
+  line-height: 1.5em;
+  color: var(--bullet-color);
+  transition: color 0.3s;
+}
+
+.note-item hr {
+  border: none;
+  border-bottom: 1px solid white;
+  transition: border-color 0.3s;
+}
+
+.note-item:hover hr {
+  border-color: var(--bookmark-);
+}
+
+.add-note-toggle {
+  position: fixed;
+  bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toggle-add-note {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+.toggle-add-note:hover {
+  background-color: var(--background-);
+}
+
+.no-notes {
+  color: var(--bookmark-);
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  font-size: 20px;
+  margin-top: 20%;
+}
+.notes-section h3 {
+  color: var(--bookmark-);
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.note-item p {
+  color: #fff;
+}
+.note-preview {
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font-size: 15px;
+}
+
+.note-time {
+  font-style: italic;
+  font-size: 13px;
+}

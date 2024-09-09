@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setting</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/setting.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <div class="page">
+      <div class="left-container">
+        <div class="all">
+          <div class="profile">
+            <div class="cover-photo">
+              {% if current_user.cover_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.cover_picture }}"
+                alt="Cover Photo"
+                class="cover-image"
+              />
+              {% else %}
+              <div class="default-cover">
+                <p>Default Cover Photo</p>
+              </div>
+              {% endif %}
+            </div>
+            <div class="profile-pic">
+              {% if current_user.profile_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.profile_picture }}"
+                alt="Profile Picture"
+                class="profile-image"
+              />
+              {% else %}
+              <i
+                class="fas fa-5x"
+                style="--background-: {{ current_user.generated_color }}"
+                >{{ current_user.first_name[0] }}</i
+              >
+              {% endif %}
+            </div>
+          </div>
+          <div class="profile-info">
+            <p class="username">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="settings-menu">
+          <ul>
+            <li>
+              <a href="#" id="accountLink" data-target="#profilePicFormSection">
+                <span class="account-text"
+                  ><i class="bx bxs-user-account"></i> Account</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="accountDropdown" class="dropdown-content">
+                <li>
+                  <a
+                    href="#profilePicFormSection"
+                    data-target="#profilePicFormSection"
+                    ><i class="bx bx-user-circle"></i> Profile</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#usernameFormSection"
+                    ><i class="bx bx-user"></i> Username</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#nameFormSection"
+                    ><i class="bx bx-user"></i> Name</a
+                  >
+                </li>
+
+                <li>
+                  <a href="#" data-target="#phoneNumberFormSection"
+                    ><i class="bx bx-phone-call"></i> Phone Number</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#dobFormSection"
+                    ><i class="bx bx-calendar"></i> Date of Birth</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#timeZoneFormSection"
+                    ><i class="bx bx-time"></i> Time Zone</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#bioFormSection"
+                    ><i class="bx bx-info-circle"></i> Bio</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#genderFormSection"
+                    ><i class="fas fa-mars"></i> Gender</a
+                  >
+                </li>
+                {% if not current_user.email_verified %}
+                <li>
+                  <a href="#" data-target="#verifySection"
+                    ><i class="bx bxs-check-circle"></i> Verify</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            <hr class="divider" />
+            <li>
+              <a href="#" id="privacyLink" data-target="#profilePicFormSection">
+                <span class="privacy-text"
+                  ><i class="bx bx-lock-alt"></i> Privacy</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="privacyDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#privacySettings"
+                    ><i class="bx bx-check-shield"></i> Privacy Settings</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#passwordFormSection"
+                    ><i class="bx bxs-lock"></i> Security Settings</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <hr class="divider" />
+            <li>
+              <a
+                href="#"
+                id="appearanceLink"
+                data-target="#profilePicFormSection"
+              >
+                <span class="appearance-text"
+                  ><i class="bx bx-palette"></i> Appearance</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="appearanceDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#generatedColorFormSection"
+                    ><i class="bx bx-palette"></i> Text Color</a
+                  >
+                </li>
+              </ul>
+            </li>
+
+            <hr class="divider" />
+            <li>
+              <a
+                href="#"
+                id="notificationsLink"
+                data-target="#profilePicFormSection"
+              >
+                <span class="notifications-text"
+                  ><i class="bx bx-bell"></i> Notifications</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="notificationsDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#emailNotifications"
+                    >Email Notifications</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#pushNotifications"
+                    >Push Notifications</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <hr class="divider" />
+            <li>
+              <a href="#" id="helpLink" data-target="#profilePicFormSection">
+                <span class="help-text"
+                  ><i class="bx bx-help-circle"></i> Help & Support</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="helpDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#helpCenter"
+                    ><i class="bx bx-help-circle"></i> Help Center</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#contactSupport"
+                    ><i class="bx bxs-contact"></i> Contact Support</a
+                  >
+                </li>
+              </ul>
+            </li>
+            {% if current_user.email_verified %}
+            <hr class="divider" />
+
+            <li>
+              <a
+                href="#"
+                id="accountManagementLink"
+                data-target="#profilePicFormSection"
+              >
+                <span class="account-management-text"
+                  ><i class="bx bx-cog"></i> Account Management</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="accountManagementDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#deleteAccount"
+                    ><i class="bx bxs-trash" style="color: #ce0606"></i>Delete
+                    Account</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#deactivateAccount"
+                    ><i class="bx bx-power-off"></i> Deactivate Account</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#logoutAccount"
+                    ><i class="bx bx-log-out"></i> Log Out</a
+                  >
+                </li>
+                {% if current_user.is_admin %}
+                <li>
+                  <a href="#" data-target="#activateUsers"
+                    ><i class="fas fa-check-circle" style="color: green"></i
+                    >Manage Users</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            <hr class="divider" />
+            <li>
+              <a
+                href="#"
+                id="dataManagementLink"
+                data-target="#profilePicFormSection"
+              >
+                <span class="data-management-text"
+                  ><i class="bx bx-data"></i> Data Management</span
+                >
+                <i class="bx bx-chevron-down"></i>
+              </a>
+              <ul id="dataManagementDropdown" class="dropdown-content">
+                <li>
+                  <a href="#" data-target="#exportData"
+                    ><i class="bx bx-export"></i> Export Data</a
+                  >
+                </li>
+                <li>
+                  <a href="#" data-target="#importData"
+                    ><i class="bx bx-import"></i> Import Data</a
+                  >
+                </li>
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="right-container">
+        <div class="settings-content">
+          <!-- Contact -->
+          <section id="verifySection">
+            <h2>Account Setting</h2>
+            <h3>Verify Account</h3>
+            <br /><br />
+            <form
+              action="{{ url_for('auth.resend_verification') }}"
+              method="POST"
+            >
+              <div class="form-group">
+                <label for="email">Email address:</label>
+
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  value="{{ current_user.email }}"
+                  readonly
+                  required
+                  style="--background-: {{ current_user.generated_color }}"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Resend Verification Email
+              </button>
+            </form>
+          </section>
+
+          <section id="contactSupport">
+            <h2>Help & Support</h2>
+            <h3>Contact</h3>
+            <div class="formBox">
+              <p>You will hear from us at the earliest!</p>
+              <form action="/send_email" method="post">
+                <div class="nameInp">
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    name="name"
+                    id="name"
+                    style="--background-: {{ current_user.generated_color }}"
+                  />
+                </div>
+                <div class="mailInp">
+                  <input
+                    type="email"
+                    name="mail"
+                    id="mail"
+                    placeholder="Email"
+                    style="--background-: {{ current_user.generated_color }}"
+                  />
+                </div>
+                <div class="phoneInp">
+                  <input
+                    type="text"
+                    name="phone"
+                    id="phone"
+                    placeholder="Phone"
+                    style="--background-: {{ current_user.generated_color }}"
+                  />
+                </div>
+                <div class="queryInp">
+                  <textarea
+                    name="query"
+                    id="query"
+                    cols="30"
+                    rows="5"
+                    placeholder="Any comment or your query"
+                    style="--background-: {{ current_user.generated_color }}"
+                  ></textarea>
+                </div>
+                <div class="submitBtn">
+                  <button
+                    id="btn"
+                    onclick="notif()"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Send
+                  </button>
+                </div>
+              </form>
+              <p class="extra">You can also contact us at +254 703853259</p>
+            </div>
+          </section>
+          <section id="helpCenter">
+            <h2>Help Center</h2>
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-category">
+              <h3>Account Management</h3>
+              <div class="faq-item">
+                <h4>How do I update my account information?</h4>
+                <p>
+                  To update your account information, go to the
+                  <a href="/settings">Settings</a> page. Here you can edit your
+                  personal details, including your email, password, and other
+                  settings.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>How can I delete my account?</h4>
+                <p>
+                  If you wish to delete your account, please contact our support
+                  team via the <a href="/contact">Contact Us</a> page. We will
+                  guide you through the account deletion process.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>How do I change my email address?</h4>
+                <p>
+                  To change your email address, navigate to the
+                  <a href="/settings">Settings</a> page and update your email
+                  information under the "Account" tab. Make sure to verify your
+                  new email address.
+                </p>
+              </div>
+              <div class="faq-item">
+                <h4>How do I deactivate my account?</h4>
+                <p>
+                  If you want to deactivate your account, please
+                  <a
+                    href="mailto:vo4685336@gmail.com?subject=Account%20Deactivation%20Request&body=Please%20deactivate%20my%20account.%20My%20details%20are%20as%20follows:%0AFull%20Name:%20%0AEmail:%20"
+                  >
+                    send us an email </a
+                  >with your full name and the email address associated with
+                  your account.
+                </p>
+              </div>
+              <div class="faq-item">
+                <h4>How do I know if my account is verified?</h4>
+                <p>
+                  If your account is verified, a verification badge will appear
+                  next to your full name on your profile.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-category">
+              <h3>General Questions</h3>
+              <div class="faq-item">
+                <h4>Is NoteWave free to use?</h4>
+                <p>
+                  NoteWave is free to use, but a verified account has all
+                  features. If you've verified your account, you can verify it
+                  here:
+                  <a href="/settings">Settings</a>.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>What browsers are supported by NoteWave?</h4>
+                <p>
+                  NoteWave supports modern browsers including Chrome, Firefox,
+                  Safari, and Edge. Ensure your browser is up-to-date for the
+                  best experience.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>How can I contact customer support?</h4>
+                <p>
+                  If you need assistance, please reach out to our customer
+                  support team via the <a href="/contact">Contact Us</a> page.
+                  We are here to help!
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-category">
+              <h3>Technical Support</h3>
+              <div class="faq-item">
+                <h4>What should I do if I encounter a bug?</h4>
+                <p>
+                  If you encounter a bug, please report it through the
+                  <a href="/contact">Contact Us</a> page with detailed
+                  information about the issue, including screenshots if
+                  possible.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>How can I recover my account if I'm locked out?</h4>
+                <p>
+                  If you're locked out of your account, use the "Forgot
+                  Password" option on the login page to reset your password. If
+                  you're still having trouble, contact our support team.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-category">
+              <h3>Privacy and Security</h3>
+              <div class="faq-item">
+                <h4>How is my data protected?</h4>
+                <p>
+                  We prioritize your data security by using encryption and
+                  secure servers to protect your information. For more details,
+                  please review our
+                  <a href="/privacy_policy">Privacy Policy</a>.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>
+                  Do you share my personal information with third parties?
+                </h4>
+                <p>
+                  We do not share your personal information with third parties
+                  without your consent. For more details, please see our
+                  <a href="/privacy_policy">Privacy Policy</a>.
+                </p>
+              </div>
+
+              <div class="faq-item">
+                <h4>Do you support 2FA?</h4>
+                <p>
+                  Yes, we support 2FA using authenticator apps or sending OTP
+                  codes to your email. For more information, please see our
+                  <a href="/privacy_policy">Privacy Policy</a>.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section id="usernameFormSection">
+            <h2>Account Settings</h2>
+            <form
+              id="usernameForm"
+              action="{{ url_for('auth.update_username') }}"
+              method="POST"
+            >
+              <h3>Change Your Username</h3>
+              <br /><br />
+              <label for="newUsername">New Username:</label>
+              <input
+                type="text"
+                id="newUsername"
+                name="newUsername"
+                value="@{{ current_user.user_name[1:] }}"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+              <div id="usernameError" class="error-message"></div>
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Update Username
+              </button>
+            </form>
+          </section>
+          <!-- Name -->
+          <section id="nameFormSection">
+            <h2>Account Settings</h2>
+            <form
+              id="nameForm"
+              action="{{ url_for('auth.update_name') }}"
+              method="POST"
+            >
+              <h3>Change Your Name</h3>
+              <br /><br />
+              <label for="firstName">First Name:</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value="{{ current_user.first_name }}"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+              <br /><br />
+              <label for="secondName">Second Name:</label>
+              <input
+                type="text"
+                id="secondName"
+                name="secondName"
+                value="{{ current_user.second_name }}"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+              <div id="nameError" class="error-message"></div>
+
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Update Name
+              </button>
+            </form>
+          </section>
+          <!-- Password -->
+          <section id="passwordFormSection">
+            <h2>Security Settings</h2>
+            <form
+              id="passwordForm"
+              action="{{ url_for('auth.update_password') }}"
+              method="POST"
+            >
+              <h3>Change Your Password</h3>
+
+              <label for="currentPassword">Current Password:</label>
+              <div class="input-container">
+                <input
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  style="--background-: {{ current_user.generated_color }}"
+                />
+                <i
+                  class="toggle-password fas fa-eye"
+                  data-target="#currentPassword"
+                ></i>
+              </div>
+              <div id="currentPasswordError" class="error-message"></div>
+
+              <label for="newPassword">New Password:</label>
+              <div class="input-container">
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  style="--background-: {{ current_user.generated_color }}"
+                />
+                <i
+                  class="toggle-password fas fa-eye"
+                  data-target="#newPassword"
+                ></i>
+              </div>
+              <div id="newPasswordError" class="error-message"></div>
+
+              <label for="confirmPassword">Confirm New Password:</label>
+              <div class="input-container">
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  style="--background-: {{ current_user.generated_color }}"
+                />
+                <i
+                  class="toggle-password fas fa-eye"
+                  data-target="#confirmPassword"
+                ></i>
+              </div>
+              <div id="confirmPasswordError" class="error-message"></div>
+
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Update Password
+              </button>
+            </form>
+          </section>
+
+          <!-- Profile Pic -->
+          <section id="profilePicFormSection">
+            <h2>Profile Settings</h2>
+            <div id="mainContainer">
+              <div id="pictureUpdateContainer">
+                <div id="coverPicContainer">
+                  {% if current_user.cover_picture %}
+                  <img
+                    id="currentCoverPic"
+                    src="/static/profile_pics/{{ current_user.cover_picture }}"
+                    alt="Current Cover Picture"
+                    class="cover-pic"
+                  />
+                  <div class="editting">
+                    <button
+                      id="editCoverPicButton"
+                      title="Edit Cover Picture"
+                      class="edit-button"
+                      style="--background-: {{ current_user.generated_color }}"
+                    >
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                  </div>
+                  {%else%}
+                  <div class="default-cover">
+                    <p>Default Cover Photo</p>
+                  </div>
+                  <div class="editting">
+                    <button
+                      id="editCoverPicButton"
+                      title="Edit Cover Picture"
+                      class="edit-button"
+                      style="--background-: {{ current_user.generated_color }}"
+                    >
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                  </div>
+                  {% endif %}
+                </div>
+                <div id="profilePicContainer">
+                  {% if current_user.profile_picture %}
+                  <img
+                    id="currentProfilePic"
+                    src="/static/profile_pics/{{ current_user.profile_picture }}"
+                    alt="Current Profile Picture"
+                    class="profile-pic"
+                  />
+                  <div class="editting">
+                    <button
+                      style="--background-: {{ current_user.generated_color }}"
+                      id="editProfilePicButton"
+                      title="Edit Profile Picture"
+                      class="edit-button"
+                    >
+                      <i class="fas fa-pencil-alt" style="color: #fff"></i>
+                    </button>
+                  </div>
+                  {% else %}
+                  <i
+                    class="fas fa-5x"
+                    style="--background-: {{ current_user.generated_color }}"
+                    >{{ current_user.first_name[0] }}</i
+                  >
+                  <div class="editting">
+                    <button
+                      style="--background-: {{ current_user.generated_color }}"
+                      id="editProfilePicButton"
+                      title="Edit Profile Picture"
+                      class="edit-button"
+                    >
+                      <i class="fas fa-pencil-alt" style="color: #fff"></i>
+                    </button>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <form
+                id="profilePicForm"
+                action="{{ url_for('auth.update_profile_pic') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="picture-form"
+                style="display: none"
+              >
+                <input
+                  type="file"
+                  id="profilePic"
+                  name="profile_pic"
+                  accept="image/*"
+                  class="file-input"
+                />
+                <input
+                  type="file"
+                  id="coverPic"
+                  name="cover_pic"
+                  accept="image/*"
+                  class="file-input"
+                />
+                <input
+                  type="hidden"
+                  id="userId"
+                  name="user_id"
+                  value="{{ current_user.id }}"
+                />
+                <button
+                  type="submit"
+                  class="submit-button"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Upload Pictures
+                </button>
+              </form>
+
+              <!-- Cropping Container -->
+              <div id="croppingContainer" style="display: none">
+                <div id="cropperWrapper">
+                  <img id="imageToCrop" src="" alt="Image to crop" />
+                  <div class="cropper-crop-box"></div>
+                </div>
+                <div class="buttons">
+                  <button
+                    type="button"
+                    id="cropButton"
+                    class="crop-button"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Upload
+                  </button>
+                  <button
+                    type="button"
+                    id="cancelButton"
+                    class="cancel-button"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <!-- Progress Circle Container -->
+                <div id="progressContainer" style="display: none">
+                  <div class="progress-circle">
+                    <div class="progress-bar"></div>
+                    <div class="progress-text">0%</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User Details -->
+              <div id="userDetails">
+                <div class="detail-item">
+                  <label for="name">Name:</label><br />
+                  <span id="name">
+                    {% if current_user.full_name %}
+                    <a href="#nameFormSection">{{ current_user.full_name }}</a>
+                    {% else %}
+                    <button><a href="#nameFormSection"></a>Add Name</button>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <label for="name">Username:</label><br />
+                  <span id="name">
+                    {% if current_user.user_name %}
+                    <a href="#usernameFormSection"
+                      >{{ current_user.user_name }}</a
+                    >
+                    {% else %}
+                    <button><a href="#usernameFormSection"></a>Add Name</button>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <label for="bio">Bio:</label> <br />
+                  <span id="bio">
+                    {% if current_user.bio %}
+                    <a href="#bioFormSection">{{ current_user.bio }}</a>
+                    {% else %}
+                    <button><a href="#bioFormSection">Add Bio</a></button>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <label for="phone">Phone:</label><br />
+                  <span id="phone">
+                    {% if current_user.phone_number %}
+                    <a href="#phoneNumberFormSection"
+                      >{{ current_user.phone_number }}</a
+                    >
+                    {% else %}
+                    <button>
+                      <a href="#phoneNumberFormSection">Add Phone</a>
+                    </button>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <label for="age">Age:</label><br />
+                  <span id="age">
+                    {% if current_user.date_birth %}
+                    <a href="#dobFormSection" id="ageLink">Edit Age</a>
+                    {% else %}
+                    <button><a href="#dobFormSection">Add D.O.B</a></button>
+                    {% endif %}
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <label for="gender">Gender:</label><br />
+                  <span id="gender">
+                    {% if current_user.gender %}
+                    <a href="#genderFormSection">{{ current_user.gender }}</a>
+                    {% else %}
+                    <button><a href="#genderFormSection">Add Gender</a></button>
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div id="quickLinksResources" class="attention-section">
+              <h3>Quick Links & Resources</h3>
+              <p>Access key features and helpful resources quickly:</p>
+              <ul>
+                <li>
+                  <a href="/settings">Account Settings</a> - Manage your profile
+                  and preferences.
+                </li>
+                <li>
+                  <a href="/user_home">Your Home Dashboard</a>
+                  - Access and manage your notes, notifications, and more.
+                </li>
+                <li>
+                  <a href="/contact" target="_blank">Give Feedback</a> - Share
+                  your thoughts and suggestions with us.
+                </li>
+              </ul>
+              <button
+                id="contactSupportButton"
+                class="contact-button"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Contact Support
+              </button>
+            </div>
+          </section>
+
+          <!-- Phone Number -->
+          <section id="phoneNumberFormSection">
+            <h2>Account Setting</h2>
+            <h3>Change Phone Number</h3>
+            <br /><br />
+            <span>Phone Number:</span>
+            <div id="phoneNumberContainer">
+              <select
+                id="countryCode"
+                name="country_code"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <option value="+1">+1 (US)</option>
+                <option value="+44">+44 (UK)</option>
+                <option value="+91">+91 (India)</option>
+                <option value="+254">+254 (Kenya)</option>
+              </select>
+              <input
+                type="text"
+                id="phoneNumber"
+                name="phone_number"
+                placeholder="(555) 555-5555"
+                readonly
+                value="{{current_user.phone_number}}"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+
+              <button id="editPhoneNumberButton" title="Edit Phone Number">
+                <i class="fas fa-pencil-alt"></i>
+              </button>
+            </div>
+            <div id="newNumberError" class="error-message"></div>
+            <input type="hidden" id="userId" value="{{ current_user.id }}" />
+            <br />
+            <button
+              type="button"
+              id="savePhoneNumberButton"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Save Phone Number
+            </button>
+          </section>
+          <!-- DOB -->
+          <section id="dobFormSection">
+            <h2>Account Setting</h2>
+            <h3>Change Date of Birth</h3>
+            <br /><br />
+            <div id="dobContainer">
+              <label for="dobInput">Date of Birth:</label>
+              <input
+                type="text"
+                id="dobInput"
+                name="date_of_birth"
+                placeholder="Select Date"
+                required
+                value="{{current_user.date_birth}}"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+
+              <br /><br />
+              <div id="dobError" class="error-message"></div>
+              <button
+                type="button"
+                id="saveDobButton"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Save Date of Birth
+              </button>
+            </div>
+          </section>
+          <!-- TimeZone -->
+          <section id="timeZoneFormSection">
+            <h2>Account Setting</h2>
+            <h3>Change Time Zone</h3>
+            <br />
+            <span>Time Zone:</span>
+            <div id="timeZoneContainer">
+              <input
+                value="{{current_user.time_zone}}"
+                type="text"
+                id="timeZoneSearch"
+                placeholder="Search for a time zone"
+                style="--background-: {{ current_user.generated_color }}"
+              />
+              <ul id="timeZoneList" class="hidden">
+                <li data-value="America/New_York">
+                  Eastern Time (US & Canada)
+                </li>
+                <li data-value="America/Chicago">Central Time (US & Canada)</li>
+                <li data-value="America/Denver">Mountain Time (US & Canada)</li>
+                <li data-value="America/Los_Angeles">
+                  Pacific Time (US & Canada)
+                </li>
+                <li data-value="Europe/London">London</li>
+                <li data-value="Europe/Paris">Paris</li>
+                <li data-value="Asia/Tokyo">Tokyo</li>
+                <li data-value="Africa/Nairobi">Kenya</li>
+              </ul>
+
+              <div id="timeZoneError" class="error-message"></div>
+
+              <button
+                type="button"
+                id="saveTimeZoneButton"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Save Time Zone
+              </button>
+            </div>
+            <!-- Bio -->
+          </section>
+          <section id="bioFormSection">
+            <h2>Account Setting</h2>
+            <h3>Update Bio</h3>
+            <br />
+            <span>Bio:</span>
+            <div class="view-bio">
+              <textarea
+                id="bioInput"
+                name="bio"
+                rows="4"
+                cols="50"
+                placeholder="Enter your bio"
+                required
+                readonly
+                style="--background-: {{ current_user.generated_color }}"
+              >
+{{current_user.bio}}</textarea
+              >
+              <i id="editBioButton" class="fas fa-pencil-alt"></i>
+            </div>
+            <div id="bioError" class="error-message"></div>
+            <br />
+            <button
+              type="button"
+              id="saveBioButton"
+              style="--background-: {{ current_user.generated_color }}; display: none;"
+            >
+              Save Bio
+            </button>
+          </section>
+          <!-- Color -->
+          <section id="generatedColorFormSection">
+            <h2>Account Setting</h2>
+            <h3>Change Generated Color</h3>
+            <br />
+            <span>Generated Color:</span>
+            <div
+              id="colorOptionContainer"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              <div
+                class="color-option"
+                style="background-color: #ff0000"
+                data-color="#FF0000"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #00ff00"
+                data-color="#00FF00"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #0000ff"
+                data-color="#0000FF"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #ffff00"
+                data-color="#FFFF00"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #ff00ff"
+                data-color="#FF00FF"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #00ffff"
+                data-color="#00FFFF"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #3498db"
+                data-color="#3498db"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #2ecc71"
+                data-color="#2ecc71"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #e67e22"
+                data-color="#e67e22"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #95a5a6"
+                data-color="#95a5a6"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #9b59b6"
+                data-color="#9b59b6"
+              ></div>
+              <div
+                class="color-option"
+                style="background-color: #123456"
+                data-color="#123456"
+              ></div>
+            </div>
+            <div id="generatedColorError" class="error-message"></div>
+            <br />
+            <button
+              type="button"
+              id="saveGeneratedColorButton"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Save Color
+            </button>
+          </section>
+          <section id="genderFormSection">
+            <h2>Account Setting</h2>
+            <h3>Update Gender</h3>
+            <br />
+            <span>Gender:</span>
+            <select
+              id="genderSelect"
+              name="gender"
+              required
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-Binary">Non-Binary</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+            <div id="genderError" class="error-message"></div>
+            <br />
+            <button
+              type="button"
+              id="saveGenderButton"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Save Gender
+            </button>
+          </section>
+
+          <section id="privacySettings">
+            <h2>Privacy Settings</h2>
+
+            <div id="twoFactorAuthentication">
+              <h3>Two-Factor Authentication (2FA)</h3>
+              {% if current_user.is_2fa_enabled %}
+              <p>
+                Your Two-Factor Authentication is enabled using {{
+                current_user.otp_method }}.
+              </p>
+              <form action="{{ url_for('auth.disable_2fa') }}" method="post">
+                <button
+                  id="disable2FAButton"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Disable 2FA
+                </button>
+              </form>
+              {% else %}
+              <p>Your Two-Factor Authentication is not enabled.</p>
+              <form action="{{ url_for('auth.enable_2fa') }}" method="post">
+                <label style="color: #fff">
+                  <input type="radio" name="otp_method" value="app" checked />
+                  Use Authenticator App
+                </label>
+                <label style="color: #fff">
+                  <input type="radio" name="otp_method" value="email" /> Send
+                  OTP to Email
+                </label>
+                <br />
+                <button
+                  id="enable2FAButton"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Enable 2FA
+                </button>
+              </form>
+              {% endif %}
+              <div id="twoFAStatusMessage"></div>
+            </div>
+
+            <br /><br /><br />
+            <hr />
+            <div id="accountActivity">
+              <h3>Recent Account Activity(Logins)</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp in {{current_user.time_zone}}</th>
+                    <th>IP Address</th>
+                    <th>User Agent</th>
+                    <th>Browser</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for activity in current_user.login_activities %}
+                  <tr>
+                    <td>
+                      {{ activity.get_local_timestamp().strftime('%Y-%m-%d
+                      %H:%M:%S') }}
+                    </td>
+                    <td>{{ activity.ip_address }}</td>
+                    <td class="user-agent">{{ activity.user_agent }}</td>
+                    <td>{{ activity.browser_name }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <br /><br />
+            <hr />
+            <h3>Email Preferences</h3>
+            <div id="emailPreferences">
+              <form
+                id="emailPreferencesForm"
+                method="POST"
+                action="{{ url_for('auth.update_email_preferences') }}"
+              >
+                <label>
+                  <input
+                    type="checkbox"
+                    name="newsletter"
+                    {%
+                    if
+                    current_user.email_preferences.newsletter
+                    %}checked{%
+                    endif
+                    %}
+                  />
+                  Receive Newsletter
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="activity_alerts"
+                    {%
+                    if
+                    current_user.email_preferences.activity_alerts
+                    %}checked{%
+                    endif
+                    %}
+                  />
+                  Receive Activity Alerts
+                </label>
+                <button
+                  type="submit"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Update Preferences
+                </button>
+              </form>
+            </div>
+          </section>
+
+          <!-- Logout -->
+          <section id="logoutAccount">
+            <h2>Account Management</h2>
+            <h3>Logout</h3>
+            <br />
+            <div class="logout">
+              <form action="{{ url_for('auth.logout') }}" method="post">
+                <button type="submit" class="logout-btn">
+                  <i class="bx bx-log-out-circle"></i> Logout
+                </button>
+              </form>
+            </div>
+          </section>
+          <!-- Delete Account -->
+          <section id="deleteAccount">
+            <h2>Account Management</h2>
+            <h3>Delete Your Account?</h3>
+            <div class="delete">
+              <button class="delete-btn" id="deleteAccountBtn">
+                <i class="bx bx-trash"></i> Delete Account
+              </button>
+            </div>
+          </section>
+
+          <!-- The Modal -->
+          <div id="deleteModal" class="modal">
+            <div class="modal-content">
+              <span class="close" id="closeModal">&times;</span>
+              <h2>Confirm Account Deletion</h2>
+              <p>
+                Are you sure you want to delete your account? This action cannot
+                be undone.
+              </p>
+              <form action="{{ url_for('auth.delete_account') }}" method="post">
+                <button type="submit" class="modal-btn confirm-btn">
+                  Yes, delete my account
+                </button>
+                <button
+                  type="button"
+                  class="modal-btn cancel-btn"
+                  id="cancelDelete"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Deactivate Account -->
+          <section id="deactivateAccount">
+            <h2>Account Management</h2>
+            <h3>Deactivate Account?</h3>
+            <div class="deactivate">
+              <form
+                action="{{ url_for('auth.deactivate_account') }}"
+                method="POST"
+              >
+                <p>
+                  Are you sure you want to deactivate your account? This action
+                  cannot be undone.
+                </p>
+                <div class="deactivate-btn">
+                  <button type="submit" class="btn btn-danger">
+                    Deactivate Account
+                  </button>
+                  <a
+                    href="{{ url_for('views.settings') }}"
+                    class="btn btn-secondary"
+                    >Cancel</a
+                  >
+                </div>
+              </form>
+            </div>
+          </section>
+          <!-- Activate Users, for Admins only -->
+          <section id="activateUsers">
+            <h1>Manage Users</h1>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Full Name</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                  <th>Make Admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr>
+                  <td>{{ user.id }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.full_name }}</td>
+                  <td>
+                    {% if user.is_active %}
+                    <i
+                      class="fas fa-check-circle"
+                      style="color: green"
+                      title="Active"
+                    ></i>
+                    {% else %}
+                    <i
+                      class="fas fa-times-circle"
+                      style="color: red"
+                      title="Inactive"
+                    ></i>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not user.is_active %}
+                    <form
+                      action="{{ url_for('auth.activate_account', user_id=user.id) }}"
+                      method="post"
+                    >
+                      <button type="submit">Activate</button>
+                    </form>
+                    {% else %}
+                    <span>Active</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not user.is_admin %}
+                    <form
+                      action="{{ url_for('auth.make_admin', user_id=user.id) }}"
+                      method="post"
+                    >
+                      <button type="submit">Make Admin</button>
+                    </form>
+                    {% else %}
+                    <span>Admin</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </section>
+          <section id="exportData">
+            <h2>Data Management</h2>
+            <h3>Export Your Data</h3>
+            <div class="export">
+              <p>Choose Category to Download</p>
+              <ul>
+                <li>
+                  <a href="{{ url_for('auth.export_notes') }}"
+                    ><i class="bx bx-note"></i>Export Notes</a
+                  >
+                </li>
+                <li>
+                  <a href="{{ url_for('auth.export_user_details') }}"
+                    ><i class="bx bxs-user-detail"></i> Export User Details</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </section>
+          <section id="importData">
+            <h2>Data Management</h2>
+            <h3>Import Data/Notes (File Format .json )</h3>
+            <br /><br />
+            <form
+              action="{{ url_for('auth.import_notes') }}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <input type="file" name="file" accept=".json,.csv" required />
+              <button
+                type="submit"
+                class="btn btn-primary"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Import Data
+              </button>
+            </form>
+          </section>
+          <section id="emailNotifications">
+            <h2>Notifications</h2>
+            <h3>Email Notifications</h3>
+            <br />
+            <form
+              id="emailPreferencesForm"
+              method="POST"
+              action="{{ url_for('auth.update_email_preferences') }}"
+            >
+              <label style="color: #fff">
+                <input
+                  type="checkbox"
+                  name="activity_alerts"
+                  {%
+                  if
+                  current_user.email_preferences.activity_alerts
+                  %}checked{%
+                  endif
+                  %}
+                />
+                Receive Activity Alerts
+              </label>
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Update Preferences
+              </button>
+            </form>
+          </section>
+
+          <section id="pushNotifications">
+            <h2>Notification</h2>
+            <h3>Push Notifications</h3>
+            <br />
+            <form
+              id="pushNotificationsForm"
+              method="POST"
+              action="{{ url_for('auth.update_push_notifications') }}"
+            >
+              <label style="color: #fff">
+                <input
+                  type="checkbox"
+                  name="new_message"
+                  {%
+                  if
+                  current_user.push_preferences.new_message
+                  %}checked{%
+                  endif
+                  %}
+                />
+                New Message Alerts
+              </label>
+              <button
+                type="submit"
+                style="--background-: {{ current_user.generated_color }};"
+              >
+                Update Push Notifications
+              </button>
+            </form>
+          </section>
+
+          <section id="themeSettings">
+            <h2>Appearance</h2>
+            <h3>Theme Setting (Only on viewing Notes)</h3>
+          </section>
+          <section id="fontSizeSettings">
+            <h2>Appearance</h2>
+            <h3>Font Size (For Viewing Notes)</h3>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Enable 2FA
+        $("#enable2FAButton").click(function () {
+          $.post('{{ url_for("auth.enable_2fa") }}', function (response) {
+            window.location.href = response.redirect_url; // Redirect to setup 2FA page
+          }).fail(function () {
+            $("#twoFAStatusMessage")
+              .text(
+                "Failed to enable Two-Factor Authentication. Please try again."
+              )
+              .css("color", "white");
+          });
+        });
+
+        // Disable 2FA
+        $("#disable2FAButton").click(function () {
+          $.post('{{ url_for("auth.disable_2fa") }}', function (response) {
+            $("#twoFAStatusMessage")
+              .text("Two-Factor Authentication has been disabled.")
+              .css("color", "white");
+            $("#disable2FAButton").hide();
+            $("#enable2FAButton").show();
+          }).fail(function () {
+            $("#twoFAStatusMessage")
+              .text(
+                "Failed to disable Two-Factor Authentication. Please try again."
+              )
+              .css("color", "white");
+          });
+        });
+      });
+      var modal = document.getElementById("deleteModal");
+      var btn = document.getElementById("deleteAccountBtn");
+      var span = document.getElementById("closeModal");
+      var cancelBtn = document.getElementById("cancelDelete");
+      btn.onclick = function () {
+        modal.style.display = "block";
+      };
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
+      cancelBtn.onclick = function () {
+        modal.style.display = "none";
+      };
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+    </script>
+    <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
+  </body>
+</html>

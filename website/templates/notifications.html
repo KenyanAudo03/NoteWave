@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/notifications.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/user_home.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+    rel="icon"
+    href="{{ url_for('static', filename='img/notewave.ico') }}"
+    type="image/x-icon"
+  />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <div class="left-container">
+        <div class="all">
+          <div class="profile">
+            <div class="cover-photo">
+              {% if current_user.cover_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.cover_picture }}"
+                alt="Cover Photo"
+                class="cover-image"
+              />
+              {% else %}
+              <div class="default-cover">
+                <p>Default Cover Photo</p>
+              </div>
+              {% endif %}
+            </div>
+            <div class="profile-pic">
+              {% if current_user.profile_picture %}
+              <img
+                src="/static/profile_pics/{{ current_user.profile_picture }}"
+                alt="Profile Picture"
+                class="profile-image"
+              />
+              {% else %}
+              <i
+                class="fas fa-5x"
+                style="--background-: {{ current_user.generated_color }}"
+                >{{ current_user.first_name[0] }}</i
+              >
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="profile-info">
+          <p class="username">
+            {{ current_user.full_name }} {% if current_user.email_verified %}
+            <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="notes">
+          <p class="section-title">NOTES</p>
+          <div class="notes-content">
+            <a href="/user_home" class="notes-link">
+              <p>
+                <i class="far fa-file-alt"></i> All notes
+                <span style="--background-: {{ current_user.generated_color }}">
+                  ({{ current_user.notes|length }})
+                </span>
+              </p>
+            </a>
+            <a href="{{ url_for('views.show_todo_page') }}" class="notes-link">
+              <p style="--background-: {{ current_user.generated_color }}">
+                <i class="far fa-check-circle"></i> To-dos
+                <span> (<span id="todoCount">0</span>)</span>
+              </p>
+            </a>
+
+            <hr />
+          </div>
+
+          <div class="favorite">
+            <a href="/favorites" class="favorite-link" id="favoriteLink">
+              <p style="--background-: {{ current_user.generated_color }}">
+                <i class="far fa-star"></i> My favorites
+                <span> (<span id="favoriteCount">0</span>) </span>
+              </p>
+            </a>
+          </div>
+        </div>
+
+        <div class="tags">
+          <p class="section-title">BOOKMARKS</p>
+          {% for tag in tags %}
+          <a
+            href="{{ url_for('views.tag_notes', tag_id=tag.id) }}"
+            class="tag"
+            data-tag-id="{{ tag.id }}"
+          >
+            <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
+            {{ tag.name }}
+            <span
+              class="note-count"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              ({{ tag_counts.get(tag.id, 0) }})
+            </span>
+          </a>
+          <hr class="tag-divider" />
+          {% endfor %}
+        </div>
+
+        <div class="settings" id="settingsLink">
+          <a href="{{url_for('views.settings')}}">
+            <p><i class="fas fa-cog"></i> Settings</p>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="right-container"
+        data-user-timezone="{{ current_user.time_zone }}"
+        data-user-fullname="{{ current_user.full_name }}"
+      >
+        <div class="header">
+          <div class="the-header">
+            <div
+              class="left"
+              style="--background-: {{ current_user.generated_color }}"
+            ></div>
+            <div class="notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Mark all as read"></i>
+                <span id="notificationBadge" class="badge" >0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="notification"></i>
+                {% endif %}
+              </a>
+            </div>
+
+            <div
+              class="right"
+              style="--background-: {{ current_user.generated_color }}"
+            ></div>
+          </div>
+        </div>
+        <div class="page1">
+          <h1>Notifications</h1>
+          <ul
+            style="--background-: {{ current_user.generated_color }}"
+            id="notificationList"
+          >
+            {% for notification in notifications %}
+            <li
+              class="notification-item {% if notification.is_read %}read{% endif %}"
+              data-notification-id="{{ notification.id }}"
+            >
+              <p>{{ notification.message }}</p>
+              <p>
+                <small
+                  >{{ notification.created_at.strftime('%Y-%m-%d %H:%M')
+                  }}</small
+                >
+              </p>
+            </li>
+            <hr />
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+  </body>
+</html>
