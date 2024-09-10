@@ -8,7 +8,7 @@ Am gonna drop the link soon, when I have completed it!! 💯💯
 
 
 _____________________________________________________________________________________________________________
-# STEPS OF RUNNING THE NOTEPAD
+# STEPS TO MAKE THE APPLICATION RUNNING
 1. pip install -r requirements.txt
 2. python3 main.py  or the python version you are using
 3. Once its running Crtl+Click the link which is 127.0.0.1:5000
