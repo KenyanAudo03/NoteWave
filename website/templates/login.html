@@ -32,18 +32,19 @@
       content="{{ url_for('static', filename='images/logo.png') }}"
     />
     <link
-    rel="icon"
-    href="{{ url_for('static', filename='img/notewave.ico') }}"
-    type="image/x-icon"
-  />
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
-    <!-- Favicon -->
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      defer
+    ></script>
     <link
       rel="icon"
       href="{{ url_for('static', filename='images/favicon.ico') }}"
       type="image/x-icon"
     />
-    <!-- Stylesheets -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/login.css') }}"
@@ -60,7 +61,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
-
   </head>
   <body>
     <div class="messages-container">
@@ -78,83 +78,81 @@
       </div>
       {% endfor %} {% endif %} {% endwith %}
     </div>
-    <div class="form-container">
-      <div class="col col-1">
-        <div class="black-box">
-          <i class="bx bx-left-arrow-alt left-arrow" aria-label="Previous"></i>
-          <i class="bx bx-right-arrow-alt right-arrow" aria-label="Next"></i>
-          <div class="main-info">
-            <p>Arrange. Streamline. Simplify</p>
-          </div>
-          <div id="notepad-info">
-            <div class="info-section">
-              <h3>Create, edit, and save</h3>
-              <p>Your notes online with our easy-to-use online notepad.</p>
-            </div>
-            <div class="info-section">
-              <h3>Access anytime, anywhere</h3>
-              <p>Your notes from anywhere, anytime, on any device.</p>
-            </div>
-            <div class="info-section">
-              <h3>Collaborate in real-time</h3>
-              <p>
-                With others by sharing your notes and working together in
-                real-time.
-              </p>
-            </div>
-          </div>
-          <div class="indicator-container">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+    <div id="back">
+      <canvas id="canvas" class="canvas-back"></canvas>
+      <div class="backLeft"></div>
+    </div>
+
+    <div id="slideBox">
+      <div class="topLayer">
+        <div class="right">
+          <div class="content">
+            <h2>Login</h2>
+            <form
+              id="form-login"
+              method="POST"
+              action="{{ url_for('auth.login') }}"
+            >
+              <div class="form-element form-stack">
+                <label for="email" class="email"
+                  ><i class="bx bx-envelope icon"></i> Email</label
+                >
+                <input
+                  id="email"
+                  name="email"
+                  class="input-field"
+                  aria-required="true"
+                  aria-label="Email"
+
+                />
+              </div>
+              <div class="form-element form-stack">
+                <label for="password-login" class="form-label"
+                  ><i class="bx bx-lock-alt icon"></i> Password</label
+                >
+                <input
+                  type="password"
+                  id="password-login"
+                  name="password-login"
+                  class="input-field"
+                  aria-required="true"
+                  aria-label="Password"
+                />
+                <div id="password-strength" aria-live="polite"></div>
+              </div>
+              <div class="container1">
+                <div class="show-pass">
+                  <input
+                    type="checkbox"
+                    id="show-pass-checkbox"
+                    class="checkbox"
+                  />
+                  <label for="show-pass-checkbox">Show Password</label>
+                </div>
+                <div class="forgot-password">
+                  <a href="/auth/forgot-password">Forgot Password?</a>
+                </div>
+              </div>
+              <div class="register">
+                <p>
+                  Don't have an account? <a href="/auth/sign_up">Click here</a>
+                </p>
+              </div>
+              <div class="form-element form-submit">
+                <button id="logIn" class="login" type="submit" name="login">
+                  <span>Sign In</span>
+                  <i class="bx bx-right-arrow-alt"></i>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-      </div>
-      <div class="col col-2">
-        <div class="loader" id="loading-spinner" style="display: none"></div>
-
-        <div class="logo">
-          <p>Note<span>wave.</span></p>
-        </div>
-        <form id="form-login" method="POST" action="{{ url_for('auth.login') }}">
-          <div class="form-login">
-              <div class="form-title">
-                  <p>Welcome Back to NoteWave.</p>
-              </div>
-              <div class="form-inputs">
-                  <div class="input-box">
-                      <label for="email" class="form-label"><i class="bx bx-envelope icon"></i> Email</label>
-                      <input id="email" name="email" class="input-field" aria-required="true" aria-label="Email" required />
-                  </div>
-                  <div class="input-box">
-                      <label for="password-login" class="form-label"><i class="bx bx-lock-alt icon"></i> Password</label>
-                      <input type="password" id="password-login" name="password-login" class="input-field" aria-required="true" aria-label="Password" required />
-                      <div id="password-strength" aria-live="polite"></div>
-                  </div>
-
-                  <div class="container1">
-                      <div class="show-pass">
-                          <input type="checkbox" id="show-pass-checkbox" />
-                          <label for="show-pass-checkbox">Show Password</label>
-                      </div>
-                      <div class="forgot-password">
-                          <a href="/auth/forgot-password">Forgot Password?</a>
-                      </div>
-                  </div>
-                  <div class="register">
-                      <p>Don't have an account? <a href="/auth/sign_up">Click here</a></p>
-                  </div>
-                  <div class="input-box">
-                      <button class="submit" id="login" type="submit" name="login">
-                          <span>Sign In</span>
-                          <i class="bx bx-right-arrow-alt"></i>
-                      </button>
-                  </div>
-              </div>
-          </div>
-      </form>
       </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.11.3/paper-full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script></script>
     <script src="{{ url_for('static', filename='js/login.js') }}"></script>
   </body>
 </html>

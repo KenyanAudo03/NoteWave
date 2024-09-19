@@ -993,7 +993,7 @@ def send_password_reset_email(user, token):
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset Request"
-    message["From"] = "YourApp <your_email@example.com>"
+    message["From"] = "NoReply <no-reply@gmail.com.com>"
     message["To"] = f"{user.full_name} <{user.email}>"
 
     html_content = f"""
@@ -1003,25 +1003,27 @@ def send_password_reset_email(user, token):
 <style>
 /* Define your CSS styles for the email */
 body{{
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    min-height: 100vh;
+     font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
 }}
 .container {{
-    border: 4px solid #ff7f50;
-    border-radius: 5px;
-    padding: 20px;
-    display: inline-block;
-    justify-content: space-between;
-    margin: 0 auto;
-    min-height: 100vh;
+  background-color: #fff;
+      border: 2px solid #ff7f50;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }}
 .logo {{
-    font-family: "Roboto", sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    color: #00ffff;
+     font-family: "Roboto", sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #00ffff;
+      margin-bottom: 20px;
     text-align: center;
     position: relative;
 }}
@@ -1042,9 +1044,14 @@ body{{
     margin: 10px auto 0;
     border-radius: 2px;
 }}
+h4,h5{{
+   color: #333;
+      margin-top: 20px; 
+}}
 .procedures, .end{{
     max-width: 550px;
 }}
+
 p[type="proceed"]{{
     font-size: 14px;
     }}
@@ -1053,11 +1060,14 @@ p[type="cont"] {{
     font-size: 16px;
     }}
 button{{
-    background: #ff7f50;
-    border: none;
-    padding: 13px 15px;
-    border-radius: 5px;
-    width: auto;
+background-color: #ff7f50;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
 
     }}
 a{{
@@ -1071,11 +1081,8 @@ a{{
         font-size: 13px;
         }}
     button{{
-        background: #ff7f50;
-        border: none;
-        padding: 13px 15px;
-        border-radius: 5px;
-        width: auto;
+       padding: 8px 12px;
+        font-size: 14px;
 
        }}
     a{{
@@ -1105,8 +1112,8 @@ a{{
 
         <div class="procedures">
           <p type="proceed">
-            < To proceed with resetting your password, please follow the steps
-            below>:
+            To proceed with resetting your password, please follow the steps
+            below:
           </p>
           <h5>
             <b>Step 1: <i>Click the Password Reset Link</i></b>
