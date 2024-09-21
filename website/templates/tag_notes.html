@@ -363,6 +363,199 @@
                 ></a>
               </div>
             </div>
+            <div id="addTagModal" class="modal-overlay">
+              <div class="modal-body">
+                <span
+                  class="close-button"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>Add New Tag</h2>
+                <form id="addTagForm">
+                  <input
+                    type="text"
+                    class="inputs"
+                    id="tagName"
+                    name="name"
+                    required
+                    placeholder="Tag Name"
+                  />
+                  <br />
+                  <label for="tagColor" style="color: #f1c40f"
+                    >Tag Color:</label
+                  >
+                  <div id="colorPicker" class="color-container">
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ff0000"
+                      data-color="#FF0000"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #00ff00"
+                      data-color="#00FF00"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #0000ff"
+                      data-color="#0000FF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ffff00"
+                      data-color="#FFFF00"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ff00ff"
+                      data-color="#FF00FF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #00ffff"
+                      data-color="#00FFFF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #3498db"
+                      data-color="#3498db"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #2ecc71"
+                      data-color="#2ecc71"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #e67e22"
+                      data-color="#e67e22"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #95a5a6"
+                      data-color="#95a5a6"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #9b59b6"
+                      data-color="#9b59b6"
+                    ></div>
+                  </div>
+                  <br /><br />
+                  <button
+                    type="submit"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Add Tag
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div id="editTagsModal" class="modal">
+              <div class="modal-content">
+                <span
+                  class="close-modal"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>EDIT TAGS</h2>
+                <ul id="tagList">
+                  {% for tag in tags %}
+                  <li class="tag-item" data-tag-id="{{ tag.id }}">
+                    <div
+                      class="color-picker"
+                      style="--tag-color: {{tag.color}}"
+                    ></div>
+                    <input
+                      type="text"
+                      class="tag-name"
+                      value="{{ tag.name }}"
+                      readonly
+                    />
+                    <button class="edit-pen"><i class="fas fa-pen"></i></button>
+                    <button class="save-tag" style="display: none">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button class="delete-tag">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div id="colorPickerModal" class="modal">
+              <div class="modal-content">
+                <span
+                  class="close-color-modal"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>SELECT COLOR</h2>
+                <div class="color-options">
+                  <div
+                    class="color-option"
+                    style="background-color: #ff0000"
+                    data-color="#FF0000"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #00ff00"
+                    data-color="#00FF00"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #0000ff"
+                    data-color="#0000FF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #ffff00"
+                    data-color="#FFFF00"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #ff00ff"
+                    data-color="#FF00FF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #00ffff"
+                    data-color="#00FFFF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #3498db"
+                    data-color="#3498db"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #2ecc71"
+                    data-color="#2ecc71"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #e67e22"
+                    data-color="#e67e22"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #95a5a6"
+                    data-color="#95a5a6"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #9b59b6"
+                    data-color="#9b59b6"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #123456"
+                    data-color="#123456"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </section>
         </article>
       </div>

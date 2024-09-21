@@ -173,25 +173,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 document.addEventListener("DOMContentLoaded", function () {
+  const editTagsModal = document.getElementById("editTagsModal");
+  const colorPickerModal = document.getElementById("colorPickerModal");
+
+  let currentTagColor = "";
   document.querySelector(".edit-notes").addEventListener("click", function (e) {
     e.preventDefault();
-    document.getElementById("editTagsModal").style.display = "block";
+    editTagsModal.style.display = "block";
   });
   document.querySelector(".close-modal").addEventListener("click", function () {
-    document.getElementById("editTagsModal").style.display = "none";
+    editTagsModal.style.display = "none";
     location.reload();
   });
 
   document
     .querySelector(".close-color-modal")
     .addEventListener("click", function () {
-      document.getElementById("colorPickerModal").style.display = "none";
+      colorPickerModal.style.display = "none";
     });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (editTagsModal.style.display === "block") {
+        editTagsModal.style.display = "none";
+      }
+      if (colorPickerModal.style.display === "block") {
+        colorPickerModal.style.display = "none";
+      }
+    }
+  });
+
   document.querySelectorAll(".edit-pen").forEach((button) => {
     button.addEventListener("click", function () {
       const tagItem = this.closest(".tag-item");
       const tagNameInput = tagItem.querySelector(".tag-name");
       const saveButton = tagItem.querySelector(".save-tag");
+
+      currentTagColor =
+        tagItem.querySelector(".color-picker").style.backgroundColor;
+      if (!currentTagColor || currentTagColor === "none") {
+        currentTagColor = "#3498db";
+      }
       tagNameInput.removeAttribute("readonly");
       tagNameInput.focus();
       this.style.display = "none";
@@ -204,8 +226,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const tagItem = this.closest(".tag-item");
       const tagNameInput = tagItem.querySelector(".tag-name");
       const tagName = tagNameInput.value;
-      const tagColor =
-        tagItem.querySelector(".color-picker").style.backgroundColor;
+      let tagColor =
+        tagItem.querySelector(".color-picker").style.backgroundColor ||
+        currentTagColor;
+      if (!tagColor || tagColor === "none") {
+        tagColor = "#3498db";
+      }
+
       const tagId = tagItem.getAttribute("data-tag-id");
       fetch(`/update_tag/${tagId}`, {
         method: "POST",
@@ -230,16 +257,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
   });
+
   document.querySelectorAll(".color-picker").forEach((picker) => {
     picker.addEventListener("click", function () {
-      const colorPickerModal = document.getElementById("colorPickerModal");
-      colorPickerModal.style.display = "block";
       const tagItem = this.closest(".tag-item");
       const tagId = tagItem.getAttribute("data-tag-id");
+
+      colorPickerModal.style.display = "block";
+
+      const colorOptions = document.querySelectorAll(".color-option");
+      colorOptions.forEach((option) => {
+        option.replaceWith(option.cloneNode(true));
+      });
+
       document.querySelectorAll(".color-option").forEach((option) => {
         option.addEventListener("click", function () {
           const color = this.getAttribute("data-color");
           tagItem.querySelector(".color-picker").style.backgroundColor = color;
+
+          currentTagColor = color;
+
           colorPickerModal.style.display = "none";
           fetch(`/update_tag_color/${tagId}`, {
             method: "POST",
@@ -257,6 +294,101 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
       });
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("addTagModal");
+
+  document.querySelector(".new-tag").addEventListener("click", function (e) {
+    e.preventDefault();
+    modal.style.display = "flex"; // Changed to flex for centering
+    modal.querySelector(".modal-body").style.transform = "scale(0.8)";
+    modal.querySelector(".modal-body").style.opacity = "0";
+    setTimeout(() => {
+      modal.querySelector(".modal-body").style.transform = "scale(1)";
+      modal.querySelector(".modal-body").style.opacity = "1";
+    }, 50);
+  });
+
+  document
+    .querySelector(".close-button")
+    .addEventListener("click", function () {
+      modal.style.display = "none";
+    });
+
+  document
+    .getElementById("addTagForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const tagName = document.getElementById("tagName").value;
+      const tagColor =
+        document.querySelector(".color-container").style.backgroundColor;
+
+      fetch("/add_tag", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: tagName, color: tagColor }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            console.log("Tag added successfully:", data);
+            modal.style.display = "none";
+            location.reload();
+          } else {
+            console.error("Error adding tag:", data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error adding tag:", error);
+        });
+    });
+
+  document.querySelectorAll(".color-swatch").forEach((option) => {
+    option.addEventListener("click", function () {
+      const color = this.getAttribute("data-color");
+      document.querySelector(".color-container").style.backgroundColor = color;
+    });
+  });
+
+  // Close modal when Esc key is pressed
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      modal.style.display = "none";
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".delete-tag").forEach((button) => {
+    button.addEventListener("click", function () {
+      const tagItem = this.closest(".tag-item");
+      const tagId = tagItem.getAttribute("data-tag-id");
+
+      if (confirm("Are you sure you want to delete this tag?")) {
+        fetch(`/delete_tag/${tagId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              console.log("Tag deleted successfully:", data);
+              tagItem.remove(); 
+            } else {
+              console.error("Error deleting tag:", data);
+            }
+          })
+          .catch((error) => {
+            console.error("Error deleting tag:", error);
+          });
+      }
     });
   });
 });
