@@ -23,12 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
   const tagId = searchInput.getAttribute("data-tag-id");
-  const noteItems = document.querySelectorAll(".note-item");
 
   function stripTags(str) {
     return str.replace(/<\/?[^>]+(>|$)/g, "");
@@ -44,25 +42,30 @@ document.addEventListener("DOMContentLoaded", function () {
     return `${formattedDate} ${formattedTime}`;
   }
 
-  noteItems.forEach((item) => {
-    const tagColor = item.getAttribute("data-tag-color");
-    item.style.setProperty("--bullet-color", tagColor);
-    
-    item.addEventListener("mouseenter", function () {
-      const hrElement = this.nextElementSibling;
-      if (hrElement) hrElement.style.borderColor = tagColor;
-    });
+  function attachEventListeners(noteItems) {
+    noteItems.forEach((item) => {
+      const tagColor = item.getAttribute("data-tag-color");
+      item.style.setProperty("--bullet-color", tagColor);
 
-    item.addEventListener("mouseleave", function () {
-      const hrElement = this.nextElementSibling;
-      if (hrElement) hrElement.style.borderColor = "#555";
-    });
+      item.addEventListener("mouseenter", function () {
+        const hrElement = this.nextElementSibling;
+        if (hrElement) hrElement.style.borderColor = tagColor;
+      });
 
-    item.addEventListener("click", function () {
-      const noteId = this.getAttribute("data-note-id");
-      window.location.href = `/note_viewer/${noteId}`;
+      item.addEventListener("mouseleave", function () {
+        const hrElement = this.nextElementSibling;
+        if (hrElement) hrElement.style.borderColor = "#555";
+      });
+
+      item.addEventListener("click", function () {
+        const noteId = this.getAttribute("data-note-id");
+        window.location.href = `/note_viewer/${noteId}`;
+      });
     });
-  });
+  }
+
+  const noteItems = document.querySelectorAll(".note-item");
+  attachEventListeners(noteItems);
 
   searchInput.addEventListener("input", function () {
     const query = searchInput.value.trim();
@@ -108,22 +111,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
               const hr = document.createElement("hr");
               notesList.appendChild(hr);  
-
-              listItem.style.setProperty("--bullet-color", note.color);
-
-              listItem.addEventListener("mouseenter", function () {
-                hr.style.borderColor = note.color;
-              });
-
-              listItem.addEventListener("mouseleave", function () {
-                hr.style.borderColor = "#555";
-              });
-
-              listItem.addEventListener("click", function () {
-                const noteId = this.getAttribute("data-note-id");
-                window.location.href = `/note_viewer/${noteId}`;
-              });
             });
+            // Attach event listeners to newly created items
+            const newNoteItems = notesList.querySelectorAll(".note-item");
+            attachEventListeners(newNoteItems);
           } else {
             notesList.innerHTML = `<p class="no-notes" style="color: #fff;">No notes found</p>`;
           }
@@ -131,13 +122,18 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       notesList.innerHTML = "";
       noteItems.forEach((item) => {
-        notesList.appendChild(item.cloneNode(true)); 
+        const clonedItem = item.cloneNode(true);
+        notesList.appendChild(clonedItem); 
         const hr = document.createElement("hr");
         notesList.appendChild(hr); 
       });
+      // Reattach event listeners to cloned items
+      const clonedNoteItems = notesList.querySelectorAll(".note-item");
+      attachEventListeners(clonedNoteItems);
     }
   });
 });
+
 
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+
+
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
@@ -110,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-fetch(`/search_notes?query=${query}&tag_id=${tagId}`)
+
 document.addEventListener("DOMContentLoaded", function () {
   const favoriteCountSpan = document.getElementById("favoriteCount");
 
@@ -207,8 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!currentTagColor || currentTagColor === "none") {
         currentTagColor = "#3498db";
       }
-
-      // Enable editing
       tagNameInput.removeAttribute("readonly");
       tagNameInput.focus();
       this.style.display = "none";
