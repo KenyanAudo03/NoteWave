@@ -1896,14 +1896,7 @@ textarea.form-input::-webkit-resizer {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
   transition: opacity 0.5s ease-in-out, max-height 0.8s ease;
-}
-.tags-wrapper.show {
-  opacity: 1;
-  max-height: 500px;
 }
 
 .tag {

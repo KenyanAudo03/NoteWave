@@ -1174,3 +1174,7 @@ def contact():
 @views.route('/privacy_policy')
 def privacy_policy():
     return render_template('privacy_policy.html')
+
+@views.route('speech_text')
+def speech_text():
+    return render_template('speech-to-text.html')
