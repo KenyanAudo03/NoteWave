@@ -26,8 +26,19 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
   });
-  updateNotificationBadge();
+  updateNotificationBadge(); 
 });
+
+function updateNotificationBadge() {
+  const unreadCount = document.querySelectorAll(".notification-item:not(.read)")
+    .length;
+  const badgeElement = document.getElementById("notificationBadge");
+
+  if (badgeElement) {
+    badgeElement.textContent = unreadCount; 
+  }
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
   function updateNotificationBadge() {
@@ -140,6 +151,31 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     });
   }
+});
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButton = document.querySelector(".toggle-tags");
+  const tagsWrapper = document.querySelector(".tags-wrapper");
+  const icon = toggleButton.querySelector("i");
+  toggleButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    tagsWrapper.classList.toggle("show");
+    if (tagsWrapper.classList.contains("show")) {
+      icon.classList.remove("fa-chevron-down");
+      icon.classList.add("fa-chevron-up");
+    } else {
+      icon.classList.remove("fa-chevron-up");
+      icon.classList.add("fa-chevron-down");
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
+      if (tagsWrapper.classList.contains("show")) {
+        tagsWrapper.classList.remove("show");
+        icon.classList.remove("fa-chevron-up");
+        icon.classList.add("fa-chevron-down");
+      }
+    }
+  });
 });
 
 function logoutUser() {

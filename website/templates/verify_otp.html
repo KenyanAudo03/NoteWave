@@ -33,117 +33,140 @@
     />
   </head>
   <body>
-    <div class="form-container">
-      <div class="col col-1">
-        <div class="black-box">
-          <i class="bx bx-left-arrow-alt left-arrow" aria-label="Previous"></i>
-          <i class="bx bx-right-arrow-alt right-arrow" aria-label="Next"></i>
-          <div class="main-info">
-            <p>Arrange. Streamline. Simplify</p>
-          </div>
-          <div id="notepad-info">
-            <div class="info-section">
-              <h3>Create, edit, and save</h3>
-              <p>Your notes online with our easy-to-use online notepad.</p>
-            </div>
-            <div class="info-section">
-              <h3>Access anytime, anywhere</h3>
-              <p>Your notes from anywhere, anytime, on any device.</p>
-            </div>
-            <div class="info-section">
-              <h3>Collaborate in real-time</h3>
-              <p>
-                With others by sharing your notes and working together in
-                real-time.
-              </p>
-            </div>
-          </div>
-          <div class="indicator-container">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-          </div>
-        </div>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% elif category == 'error' or category == 'warning' %}
+        <i class="fas fa-times-circle"></i>
+        {% elif category == 'info' %}
+        <i class="fas fa-info-circle"></i>
+        {% endif %} {{ message }}
       </div>
-      <div class="col col-2">
-        <div class="logo">
-          <p>Note<span>wave.</span></p>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+
+    <div id="error-message" class="error-message" style="display: none">
+      <span id="error-text"></span>
+      <span class="close-icon" onclick="closeErrorMessage()">✖</span>
+    </div>
+
+    <div class="container">
+      <h1>Verify OTP.</h1>
+      <form
+        action="{{ url_for('auth.verify_otp') }}"
+        method="POST"
+        id="form-authentication"
+      >
+        <p>
+          Please enter the OTP sent to
+          <span id="email">{{ current_user.email }}</span>.
+        </p>
+
+        <div class="otp-input">
+          <input
+            type="tel"
+            id="digit-1"
+            class="otp-digit"
+            maxlength="1"
+            name="digit1"
+            data-index="0"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-2"
+            class="otp-digit"
+            maxlength="1"
+            name="digit2"
+            data-index="1"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-3"
+            class="otp-digit"
+            maxlength="1"
+            name="digit3"
+            autocomplete="off"
+            data-index="2"
+          />
+          <input
+            type="tel"
+            id="digit-4"
+            class="otp-digit"
+            maxlength="1"
+            name="digit4"
+            data-index="3"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-5"
+            class="otp-digit"
+            maxlength="1"
+            name="digit5"
+            data-index="4"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-6"
+            class="otp-digit"
+            maxlength="1"
+            name="digit6"
+            autocomplete="off"
+            data-index="5"
+          />
+          <input type="hidden" id="combined-otp" name="otp" />
         </div>
 
-        <form
-          action="{{ url_for('auth.verify_otp') }}"
-          method="POST"
-          id="form-authentication"
-        >
-          <div class="form-authentication">
-            <div class="form-title">
-              <p>Verify OTP</p>
-            </div>
-            <p class="feed">Provide the OTP code sent to your email address.</p>
-            <br />
-            <div class="form-inputs">
-              <div class="input-box">
-                <label for="otp" class="form-label"
-                  ><i class="bx bxs-check-circle"></i> OTP Code</label
-                >
-                <input type="text" id="otp" name="otp" class="input-field" />
-              </div>
-              <div class="input-btn">
-                <button type="submit" id="verify-btn" class="submit">
-                  <span id="btn-text">Verify</span>
-                  <i class="bx bx-right-arrow-alt"></i>
-                </button>
-                <button id="resend-otp-btn" class="resend" disabled>
-                  Resend in <span id="countdown">30</span>
-                </button>
-              </div>
-            </div>
-            <div class="messages-container">
-              {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %} {% for category, message in messages %}
-              <div
-                class="alert alert-{{ category }} alert-dismissible fade show"
-                role="alert"
-              >
-                {% if category == 'success' %}
-                <i class="fas fa-check-circle"></i>
-                {% elif category == 'error' or category == 'warning' %}
-                <i class="fas fa-times-circle"></i>
-                {% elif category == 'info' %}
-                <i class="fas fa-info-circle"></i>
-                {% endif %} {{ message }}
-              </div>
-
-              {% endfor %} {% endif %} {% endwith %}
-            </div>
-          </div>
-        </form>
-      </div>
+        <button id="verify-btn" type="submit">Verify</button>
+        <div class="resend-text">
+          Didn't receive the code?
+          <span
+            class="resend-link inactive"
+            id="resend-otp-btn"
+            style="cursor: not-allowed; text-transform: capitalize"
+            >Resend Code<span id="timer">30</span></span
+          >
+        </div>
+      </form>
     </div>
     <script src="{{ url_for('static', filename='js/verify_2fa.js') }}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const resendBtn = document.getElementById("resend-otp-btn");
-        const countdownEl = document.getElementById("countdown");
+        const timerEl = document.getElementById("timer");
+        const verifyBtn = document.getElementById("verify-btn");
+        const otpDigits = document.querySelectorAll(".otp-digit");
         let countdown = 30;
+        let interval;
 
-        const interval = setInterval(() => {
-          countdown--;
-          countdownEl.textContent = countdown;
-
-          if (countdown === 0) {
-            clearInterval(interval);
-            resendBtn.disabled = false;
-            resendBtn.innerHTML = "Resend OTP";
-            resendBtn.addEventListener("click", function () {
-              resendBtn.innerHTML = "Sending<span class='dots'></span>";
-              resendBtn.disabled = true;
-              resendOtp();
-            });
-          }
-        }, 1000);
-
+        function startCountdown() {
+          resendBtn.classList.add("inactive");
+          resendBtn.style.cursor = "not-allowed";
+          countdown = 30;
+          timerEl.textContent = countdown;
+          interval = setInterval(() => {
+            countdown--;
+            timerEl.textContent = countdown;
+            if (countdown === 0) {
+              clearInterval(interval);
+              resendBtn.classList.remove("inactive");
+              resendBtn.style.cursor = "pointer";
+              resendBtn.textContent = "Resend Code";
+            }
+          }, 1000);
+        }
         function resendOtp() {
+          resendBtn.classList.add("inactive");
+          resendBtn.textContent = "Sending...";
           fetch('{{ url_for("auth.resend_otp") }}', {
             method: "POST",
             headers: {
@@ -154,34 +177,116 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
-                location.reload();
+                startCountdown();
+                setTimeout(() => {
+                  location.reload();
+                }, 1000);
               } else {
-                alert("Failed to resend OTP. Please try again.");
-                resendBtn.innerHTML = "Resend OTP";
-                resendBtn.disabled = false;
+                showError("Failed to resend OTP. Please try again.");
               }
             })
-            .catch((error) => {
-              console.error("Error:", error);
-              alert("An error occurred. Please try again.");
-              resendBtn.innerHTML = "Resend OTP";
-              resendBtn.disabled = false;
+            .catch(() => {
+              showError("An error occurred. Please try again.");
             });
         }
-      });
+        function verifyOtp(event) {
+          event.preventDefault();
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const verifyBtn = document.getElementById("verify-btn");
-        const btnText = document.getElementById("btn-text");
+          let otp = "";
+          otpDigits.forEach((input) => {
+            otp += input.value;
+          });
 
-        verifyBtn.addEventListener("click", function () {
-          btnText.textContent = "Verifying";
-          verifyBtn.classList.add("verifying");
+          document.getElementById("combined-otp").value = otp;
 
+          if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+            showError("OTP must be a 6-digit number.");
+            clearOtpInputs();
+            return;
+          }
+
+          const verifyBtn = document.getElementById("verify-btn");
+          verifyBtn.textContent = "Verifying...";
+          verifyBtn.disabled = true;
           setTimeout(() => {
-            btnText.textContent = "Verify";
-            verifyBtn.classList.remove("verifying");
-          }, 5000);
+            document.getElementById("form-authentication").submit();
+          }, 3000);
+        }
+
+        function clearOtpInputs() {
+          otpDigits.forEach((input) => {
+            input.value = "";
+          });
+          otpDigits[0].focus();
+        }
+
+        otpDigits.forEach((input, index) => {
+          input.addEventListener("input", function () {
+            if (input.value.length === 1 && index < otpDigits.length - 1) {
+              otpDigits[index + 1].focus();
+            }
+            if (index === otpDigits.length - 1) {
+              verifyOtp(event);
+            }
+          });
+
+          input.addEventListener("keydown", function (event) {
+            if (
+              event.key === "Backspace" &&
+              input.value.length === 0 &&
+              index > 0
+            ) {
+              otpDigits[index - 1].focus();
+            }
+          });
+
+          input.addEventListener("paste", function (event) {
+            const pastedData = event.clipboardData.getData("text");
+            if (/^\d{6}$/.test(pastedData)) {
+              otpDigits.forEach((input, idx) => {
+                input.value = pastedData[idx] || "";
+              });
+              verifyOtp(event);
+            }
+            event.preventDefault();
+          });
+        });
+
+        function showError(message) {
+          const errorMessage = document.getElementById("error-message");
+          const errorText = document.getElementById("error-text");
+          errorText.textContent = message;
+          errorMessage.style.display = "block";
+          setTimeout(() => {
+            errorMessage.classList.add("slide-out");
+            setTimeout(() => {
+              errorMessage.style.display = "none";
+              errorMessage.classList.remove("slide-out");
+            }, 500);
+          }, 3000);
+        }
+
+        window.closeErrorMessage = function () {
+          const errorMessage = document.getElementById("error-message");
+          errorMessage.classList.add("slide-out");
+          setTimeout(() => {
+            errorMessage.style.display = "none";
+            errorMessage.classList.remove("slide-out");
+          }, 500);
+        };
+
+        resendBtn.addEventListener("click", resendOtp);
+        startCountdown();
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.classList.add("fade");
+            setTimeout(() => {
+              alert.remove();
+            }, 150);
+          }, 3000);
         });
       });
     </script>

@@ -27,441 +27,641 @@
       type="image/x-icon"
     />
   </head>
-
   <body>
     {% if not current_user.email_verified %}
     <div class="message-container">
-      <div class="email-verification-alert" role="alert">
-        <i class="fas fa-exclamation-circle"></i> Your email is not verified.
-        Please verify your email to access all features.
-        <form
-          action="{{ url_for('auth.resend_verification') }}"
-          method="POST"
-          class="resend-verification"
-        >
-          <div class="form-group" style="display: none">
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              value="{{ current_user.email }}"
-              readonly
-              required
-              style="--background-: {{ current_user.generated_color }}"
-            />
-          </div>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            style="--background-: {{ current_user.generated_color }}"
-          >
-            Resend Verification Email
-          </button>
-        </form>
-      </div>
-    </div>
-    {% endif %}
-    <div class="messages-container">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div
-        class="alert alert-{{ category }} alert-dismissible fade show"
-        role="alert"
-      >
-        {% if category == 'success' %}
-        <i class="fas fa-check-circle"></i>
-        {% else %}
-        <i class="fas fa-times-circle"></i>
-        {% endif %} {{ message }}
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
-    </div>
-    <div class="page">
-      <div class="left-container">
-        <div class="all">
-          <div class="profile">
-            <div class="cover-photo">
-              {% if current_user.cover_picture %}
-              <img
-                src="/static/profile_pics/{{ current_user.cover_picture }}"
-                alt="Cover Photo"
-                class="cover-image"
-              />
-              {% else %}
-              <div class="default-cover">
-                <p>Default Cover Photo</p>
-              </div>
-              {% endif %}
-            </div>
-            <div class="profile-pic">
-              {% if current_user.profile_picture %}
-              <img
-                src="/static/profile_pics/{{ current_user.profile_picture }}"
-                alt="Profile Picture"
-                class="profile-image"
-              />
-              {% else %}
-              <i
-                class="fas fa-5x"
-                style="--background-: {{ current_user.generated_color }}"
-                >{{ current_user.first_name[0] }}</i
-              >
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        <div class="profile-info">
-          <p class="username">
-            {{ current_user.full_name }} {% if current_user.email_verified %}
-            <i class="bx bxs-badge-check" style="color: #1877f2"></i>
-            {% endif %}
-          </p>
-        </div>
-
-        <div class="notes">
-          <p class="section-title">
-            NOTES {% if current_user.email_verified %}
-            <a href="" class="edit-notes"><i class="bx bxs-edit"></i></a>
-            {% endif %}
-          </p>
-          <div class="notes-content">
-            <a href="/user_home" class="notes-link">
-              <p>
-                <i class="far fa-file-alt"></i> All notes
-                <span style="--background-: {{ current_user.generated_color }}">
-                  ({{ current_user.notes|length }})
-                </span>
-              </p>
-            </a>
-            <a href="{{ url_for('views.show_todo_page') }}" class="notes-link">
-              <p style="--background-: {{ current_user.generated_color }}">
-                <i class="far fa-check-circle"></i> To-dos
-                <span> (<span id="todoCount">0</span>)</span>
-              </p>
-            </a>
-
-            <hr />
-          </div>
-
-          <div class="favorite">
-            <a href="/favorites" class="favorite-link" id="favoriteLink">
-              <p style="--background-: {{ current_user.generated_color }}">
-                <i class="far fa-star"></i> My favorites
-                <span> (<span id="favoriteCount">0</span>) </span>
-              </p>
-            </a>
-          </div>
-        </div>
-
-        <div class="tags">
-          <p class="section-title">BOOKMARKS</p>
-          {% for tag in tags %}
-          <a
-            href="{{ url_for('views.tag_notes', tag_id=tag.id) }}"
-            class="tag"
-            data-tag-id="{{ tag.id }}"
-          >
-            <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
-            {{ tag.name }}
-            <span
-              class="note-count"
-              style="--background-: {{ current_user.generated_color }}"
-              >({{ tag.note_count }})</span
+        <div class="email-verification-alert" role="alert">
+            <i class="fas fa-exclamation-circle"></i> Your email is not verified.
+            Please verify your email to access all features.
+            <form
+                action="{{ url_for('auth.resend_verification') }}"
+                method="POST"
+                class="resend-verification"
             >
-          </a>
-
-          <hr class="tag-divider" />
-          {% endfor %} {% if current_user.email_verified %}
-          <a
-            href="#"
-            class="tag new-tag"
-            style="--background-: {{ current_user.generated_color }}"
-            >New tag</a
-          >
-          <hr class="tag-divider" />
-          {% endif %}
+                <!-- Hidden field for email -->
+                <div class="form-group" style="display: none">
+                    <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        name="email"
+                        value="{{ current_user.email }}"
+                        readonly
+                        required
+                        style="--background-: {{ current_user.generated_color }}"
+                    />
+                </div>
+                <!-- Resend Verification Button -->
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    style="--background-: {{ current_user.generated_color }}"
+                >
+                    Resend Verification Email
+                </button>
+            </form>
         </div>
+    </div>
+{% endif %}
 
-        <div class="settings" id="settingsLink">
-          <a href="{{url_for('views.settings')}}">
-            <p><i class="fas fa-cog"></i> Settings</p>
-          </a>
-        </div>
-      </div>
+<div class="messages-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div
+                    class="alert alert-{{ category }} alert-dismissible fade show"
+                    role="alert"
+                >
+                    <!-- Icons for success and error messages -->
+                    {% if category == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% else %}
+                        <i class="fas fa-times-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
 
-      <div
-        class="right-container"
-        data-user-timezone="{{ current_user.time_zone }}"
-        data-user-fullname="{{ current_user.full_name }}"
-      >
-        <div class="header">
-          <div class="the-header">
-            <div
-              class="left"
+
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
               style="--background-: {{ current_user.generated_color }}"
-            ></div>
-            <div class="notification">
+              >{{ current_user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
+
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
+
+            <p class="title" title="{{ current_user.bio }}">
+              {% if current_user.bio %} {{ current_user.bio }} {% else %}
+              <a
+                href="{{ url_for('views.settings') }}"
+                style="color: #f1c40f; text-decoration: underline"
+              >
+                Add your bio
+              </a>
+              {% endif %}
+            </p>
+          </div>
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
               <a href="{{ url_for('views.notifications') }}">
                 {% if current_user.push_preferences.new_message %}
-                <i class="bx bxs-bell"></i>
+                <i class="bx bxs-bell" title="Notifications on"></i>
                 <span id="notificationBadge" class="badge">0</span>
                 {% else %}
-                <i class="bx bx-bell-off" title="notification"></i>
+                <i class="bx bx-bell-off" title="Notifications off"></i>
                 {% endif %}
               </a>
-            </div>
-            <div class="logout">
+            </li>
+
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <i class="bx bx-message" title="Messages"></i>
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <i class="bx bx-user" title="Followers"></i>
+              </a>
+            </li>
+            <li class="social-item">
+              <a href="#" class="social-link" title="Show Friends">
+                <i class="bx bx-user-check"></i>
+              </a>
+            </li>
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <i class="bx bx-user-plus" title="Following"></i>
+              </a>
+            </li>
+            <li class="social-item">
               <form action="{{ url_for('auth.logout') }}" method="post">
                 <button type="submit" class="log-item">
-                  <i class="bx bx-power-off" title="logout"></i>
+                  <i class="bx bx-power-off" title="Logout"></i>
                 </button>
               </form>
-            </div>
-            <div
-              class="right"
-              style="--background-: {{ current_user.generated_color }}"
-            ></div>
-          </div>
-          <div class="search">
-            <input
-              style="--background-: {{ current_user.generated_color }}"
-              type="text"
-              id="searchInput"
-              placeholder="Search notes..."
-              class="input-search"
-            />
-          </div>
-        </div>
-        <div class="notes-list">
-          <h2 style="--background-: {{ current_user.generated_color }}">
-            All Notes
-          </h2>
-          <ul id="notesList" data-color="{{current_user.generated_color}}">
-            {% if notes %} {% for note in notes %}
-            <li
-              data-note-id="{{ note.id }}"
-              data-tag-color="{{ note.tag.color }}"
-              class="note-item"
-              style="--background-: {{ current_user.generated_color }}"
-            >
-              <h3 style="--background-: {{ current_user.generated_color }}">
-                {{ note.title }} -- <span>Tag: {{ note.tag.name }}</span>
-              </h3>
-              <pre>
-{{ note.content.split('\n')[0][:60] | safe |striptags}}..</pre
-              >
-              <p class="note-time">
-                {% if note.updated_at %} Updated at: {{
-                note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %} Created
-                at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }} {% endif %}
-              </p>
             </li>
-            <hr style="--background-: {{ current_user.generated_color }}" />
-            {% endfor %} {% else %}
-            <p class="no-notes">No Available Notes</p>
-            {% endif %}
           </ul>
-          <div class="add-note-toggle">
-            <a
-              href="{{url_for('views.show_add_note2')}}"
-              style="--background-: {{ current_user.generated_color }}"
-              class="toggle-add"
-              >+</a
-            >
-          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link active">
+                <p>
+                  All notes
+                  <span
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    ({{ current_user.notes|length }})
+                  </span>
+                </p>
+              </a>
+            </li>
 
-    <div id="editTagsModal" class="modal">
-      <div class="modal-content">
-        <span
-          class="close-modal"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <h2>EDIT TAGS</h2>
-        <ul id="tagList">
-          {% for tag in tags %}
-          <li class="tag-item" data-tag-id="{{ tag.id }}">
-            <div class="color-picker" style="--tag-color: {{tag.color}}"></div>
-            <input
-              type="text"
-              class="tag-name"
-              value="{{ tag.name }}"
-              readonly
-            />
-            <button class="edit-pen"><i class="fas fa-pen"></i></button>
-            <button class="save-tag" style="display: none">
-              <i class="fas fa-check"></i>
-            </button>
-            <button class="delete-tag"><i class="fas fa-trash"></i></button>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    <div id="colorPickerModal" class="modal">
-      <div class="modal-content">
-        <span
-          class="close-color-modal"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <h2>SELECT COLOR</h2>
-        <div class="color-options">
-          <div
-            class="color-option"
-            style="background-color: #ff0000"
-            data-color="#FF0000"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #00ff00"
-            data-color="#00FF00"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #0000ff"
-            data-color="#0000FF"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #ffff00"
-            data-color="#FFFF00"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #ff00ff"
-            data-color="#FF00FF"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #00ffff"
-            data-color="#00FFFF"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #3498db"
-            data-color="#3498db"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #2ecc71"
-            data-color="#2ecc71"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #e67e22"
-            data-color="#e67e22"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #95a5a6"
-            data-color="#95a5a6"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #9b59b6"
-            data-color="#9b59b6"
-          ></div>
-          <div
-            class="color-option"
-            style="background-color: #123456"
-            data-color="#123456"
-          ></div>
-        </div>
-      </div>
-    </div>
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.show_todo_page') }}"
+                class="navbar-link"
+              >
+                <p style="--background-: {{ current_user.generated_color }}">
+                  To-dos
+                  <span> (<span id="todoCount">0</span>)</span>
+                </p>
+              </a>
+            </li>
 
-    <div id="addTagModal" class="modal-overlay">
-      <div class="modal-body">
-        <span
-          class="close-button"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <h2>Add New Tag</h2>
-        <form id="addTagForm">
-          <input
-            type="text"
-            class="inputs"
-            id="tagName"
-            name="name"
-            required
-            placeholder="Tag Name"
-          />
-          <br />
-          <label for="tagColor">Tag Color:</label>
-          <div id="colorPicker" class="color-container">
-            <div
-              class="color-swatch"
-              style="background-color: #ff0000"
-              data-color="#FF0000"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #00ff00"
-              data-color="#00FF00"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #0000ff"
-              data-color="#0000FF"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #ffff00"
-              data-color="#FFFF00"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #ff00ff"
-              data-color="#FF00FF"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #00ffff"
-              data-color="#00FFFF"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #3498db"
-              data-color="#3498db"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #2ecc71"
-              data-color="#2ecc71"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #e67e22"
-              data-color="#e67e22"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #95a5a6"
-              data-color="#95a5a6"
-            ></div>
-            <div
-              class="color-swatch"
-              style="background-color: #9b59b6"
-              data-color="#9b59b6"
-            ></div>
-          </div>
-          <br /><br />
-          <button
-            type="submit"
-            style="--background-: {{ current_user.generated_color }}"
-          >
-            Add Tag
-          </button>
-        </form>
+            <li class="navbar-item">
+              <a href="/favorites" class="navbar-link" id="favoriteLink">
+                <p style="--background-: {{ current_user.generated_color }}">
+                  My favorites
+                  <span> (<span id="favoriteCount">0</span>) </span>
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              {% if current_user.email_verified %}
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>New Tag</p></a
+              >
+              {% endif %}
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{url_for('views.settings')}}"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Settings</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="about">
+          <section class="testimonials">
+            <div class="tags">
+              <p class="section-title">
+                BOOKMARKS
+                {% if current_user.email_verified %}
+                <a href="" class="edit-notes" title="edit tags"><i class="bx bxs-edit"></i></a>
+                {% endif %}
+              </p>
+              <div class="tags-wrapper">
+                {% for tag in tags %}
+                <a href="{{ url_for('views.tag_notes', tag_id=tag.id) }}" class="tag" data-tag-id="{{ tag.id }}">
+                  <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
+                  <span class="tag-name">{{ tag.name }}</span>
+                  <span class="note-count">({{ tag.note_count }})</span>
+                </a>
+                {% endfor %}
+              </div>
+              <button class="toggle-tags">
+                <i class="fas fa-chevron-down"></i> 
+              </button>
+            </div>
+          </section>
+          
+
+          <header>
+            <h2 class="h2 article-title">All Notes</h2>
+          </header>
+
+          <section class="about-text">
+            <div class="search">
+              <input
+                style="--background-: {{ current_user.generated_color }}"
+                type="text"
+                id="searchInput"
+                placeholder="Search notes..."
+                class="input-search"
+              />
+            </div>
+          </section>
+          <section class="service">
+            <div class="notes-list">
+              <ul id="notesList" data-color="{{current_user.generated_color}}">
+                {% if notes %} {% for note in notes %}
+                <li
+                  data-note-id="{{ note.id }}"
+                  data-tag-color="{{ note.tag.color }}"
+                  class="note-item"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  <div class="note-header">
+                    <h3>{{ note.title.split('\n')[0][:13] }} ...</h3>
+                    <span class="note-tag"
+                      >Tag: {{ note.tag.name.split('\n')[0][:20] }}</span
+                    >
+                  </div>
+                  <pre class="note-content">
+{{ note.content | striptags  | truncate(20, True, '...')}}</pre
+                  >
+                  <p class="note-time">
+                    {% if note.updated_at %} Updated at: {{
+                    note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %}
+                    Created at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% endif %}
+                  </p>
+                </li>
+                <hr />
+                {% endfor %} {% else %}
+                <p class="no-notes">No Available Notes</p>
+                {% endif %}
+              </ul>
+              <div class="add-note-toggle">
+                <a
+                  href="{{url_for('views.show_add_note2')}}"
+                  style="--background-: {{ current_user.generated_color }}"
+                  class="toggle-add"
+                  >+</a
+                >
+              </div>
+              <div class="speech-text">
+                <a
+                  href="{{url_for('views.show_add_note2')}}"
+                  style="--background-: {{ current_user.generated_color }}"
+                  class="speech-text-toggle-add"
+                  ><i class="bx bxs-microphone-alt" title="Speech-Text"></i
+                ></a>
+              </div>
+            </div>
+
+            <div id="addTagModal" class="modal-overlay">
+              <div class="modal-body">
+                <span
+                  class="close-button"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>Add New Tag</h2>
+                <form id="addTagForm">
+                  <input
+                    type="text"
+                    class="inputs"
+                    id="tagName"
+                    name="name"
+                    required
+                    placeholder="Tag Name"
+                  />
+                  <br />
+                  <label for="tagColor" style="color: #f1c40f"
+                    >Tag Color:</label
+                  >
+                  <div id="colorPicker" class="color-container">
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ff0000"
+                      data-color="#FF0000"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #00ff00"
+                      data-color="#00FF00"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #0000ff"
+                      data-color="#0000FF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ffff00"
+                      data-color="#FFFF00"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #ff00ff"
+                      data-color="#FF00FF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #00ffff"
+                      data-color="#00FFFF"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #3498db"
+                      data-color="#3498db"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #2ecc71"
+                      data-color="#2ecc71"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #e67e22"
+                      data-color="#e67e22"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #95a5a6"
+                      data-color="#95a5a6"
+                    ></div>
+                    <div
+                      class="color-swatch"
+                      style="background-color: #9b59b6"
+                      data-color="#9b59b6"
+                    ></div>
+                  </div>
+                  <br /><br />
+                  <button
+                    type="submit"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Add Tag
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div id="editTagsModal" class="modal">
+              <div class="modal-content">
+                <span
+                  class="close-modal"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>EDIT TAGS</h2>
+                <ul id="tagList">
+                  {% for tag in tags %}
+                  <li class="tag-item" data-tag-id="{{ tag.id }}">
+                    <div
+                      class="color-picker"
+                      style="--tag-color: {{tag.color}}"
+                    ></div>
+                    <input
+                      type="text"
+                      class="tag-name"
+                      value="{{ tag.name }}"
+                      readonly
+                    />
+                    <button class="edit-pen"><i class="fas fa-pen"></i></button>
+                    <button class="save-tag" style="display: none">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button class="delete-tag">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div id="colorPickerModal" class="modal">
+              <div class="modal-content">
+                <span
+                  class="close-color-modal"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >&times;</span
+                >
+                <h2>SELECT COLOR</h2>
+                <div class="color-options">
+                  <div
+                    class="color-option"
+                    style="background-color: #ff0000"
+                    data-color="#FF0000"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #00ff00"
+                    data-color="#00FF00"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #0000ff"
+                    data-color="#0000FF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #ffff00"
+                    data-color="#FFFF00"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #ff00ff"
+                    data-color="#FF00FF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #00ffff"
+                    data-color="#00FFFF"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #3498db"
+                    data-color="#3498db"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #2ecc71"
+                    data-color="#2ecc71"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #e67e22"
+                    data-color="#e67e22"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #95a5a6"
+                    data-color="#95a5a6"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #9b59b6"
+                    data-color="#9b59b6"
+                  ></div>
+                  <div
+                    class="color-option"
+                    style="background-color: #123456"
+                    data-color="#123456"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </article>
       </div>
-    </div>
+    </main>
+
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
 
     <script src="{{ url_for('static', filename='js/user_home.js') }}"></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll("[data-nav-link]");
+        const articles = document.querySelectorAll("article");
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((btn) => btn.classList.remove("active"));
+            link.classList.add("active");
+            const targetPage = link.textContent.trim().toLowerCase();
+            articles.forEach((article) => (article.style.display = "none"));
+            const targetArticle = document.getElementById(targetPage);
+            if (targetArticle) {
+              targetArticle.style.display = "block";
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>

@@ -32,6 +32,7 @@ body {
 
 .canvas-back {
   position: absolute;
+
   top: 0;
   left: 0;
   width: 100%;
@@ -430,4 +431,33 @@ button:hover {
   font-size: 18px;
   margin-left: 10px;
   margin-right: 5px;
+}
+
+.resend-link {
+  cursor: pointer;
+  background-color: #007bff; 
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.resend-link:hover:not(.inactive) {
+  background-color: #0056b3; 
+}
+
+.resend-link:disabled {
+  background-color: #ccc; 
+  cursor: not-allowed;
+}
+@media (max-width: 500px) {
+  .alert {
+    display: inline-block;
+    width: auto;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
 }

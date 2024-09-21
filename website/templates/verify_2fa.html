@@ -46,105 +46,228 @@
     />
   </head>
   <body>
-    <div class="form-container">
-      <div class="col col-1">
-        <div class="black-box">
-          <i class="bx bx-left-arrow-alt left-arrow" aria-label="Previous"></i>
-          <i class="bx bx-right-arrow-alt right-arrow" aria-label="Next"></i>
-          <div class="main-info">
-            <p>Arrange. Streamline. Simplify</p>
-          </div>
-          <div id="notepad-info">
-            <div class="info-section">
-              <h3>Create, edit, and save</h3>
-              <p>Your notes online with our easy-to-use online notepad.</p>
-            </div>
-            <div class="info-section">
-              <h3>Access anytime, anywhere</h3>
-              <p>Your notes from anywhere, anytime, on any device.</p>
-            </div>
-            <div class="info-section">
-              <h3>Collaborate in real-time</h3>
-              <p>
-                With others by sharing your notes and working together in
-                real-time.
-              </p>
-            </div>
-          </div>
-          <div class="indicator-container">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-          </div>
-        </div>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% elif category == 'error' or category == 'warning' or category ==
+        'danger'%}
+        <i class="fas fa-times-circle"></i>
+        {% elif category == 'info' %}
+        <i class="fas fa-info-circle"></i>
+        {% endif %} {{ message }}
       </div>
-      <div class="col col-2">
-        <div class="logo">
-          <p>Note<span>wave.</span></p>
-        </div>
 
-        <form method="post" id="form-authentication">
-          <div class="form-authentication">
-            <div class="form-title">
-              <p>Two-Factor Authentication Verification</p>
-            </div>
-            <div class="form-inputs">
-              <div class="input-box">
-                <label for="token" class="form-label"
-                  ><i class="bx bxs-check-circle"></i> Enter your 2FA
-                  token</label
-                >
-                <input
-                  type="text"
-                  id="token"
-                  name="token"
-                  class="input-field"
-                />
-              </div>
-
-              <div class="input-box">
-                <button type="submit" id="verify-btn" class="submit">
-                  <span id="btn-text">Verify</span>
-                  <i class="bx bx-right-arrow-alt"></i>
-                </button>
-              </div>
-              <div class="error-msg" id="error">Token is required</div>
-            </div>
-            <div class="messages-container">
-              {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %} {% for category, message in messages %}
-              <div
-                class="alert alert-{{ category }} alert-dismissible fade show"
-                role="alert"
-              >
-                {% if category == 'success' %}
-                <i class="fas fa-check-circle"></i>
-                {% else %}
-                <i class="fas fa-times-circle"></i>
-                {% endif %} {{ message }}
-              </div>
-              {% endfor %} {% endif %} {% endwith %}
-            </div>
-          </div>
-        </form>
-      </div>
+      {% endfor %} {% endif %} {% endwith %}
     </div>
-    <script src="{{ url_for('static', filename='js/verify_2fa.js') }}"></script>
+
+    <div class="container">
+      <h1>2FA Verification. <b>(APP)</b>
+      </h1>
+      <form method="post" id="otp-form">
+        <div class="otp-input">
+          <input
+            type="tel"
+            id="digit-1"
+            class="otp-digit"
+            maxlength="1"
+            name="digit1"
+            data-index="0"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-2"
+            class="otp-digit"
+            maxlength="1"
+            name="digit2"
+            data-index="1"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-3"
+            class="otp-digit"
+            maxlength="1"
+            name="digit3"
+            data-index="2"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-4"
+            class="otp-digit"
+            maxlength="1"
+            name="digit4"
+            data-index="3"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-5"
+            class="otp-digit"
+            maxlength="1"
+            name="digit5"
+            data-index="4"
+            autocomplete="off"
+          />
+          <input
+            type="tel"
+            id="digit-6"
+            class="otp-digit"
+            maxlength="1"
+            name="digit6"
+            data-index="5"
+            autocomplete="off"
+          />
+          <input type="hidden" id="combined-otp" name="token" />
+        </div>
+        <button id="verify-btn" type="submit">Verify</button>
+      </form>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const verifyBtn = document.getElementById("verify-btn");
+  const otpDigits = document.querySelectorAll(".otp-digit");
+  const combinedOtpInput = document.getElementById("combined-otp");
+
+  // Function to verify OTP
+  function verifyOtp(event) {
+    event.preventDefault();
+
+    let otp = "";
+    otpDigits.forEach((input) => {
+      otp += input.value;
+    });
+
+    combinedOtpInput.value = otp;
+
+    if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+      showError("OTP must be a 6-digit number.");
+      clearOtpInputs();
+      return;
+    }
+
+    verifyBtn.textContent = "Verifying...";
+    verifyBtn.disabled = true;
+
+    setTimeout(() => {
+      document.getElementById("otp-form").submit(); // Submit the form after 3 seconds
+    }, 3000);
+  }
+
+  function clearOtpInputs() {
+    otpDigits.forEach((input) => {
+      input.value = "";
+    });
+    otpDigits[0].focus();
+  }
+
+  otpDigits.forEach((input, index) => {
+    input.addEventListener("input", function (event) {
+      // Allow only digits
+      if (!/^\d?$/.test(input.value)) {
+        input.value = ""; // Clear input if it's not a digit
+      }
+
+      if (input.value.length === 1 && index < otpDigits.length - 1) {
+        otpDigits[index + 1].focus();
+      } else if (input.value.length === 0 && index > 0) {
+        otpDigits[index - 1].focus();
+      }
+
+      if (index === otpDigits.length - 1) {
+        verifyOtp(event);
+      }
+    });
+
+    input.addEventListener("keydown", function (event) {
+      if (
+        event.key === "Backspace" &&
+        input.value.length === 0 &&
+        index > 0
+      ) {
+        otpDigits[index - 1].focus();
+      }
+    });
+
+    input.addEventListener("paste", function (event) {
+      const pastedData = event.clipboardData.getData("text");
+      if (/^\d{6}$/.test(pastedData)) {
+        otpDigits.forEach((input, idx) => {
+          input.value = pastedData[idx] || "";
+        });
+        verifyOtp(event);
+      } else {
+        showError("Please paste a valid 6-digit OTP.");
+      }
+      event.preventDefault();
+    });
+  });
+
+  verifyBtn.addEventListener("click", verifyOtp);
+});
+
+function showError(message) {
+  console.error(message);
+}
+
+// Alert handling
+document.addEventListener("DOMContentLoaded", function () {
+  const alerts = document.querySelectorAll(".alert");
+  alerts.forEach((alert) => {
+    setTimeout(() => {
+      alert.classList.add("fade");
+      setTimeout(() => {
+        alert.remove();
+      }, 150);
+    }, 3000);
+  });
+});
+
+    </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const verifyBtn = document.getElementById("verify-btn");
-        const btnText = document.getElementById("btn-text");
+        const copyBtn = document.getElementById("copy-btn");
+        const otpUri = document.getElementById("otp-uri").textContent;
+        const errorMessage = document.getElementById("error-message");
 
-        verifyBtn.addEventListener("click", function () {
-          btnText.textContent = "Verifying";
-          verifyBtn.classList.add("verifying");
+        copyBtn.addEventListener("click", function () {
+          // Create a temporary textarea element to facilitate copying
+          const textarea = document.createElement("textarea");
+          textarea.value = otpUri;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
 
+          // Show the success message
+          errorMessage.style.display = "block";
+          errorMessage.classList.remove("slide-out");
           setTimeout(() => {
-            btnText.textContent = "Verify";
-            verifyBtn.classList.remove("verifying");
-          }, 5000);
+            errorMessage.classList.add("slide-out");
+            setTimeout(() => {
+              errorMessage.style.display = "none";
+            }, 500);
+          }, 2000); // Hide after 2 seconds
         });
       });
+
+      function closeErrorMessage() {
+        const errorMessage = document.getElementById("error-message");
+        errorMessage.classList.add("slide-out");
+        setTimeout(() => {
+          errorMessage.style.display = "none";
+          errorMessage.classList.remove("slide-out");
+        }, 500);
+      }
     </script>
   </body>
 </html>

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
+
   function stripTags(str) {
     return str.replace(/<\/?[^>]+(>|$)/g, "");
   }
@@ -28,50 +29,78 @@ document.addEventListener("DOMContentLoaded", function () {
             noteItem.classList.add("note-item");
             noteItem.setAttribute("data-note-id", note.id);
             noteItem.style.setProperty("--background-", note.color);
-
+            const noteHeader = document.createElement("div");
+            noteHeader.classList.add("note-header");
             const noteTitle = document.createElement("h3");
             noteTitle.style.setProperty("--background-", note.color);
-            noteTitle.innerHTML = `${note.title.slice(0, 20)}${note.title.length > 20 ? '...' : ''} -- <span>Tag: ${note.tagName}</span>`;
+            noteTitle.innerHTML = `${note.title.slice(0, 13)}${
+              note.title.length > 13 ? "..." : ""
+            }`;
+            const noteTag = document.createElement("span");
+            noteTag.classList.add("note-tag");
+            noteTag.innerHTML = `Tag: ${note.tagName.slice(0, 20)}${
+              note.tagName.length > 20 ? "..." : ""
+            }`;
+            noteTag.style.backgroundColor = `rgba(255, 191, 0, 0.1)`;
+            noteHeader.appendChild(noteTitle);
+            noteHeader.appendChild(noteTag);
+            const noteContent = document.createElement("pre");
+            noteContent.classList.add("note-content");
 
-            const noteContent = document.createElement("p");
-            noteContent.innerHTML = stripTags(
-              `${note.content.split("\n")[0].slice(0, 40)}`
-            );
+            const strippedContent = stripTags(note.content);
+            const truncatedContent =
+              strippedContent.length > 25
+                ? strippedContent.slice(0, 25) + "..."
+                : strippedContent;
+            noteContent.innerHTML = truncatedContent;
 
             const noteTime = document.createElement("p");
             noteTime.classList.add("note-time");
+
+            const formatTime = (dateString) => {
+              const date = new Date(dateString);
+              const day = String(date.getDate()).padStart(2, "0");
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const year = date.getFullYear();
+
+              const optionsTime = {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              };
+
+              const formattedDate = `${day}-${month}-${year}`;
+              const formattedTime = date.toLocaleTimeString(
+                "en-GB",
+                optionsTime
+              );
+
+              return `${formattedDate} ${formattedTime}`;
+            };
             if (note.updated_at) {
-              noteTime.innerHTML = `Updated at: ${new Date(
-                note.updated_at
-              ).toLocaleString()}`;
+              noteTime.innerHTML = `Updated at: ${formatTime(note.updated_at)}`;
             } else {
-              noteTime.innerHTML = `Created at: ${new Date(
-                note.created_at
-              ).toLocaleString()}`;
+              noteTime.innerHTML = `Created at: ${formatTime(note.created_at)}`;
             }
 
-            noteItem.appendChild(noteTitle);
+            noteItem.appendChild(noteHeader);
             noteItem.appendChild(noteContent);
             noteItem.appendChild(noteTime);
-
+            notesList.appendChild(noteItem);
             const separator = document.createElement("hr");
-            separator.style.setProperty("--background-", note.color);
-            noteItem.appendChild(separator);
-
+            separator.style.borderColor = "#555";
             noteItem.addEventListener("mouseenter", function () {
-              separator.style.borderColor = note.color;
-            });
-
-            noteItem.addEventListener("mouseleave", function () {
               separator.style.borderColor = "#fff";
             });
 
+            noteItem.addEventListener("mouseleave", function () {
+              separator.style.borderColor = "#555";
+            });
+            notesList.appendChild(separator);
             noteItem.addEventListener("click", function () {
               const noteId = this.getAttribute("data-note-id");
               window.location.href = `/note_viewer/${noteId}`;
             });
-
-            notesList.appendChild(noteItem);
           });
         } else {
           notesList.innerHTML =
@@ -167,25 +196,49 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+  const editTagsModal = document.getElementById("editTagsModal");
+  const colorPickerModal = document.getElementById("colorPickerModal");
+
+  let currentTagColor = "";
   document.querySelector(".edit-notes").addEventListener("click", function (e) {
     e.preventDefault();
-    document.getElementById("editTagsModal").style.display = "block";
+    editTagsModal.style.display = "block";
   });
   document.querySelector(".close-modal").addEventListener("click", function () {
-    document.getElementById("editTagsModal").style.display = "none";
+    editTagsModal.style.display = "none";
     location.reload();
   });
 
   document
     .querySelector(".close-color-modal")
     .addEventListener("click", function () {
-      document.getElementById("colorPickerModal").style.display = "none";
+      colorPickerModal.style.display = "none";
     });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (editTagsModal.style.display === "block") {
+        editTagsModal.style.display = "none";
+      }
+      if (colorPickerModal.style.display === "block") {
+        colorPickerModal.style.display = "none";
+      }
+    }
+  });
+
   document.querySelectorAll(".edit-pen").forEach((button) => {
     button.addEventListener("click", function () {
       const tagItem = this.closest(".tag-item");
       const tagNameInput = tagItem.querySelector(".tag-name");
       const saveButton = tagItem.querySelector(".save-tag");
+
+      currentTagColor =
+        tagItem.querySelector(".color-picker").style.backgroundColor;
+      if (!currentTagColor || currentTagColor === "none") {
+        currentTagColor = "#3498db";
+      }
+
+      // Enable editing
       tagNameInput.removeAttribute("readonly");
       tagNameInput.focus();
       this.style.display = "none";
@@ -198,8 +251,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const tagItem = this.closest(".tag-item");
       const tagNameInput = tagItem.querySelector(".tag-name");
       const tagName = tagNameInput.value;
-      const tagColor =
-        tagItem.querySelector(".color-picker").style.backgroundColor;
+      let tagColor =
+        tagItem.querySelector(".color-picker").style.backgroundColor ||
+        currentTagColor;
+      if (!tagColor || tagColor === "none") {
+        tagColor = "#3498db";
+      }
+
       const tagId = tagItem.getAttribute("data-tag-id");
       fetch(`/update_tag/${tagId}`, {
         method: "POST",
@@ -224,16 +282,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
   });
+
   document.querySelectorAll(".color-picker").forEach((picker) => {
     picker.addEventListener("click", function () {
-      const colorPickerModal = document.getElementById("colorPickerModal");
-      colorPickerModal.style.display = "block";
       const tagItem = this.closest(".tag-item");
       const tagId = tagItem.getAttribute("data-tag-id");
+
+      colorPickerModal.style.display = "block";
+
+      const colorOptions = document.querySelectorAll(".color-option");
+      colorOptions.forEach((option) => {
+        option.replaceWith(option.cloneNode(true));
+      });
+
       document.querySelectorAll(".color-option").forEach((option) => {
         option.addEventListener("click", function () {
           const color = this.getAttribute("data-color");
           tagItem.querySelector(".color-picker").style.backgroundColor = color;
+
+          currentTagColor = color;
+
           colorPickerModal.style.display = "none";
           fetch(`/update_tag_color/${tagId}`, {
             method: "POST",
@@ -256,15 +324,23 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("addTagModal");
+
   document.querySelector(".new-tag").addEventListener("click", function (e) {
     e.preventDefault();
-    document.getElementById("addTagModal").style.display = "block";
+    modal.style.display = "flex"; // Changed to flex for centering
+    modal.querySelector(".modal-body").style.transform = "scale(0.8)";
+    modal.querySelector(".modal-body").style.opacity = "0";
+    setTimeout(() => {
+      modal.querySelector(".modal-body").style.transform = "scale(1)";
+      modal.querySelector(".modal-body").style.opacity = "1";
+    }, 50);
   });
 
   document
     .querySelector(".close-button")
     .addEventListener("click", function () {
-      document.getElementById("addTagModal").style.display = "none";
+      modal.style.display = "none";
     });
 
   document
@@ -286,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
           if (data.success) {
             console.log("Tag added successfully:", data);
-            document.getElementById("addTagModal").style.display = "none";
+            modal.style.display = "none";
             location.reload();
           } else {
             console.error("Error adding tag:", data);
@@ -302,6 +378,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const color = this.getAttribute("data-color");
       document.querySelector(".color-container").style.backgroundColor = color;
     });
+  });
+
+  // Close modal when Esc key is pressed
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      modal.style.display = "none";
+    }
   });
 });
 
@@ -339,25 +422,50 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(function () {
     const alerts = document.querySelectorAll(".alert");
     alerts.forEach((alert) => {
-      alert.classList.remove("show");
       alert.classList.add("fade");
-      setTimeout(() => alert.remove(), 150);
+      setTimeout(() => {
+        alert.remove();
+      }, 400);
     });
   }, 3000);
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-  const alertElement = document.querySelector('.email-verification-alert');
+document.addEventListener("DOMContentLoaded", function () {
+  const alertElement = document.querySelector(".email-verification-alert");
 
   if (alertElement) {
-    alertElement.style.display = '';
+    alertElement.style.display = "";
 
     setTimeout(() => {
-      alertElement.style.display = 'none';
+      alertElement.style.display = "none";
     }, 5 * 1000);
   }
 });
-
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButton = document.querySelector(".toggle-tags");
+  const tagsWrapper = document.querySelector(".tags-wrapper");
+  const icon = toggleButton.querySelector("i");
+  toggleButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    tagsWrapper.classList.toggle("show");
+    if (tagsWrapper.classList.contains("show")) {
+      icon.classList.remove("fa-chevron-down");
+      icon.classList.add("fa-chevron-up");
+    } else {
+      icon.classList.remove("fa-chevron-up");
+      icon.classList.add("fa-chevron-down");
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
+      if (tagsWrapper.classList.contains("show")) {
+        tagsWrapper.classList.remove("show");
+        icon.classList.remove("fa-chevron-up");
+        icon.classList.add("fa-chevron-down");
+      }
+    }
+  });
+});
 
 
 function logoutUser() {

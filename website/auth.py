@@ -34,6 +34,8 @@ import io
 import pyotp
 from website.decorators import admin_required
 from user_agents import parse
+from flask import session
+
 
 auth = Blueprint("auth", __name__)
 
@@ -221,13 +223,8 @@ def make_admin(user_id):
     return redirect(url_for("views.settings"))
 
 
-@auth.route("/show_2fa_qr_code", methods=["GET"])
-@login_required
-def show_2fa_qr_code():
-    otp_uri = request.args.get("otp_uri")
-    return render_template("setup2fa.html", otp_uri=otp_uri)
-
-
+import urllib.parse
+from urllib.parse import urlparse, parse_qs, quote
 @auth.route("/enable_2fa", methods=["POST"])
 @login_required
 def enable_2fa():
@@ -237,8 +234,15 @@ def enable_2fa():
         current_user.otp_secret = totp.secret
         current_user.otp_method = "app"
         db.session.commit()
-        otp_uri = totp.provisioning_uri(current_user.email, issuer_name="NoteWave")
-        return redirect(url_for("auth.show_2fa_qr_code", otp_uri=otp_uri))
+        
+        account_name = f"{ current_user.email}"
+        issuer_name = f"NoteWave: {account_name}"
+        otp_uri = totp.provisioning_uri(quote(account_name), issuer_name=quote(issuer_name))
+        parsed_uri = urlparse(otp_uri)
+        query_params = parse_qs(parsed_uri.query)
+        secret = query_params.get('secret', [''])[0]
+        session['otp_secret'] = secret
+        return redirect(url_for("auth.show_2fa_qr_code", otp_uri=otp_uri, secret=secret))
     elif otp_method == "email":
         otp, secret = generate_otp()
         current_user.otp_secret = secret
@@ -248,6 +252,13 @@ def enable_2fa():
         send_otp_email(current_user.email, otp)
         flash("OTP has been sent to your email.", category="info")
         return redirect(url_for("auth.verify_otp"))
+
+@auth.route("/show_2fa_qr_code", methods=["GET"])
+@login_required
+def show_2fa_qr_code():
+    otp_uri = request.args.get("otp_uri")
+    secret = session.get('otp_secret')  
+    return render_template("setup2fa.html", otp_uri=otp_uri, secret=secret)
 
 
 def generate_otp(secret=None):
@@ -284,19 +295,21 @@ def resend_otp_email(user_email, otp):
 <html>
 <head>
 <style>
-body{{
-justify-content: center;
-text-align: center;
-position: relative;
-}}
-.container {{
-border: 4px solid #ff7f50;
-border-radius: 5px;
-padding: 20px;
-display: inline-block;
-justify-content: space-between;
-margin: 0 auto;
-}}
+ body {{
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Light background for contrast */
+        }}
+        .container {{
+            width: 100%;
+            max-width: 600px; /* Maximum width for the email */
+            margin: 0 auto; /* Center the container */
+            background-color: #fff; /* White background for content */
+            border-radius: 5px;
+            border: 4px solid #ff7f50;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        }}
 .logo {{
 font-family: "Roboto", sans-serif;
 font-size: 48px;
@@ -412,7 +425,7 @@ def verify_otp():
         otp = request.form.get("otp").strip()
         if not otp.isdigit() or len(otp) != 6:
             flash("OTP must be a 6-digit number.", category="warning")
-            return redirect(url_for("auth.verify_email_otp"))
+            return render_template("verify_otp.html")
         if current_user.otp_method == "app":
             totp = pyotp.TOTP(current_user.otp_secret)
             if totp.verify(otp):
@@ -429,7 +442,7 @@ def verify_otp():
         elif current_user.otp_method == "email":
             if not otp.isdigit() or len(otp) != 6:
                 flash("OTP must be a 6-digit number.", category="warning")
-                return redirect(url_for("auth.verify_otp"))
+                return render_template("verify_otp.html")
 
             if otp == current_user.temp_otp:
                 current_user.is_2fa_enabled = True
@@ -457,19 +470,21 @@ def send_otp_email(user_email, otp):
 <html>
 <head>
 <style>
-body{{
-justify-content: center;
-text-align: center;
-position: relative;
-}}
-.container {{
-border: 4px solid #ff7f50;
-border-radius: 5px;
-padding: 20px;
-display: inline-block;
-justify-content: space-between;
-margin: 0 auto;
-}}
+ body {{
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Light background for contrast */
+        }}
+        .container {{
+            width: 100%;
+            max-width: 600px; /* Maximum width for the email */
+            margin: 0 auto; /* Center the container */
+            background-color: #fff; /* White background for content */
+            border-radius: 5px;
+            border: 4px solid #ff7f50;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        }}
 .logo {{
 font-family: "Roboto", sans-serif;
 font-size: 48px;
@@ -1002,22 +1017,21 @@ def send_password_reset_email(user, token):
 <head>
 <style>
 /* Define your CSS styles for the email */
-body{{
-     font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-}}
-.container {{
-  background-color: #fff;
-      border: 2px solid #ff7f50;
-      border-radius: 8px;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}}
+ body {{
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Light background for contrast */
+        }}
+        .container {{
+            width: 100%;
+            max-width: 600px; /* Maximum width for the email */
+            margin: 0 auto; /* Center the container */
+            background-color: #fff; /* White background for content */
+            border-radius: 5px;
+            border: 4px solid #ff7f50;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        }}
 .logo {{
      font-family: "Roboto", sans-serif;
       font-size: 36px;
@@ -1400,13 +1414,14 @@ def update_profile_pic():
             file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
+
     if "profile_pic" in request.files:
         profile_pic = request.files["profile_pic"]
         if profile_pic and allowed_file(profile_pic.filename):
             old_profile_pic = current_user.profile_picture
             if old_profile_pic:
                 delete_file(old_profile_pic)
-                
+
             profile_pic_filename = secure_filename(profile_pic.filename)
             profile_pic_path = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], profile_pic_filename
@@ -1420,7 +1435,7 @@ def update_profile_pic():
             old_cover_pic = current_user.cover_picture
             if old_cover_pic:
                 delete_file(old_cover_pic)
-                
+
             cover_pic_filename = secure_filename(cover_pic.filename)
             cover_pic_path = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], cover_pic_filename
