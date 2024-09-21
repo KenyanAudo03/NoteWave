@@ -365,6 +365,7 @@
                   <pre class="note-content">
 {{ note.content | striptags  | truncate(20, True, '...')}}</pre
                   >
+                  
                   <p class="note-time">
                     {% if note.updated_at %} Updated at: {{
                     note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %}

@@ -1,35 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const rightContainer = document.querySelector(".right-container");
-  const userTimezone = rightContainer.getAttribute("data-user-timezone");
-  const userName = rightContainer.getAttribute("data-user-fullname");
-
-  function updateGreeting() {
-    const greetingElement = document.querySelector(".left");
-    const datetimeElement = document.querySelector(".right");
-    const now = moment().tz(userTimezone);
-    const hours = now.hours();
-    let greeting = "Hello";
-
-    if (hours < 12) {
-      greeting = "Good Morning";
-    } else if (hours < 18) {
-      greeting = "Good Afternoon";
-    } else {
-      greeting = "Good Evening";
-    }
-
-    const dateString = now.format("DD/MM/YYYY");
-    const timeString = now.format("HH:mm");
-
-    greetingElement.textContent = `${greeting}, ${userName}!`;
-    datetimeElement.textContent = `${dateString} ${timeString}`;
-  }
-
-  setInterval(updateGreeting, 1000);
-  updateGreeting();
-});
-
-document.addEventListener("DOMContentLoaded", function () {
   const noteItems = document.querySelectorAll(".note-item");
 
   noteItems.forEach((item) => {
@@ -45,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     item.addEventListener("mouseleave", function () {
       const hrElement = this.querySelector("hr");
-      hrElement.style.borderColor = "white";
+      hrElement.style.borderColor = "#555";
     });
 
     item.addEventListener("click", function () {
@@ -56,27 +25,37 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const noteItems = document.querySelectorAll(".note-item");
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
   const tagId = searchInput.getAttribute("data-tag-id");
+  const noteItems = document.querySelectorAll(".note-item");
+
+  function stripTags(str) {
+    return str.replace(/<\/?[^>]+(>|$)/g, "");
+  }
+
+  function formatTime(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+    const formattedTime = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+    return `${formattedDate} ${formattedTime}`;
+  }
 
   noteItems.forEach((item) => {
     const tagColor = item.getAttribute("data-tag-color");
-
     item.style.setProperty("--bullet-color", tagColor);
-    item.style.setProperty("--tag-color", tagColor);
-
+    
     item.addEventListener("mouseenter", function () {
-      this.style.setProperty("--bullet-color", tagColor);
-      const hrElement = this.querySelector("hr");
-      hrElement.style.borderColor = tagColor;
+      const hrElement = this.nextElementSibling;
+      if (hrElement) hrElement.style.borderColor = tagColor;
     });
 
     item.addEventListener("mouseleave", function () {
-      this.style.setProperty("--bullet-color", tagColor);
-      const hrElement = this.querySelector("hr");
-      hrElement.style.borderColor = "white";
+      const hrElement = this.nextElementSibling;
+      if (hrElement) hrElement.style.borderColor = "#555";
     });
 
     item.addEventListener("click", function () {
@@ -89,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const query = searchInput.value.trim();
 
     if (query) {
-      fetch(`/search_notes?query=${query}&tag_id=${tagId}`)
+      fetch(`/search_notes?query=${encodeURIComponent(query)}&tag_id=${tagId}`)
         .then((response) => response.json())
         .then((notes) => {
           notesList.innerHTML = "";
@@ -100,43 +79,44 @@ document.addEventListener("DOMContentLoaded", function () {
               listItem.dataset.noteId = note.id;
               listItem.dataset.tagColor = note.color;
 
+              const noteHeader = document.createElement("div");
+              noteHeader.className = "note-header";
+
               const title = document.createElement("h3");
               title.style.setProperty("--bookmark-", note.color);
-              title.innerHTML = `${note.title
-                .split("\t")[0]
-                .substring(0, 10)}...`.replace(
-                new RegExp(query, "gi"),
-                (match) => `<span class="highlight">${match}</span>`
-              );
+              title.innerHTML = note.title.split("\t")[0].substring(0, 10).replace(new RegExp(query, "gi"), (match) => `<span class="highlight">${match}</span>`) + "...";
 
-              const content = document.createElement("p");
-              content.innerHTML =
-                note.content
-                  .split("\n")[0]
-                  .substring(0, 27)
-                  .replace(
-                    new RegExp(query, "gi"),
-                    (match) => `<span class="highlight">${match}</span>`
-                  ) + "...";
+              const noteTag = document.createElement("span");
+              noteTag.className = "note-tag";
+              noteTag.innerHTML = `Tag: ${note.tagName.split("\n")[0].substring(0, 20)}`;
+
+              const noteContent = document.createElement("pre");
+              noteContent.className = "note-content"; 
+              const strippedContent = stripTags(note.content);
+              noteContent.innerHTML = strippedContent.split("\n")[0].substring(0, 27).replace(new RegExp(query, "gi"), (match) => `<span class="highlight">${match}</span>`) + "...";
+
+              const noteTime = document.createElement("p");
+              noteTime.className = "note-time";
+              noteTime.innerHTML = note.updated_at ? `Updated at: ${formatTime(note.updated_at)}` : `Created at: ${formatTime(note.created_at)}`;
+
+              noteHeader.appendChild(title);
+              noteHeader.appendChild(noteTag);
+              listItem.appendChild(noteHeader);
+              listItem.appendChild(noteContent);
+              listItem.appendChild(noteTime);
+              notesList.appendChild(listItem);
 
               const hr = document.createElement("hr");
-              hr.style.borderColor = "#fff";
-
-              listItem.appendChild(title);
-              listItem.appendChild(content);
-              listItem.appendChild(hr);
-              notesList.appendChild(listItem);
+              notesList.appendChild(hr);  
 
               listItem.style.setProperty("--bullet-color", note.color);
 
               listItem.addEventListener("mouseenter", function () {
-                const hrElement = this.querySelector("hr");
-                hrElement.style.borderColor = note.color;
+                hr.style.borderColor = note.color;
               });
 
               listItem.addEventListener("mouseleave", function () {
-                const hrElement = this.querySelector("hr");
-                hrElement.style.borderColor = "#fff";
+                hr.style.borderColor = "#555";
               });
 
               listItem.addEventListener("click", function () {
@@ -151,11 +131,14 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       notesList.innerHTML = "";
       noteItems.forEach((item) => {
-        notesList.appendChild(item);
+        notesList.appendChild(item.cloneNode(true)); 
+        const hr = document.createElement("hr");
+        notesList.appendChild(hr); 
       });
     }
   });
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const favoriteCountSpan = document.getElementById("favoriteCount");
@@ -191,6 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setInterval(updateTodoCount, 60000);
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelector(".edit-notes").addEventListener("click", function (e) {
@@ -278,6 +262,51 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       });
     });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  function updateNotificationBadge() {
+    fetch("/get_notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        const badge = document.getElementById("notificationBadge");
+        if (badge) {
+          badge.textContent = data.unread_count;
+          badge.style.display = data.unread_count > 0 ? "inline" : "none";
+        }
+      })
+      .catch((error) => console.error("Error fetching notifications:", error));
+  }
+
+  updateNotificationBadge();
+
+  setInterval(updateNotificationBadge, 60000);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButton = document.querySelector(".toggle-tags");
+  const tagsWrapper = document.querySelector(".tags-wrapper");
+  const icon = toggleButton.querySelector("i");
+  toggleButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    tagsWrapper.classList.toggle("show");
+    if (tagsWrapper.classList.contains("show")) {
+      icon.classList.remove("fa-chevron-down");
+      icon.classList.add("fa-chevron-up");
+    } else {
+      icon.classList.remove("fa-chevron-up");
+      icon.classList.add("fa-chevron-down");
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
+      if (tagsWrapper.classList.contains("show")) {
+        tagsWrapper.classList.remove("show");
+        icon.classList.remove("fa-chevron-up");
+        icon.classList.add("fa-chevron-down");
+      }
+    }
   });
 });
 

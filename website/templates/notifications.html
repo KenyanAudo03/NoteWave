@@ -249,7 +249,7 @@
                 <a href="{{ url_for('views.tag_notes', tag_id=tag.id) }}" class="tag" data-tag-id="{{ tag.id }}">
                   <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
                   <span class="tag-name">{{ tag.name }}</span>
-                  <span class="note-count">({{ tag.note_count }})</span>
+                  <span class="note-count">({{ tag_counts.get(tag.id, 0) }})</span>
                 </a>
                 {% endfor %}
               </div>

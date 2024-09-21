@@ -356,12 +356,15 @@ def search_notes():
 
     result = []
     for note in notes:
-        result.append(
+         result.append(
             {
                 "id": note.id,
                 "title": note.title,
                 "content": note.content,
                 "color": note.tag.color,
+                "tagName": note.tag.name,
+                "updated_at": note.updated_at,
+                "created_at": note.created_at,
             }
         )
 

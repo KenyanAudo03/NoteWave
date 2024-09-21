@@ -110,37 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-  const rightContainer = document.querySelector(".right-container");
-  const userTimezone = rightContainer.getAttribute("data-user-timezone");
-  const userName = rightContainer.getAttribute("data-user-fullname");
-
-  function updateGreeting() {
-    const greetingElement = document.querySelector(".left");
-    const datetimeElement = document.querySelector(".right");
-    const now = moment().tz(userTimezone);
-    const hours = now.hours();
-    let greeting = "Hello";
-
-    if (hours < 12) {
-      greeting = "Good Morning";
-    } else if (hours < 18) {
-      greeting = "Good Afternoon";
-    } else {
-      greeting = "Good Evening";
-    }
-
-    const dateString = now.format("DD/MM/YYYY");
-    const timeString = now.format("HH:mm");
-
-    greetingElement.textContent = `${greeting}, ${userName}!`;
-    datetimeElement.textContent = `${dateString} ${timeString}`;
-  }
-
-  setInterval(updateGreeting, 1000);
-  updateGreeting();
-});
-
+fetch(`/search_notes?query=${query}&tag_id=${tagId}`)
 document.addEventListener("DOMContentLoaded", function () {
   const favoriteCountSpan = document.getElementById("favoriteCount");
 
