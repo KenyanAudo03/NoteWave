@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.full_name }} Profile</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/platform.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <style>
+      a {
+        color: #fff;
+      }
+      a:hover {
+        color: darkcyan;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info" id="userList">
+          <figure class="avatar-box"
+          {%
+            if
+            user.profile_picture
+            %}
+            onclick="showImage('{{ user.profile_picture }}')"
+            {%
+            endif
+            %}>
+            {% if user.profile_picture %}
+            <img style="cursor: pointer;"
+              src="/static/profile_pics/{{ user.profile_picture }}"
+              alt="{{ user.full_name }}'s profile picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ user.generated_color }}"
+            >
+              {{ user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
+          <div class="info-content" >
+            <h1 class="name" title="{{ user.full_name }}">
+              {{ user.full_name }} {% if user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
+
+            <p class="title" title="{{ current_user.bio }}">
+              {% if user.bio %} {{ user.bio }} {% else %} Bio not added {% endif
+              %}
+            </p>
+          </div>
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Info</span>
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if user.phone_number %}
+                <span style="color: #fff"> {{ user.phone_number }} </span>
+                {% else %}
+                <span style="color: #fff">
+                  Phone not available {% endif %}
+                </span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ user.date_birth }}
+                </time>
+                {% else %}
+                <span style="color: #fff">D.O.B not available</span>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            {% if not friendship_status %}
+            <li class="social-item notification">
+              <button class="friend-btn" data-id="{{ user.id }}">
+                Add Friend
+              </button>
+            </li>
+            {% elif friendship_status.is_accepted %}
+            <li class="social-item">
+              <button class="friend-btn remove-friend" data-id="{{ user.id }}">
+                UnFriend
+              </button>
+            </li>
+            {% elif friendship_status.user_id == current_user.id %}
+            <li class="social-item">
+              <button class="friend-btn" disabled>Pending</button>
+            </li>
+            {% else %}
+            <li>
+              <button class="friend-btn">
+                <a
+                  href="{{ url_for('views.friend_requests') }}"
+                  style="color: #fff"
+                  >View Request</a
+                >
+              </button>
+            </li>
+            {% endif %}
+            <li class="social-item">
+              <button
+                class="friend-btn"
+                onclick="startConversation({{ user.id }})"
+                class="message-btn"
+              >
+                Message
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.search_users')}}"
+                class="navbar-link active"
+              >
+                <p>Users</p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+                <a href="{{ url_for('views.friend_requests') }}" class="navbar-link">
+                    <p style="--background-: {{ current_user.generated_color }}; position: relative;">
+                        Friend Requests
+                        {% if has_pending_requests %}
+                            <span class="red-dot"></span>
+                        {% endif %}
+                    </p>
+                </a>
+            </li>
+            <li class="navbar-item">
+              <a
+                href="#"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Posts</p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a href="{{ url_for('views.view_friends') }}" class="navbar-link" id="favoriteLink">
+                <p style="--background-: {{ current_user.generated_color }}">
+                  Friends
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>Groups</p></a
+              >
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="#"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Messages</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="users">
+          <header style="margin-top: 50px">
+            <h2 class="h2 article-title">
+              {% if user.id == current_user.id %} Your Friends {% else %} {{
+              user.full_name }} Friends {% endif %}
+            </h2>
+          </header>
+          <section class="about-text">
+            <ul class="user-list" id="userList">
+              {% for follow in following %}
+              <li class="user-item">
+                <!-- Avatar and user details -->
+                <figure
+                  class="avatar-box2"
+                  {%
+                  if
+                  follow.profile_picture
+                  %}
+                  onclick="showImage('{{ follow.profile_picture }}')"
+                  {%
+                  endif
+                  %}
+                >
+                  {% if follow.profile_picture %}
+                  <img
+                    src="/static/profile_pics/{{ follow.profile_picture }}"
+                    alt="Profile Picture"
+                    class="profile-image"
+                  />
+                  {% else %}
+                  <i
+                    class="fas fa-2x"
+                    style="--background-: {{ follow.generated_color }}"
+                    >{{ follow.full_name[0] }}</i
+                  >
+                  {% endif %}
+                </figure>
+                <p>
+                  <a href="/user/{{ follow.id }}">{{ follow.full_name }} <br>{{ follow.user_name }}</a>
+                </p>
+                {% if follow.id == current_user.id %}
+
+                <button class="friend-btn" disabled>You</button>
+                {% else %} {% if follow.friendship %} {% if
+                follow.friendship.is_accepted %}
+                <button class="friend-btn" disabled>Friends</button>
+                {% else %}
+                <button class="friend-btn" disabled>
+                  <small>Your request</small> Pending
+                </button>
+                {% endif %} {% else %}
+                <button class="friend-btn add-friend" data-id="{{ follow.id }}">
+                  Add Friend
+                </button>
+                {% endif %} {% endif %}
+              </li>
+              {% else %}
+              <p>No Friends</p>
+              {% endfor %}
+            </ul>
+
+            <div id="myModal" class="modal">
+              <div class="modal-content">
+                <img id="modalImage" src="" alt="Profile Picture" />
+              </div>
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+    <script>
+      function showImage(src) {
+        const modal = document.getElementById("myModal");
+        const modalImage = document.getElementById("modalImage");
+        modal.style.display = "block";
+        modalImage.src = "/static/profile_pics/" + src;
+      }
+
+      function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+      }
+      window.onclick = function (event) {
+        const modal = document.getElementById("myModal");
+        if (event.target == modal) {
+          closeModal();
+        }
+      };
+    </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+    <script>
+      document.addEventListener("click", function (e) {
+        // Remove Friend Button
+        if (e.target.classList.contains("remove-friend")) {
+          const userId = e.target.getAttribute("data-id");
+
+          fetch(`/remove_friend/${userId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                e.target.textContent = "Add Friend"; // Change text to "Add Friend"
+                e.target.classList.remove("remove-friend"); // Remove 'remove-friend' class
+                e.target.classList.add("add-friend"); // Add 'add-friend' class
+              } else {
+                alert(data.message); // Show error message if something went wrong
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "There was a problem with the fetch operation:",
+                error
+              );
+              alert("Something went wrong. Please try again.");
+            });
+        }
+
+        // Add Friend Button
+        if (e.target.classList.contains("add-friend")) {
+          const userId = e.target.getAttribute("data-id");
+
+          fetch(`/send_friend_request/${userId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                e.target.textContent = "Pending"; // Change text to "Pending"
+                e.target.classList.remove("add-friend"); // Remove 'add-friend' class
+                e.target.disabled = true; // Disable the button after sending a request
+              } else {
+                alert(data.message);
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "There was a problem with the fetch operation:",
+                error
+              );
+              alert("Something went wrong. Please try again.");
+            });
+        }
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".accept-request").forEach((button) => {
+          button.addEventListener("click", function () {
+            const userId = this.getAttribute("data-id");
+            fetch(`/accept_friend_request/${userId}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                alert(data.message);
+                if (data.success) {
+                  location.reload();
+                }
+              })
+              .catch((error) => console.error("Error:", error));
+          });
+        });
+
+        document.querySelectorAll(".decline-request").forEach((button) => {
+          button.addEventListener("click", function () {
+            const userId = this.getAttribute("data-id");
+            fetch(`/decline_friend_request/${userId}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                alert(data.message);
+                if (data.success) {
+                  location.reload();
+                }
+              })
+              .catch((error) => console.error("Error:", error));
+          });
+        });
+        function getCSRFToken() {
+          const csrfToken = document.querySelector('meta[name="csrf-token"]');
+          return csrfToken ? csrfToken.getAttribute("content") : "";
+        }
+      });
+    </script>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll("[data-nav-link]");
+        const articles = document.querySelectorAll("article");
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((btn) => btn.classList.remove("active"));
+            link.classList.add("active");
+            const targetPage = link.textContent.trim().toLowerCase();
+            articles.forEach((article) => (article.style.display = "none"));
+            const targetArticle = document.getElementById(targetPage);
+            if (targetArticle) {
+              targetArticle.style.display = "block";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

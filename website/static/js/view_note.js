@@ -3,8 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
   const tagId = searchInput.getAttribute("data-tag-id");
-
-  // Set initial styles and add event listeners for note items
   noteItems.forEach((item) => {
     const tagColor = item.getAttribute("data-tag-color");
 
@@ -12,13 +10,13 @@ document.addEventListener("DOMContentLoaded", function () {
     item.style.setProperty("--tag-color", tagColor);
 
     item.addEventListener("mouseenter", function () {
-      this.style.setProperty("--bullet-color", tagColor); // Set bullet color on hover
+      this.style.setProperty("--bullet-color", tagColor);
       const hrElement = this.querySelector("hr");
       hrElement.style.borderColor = tagColor;
     });
 
     item.addEventListener("mouseleave", function () {
-      this.style.setProperty("--bullet-color", tagColor); // Reset bullet color on leave
+      this.style.setProperty("--bullet-color", tagColor);
       const hrElement = this.querySelector("hr");
       hrElement.style.borderColor = "white";
     });
@@ -105,54 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  var modal = document.getElementById("menuModal");
-  var btn = document.getElementById("openModalBtn");
-  var span = document.querySelector(".close");
-  var closeLeftContainer = document.getElementById("closeLeftContainer");
-  var returnLeftContainer = document.getElementById("returnLeftContainer");
-  var leftContainer = document.querySelector(".left-container");
-  var rightContainer = document.querySelector(".right-container");
-  var returnIcon = document.getElementById("returnIcon");
-  var editIcon = document.querySelector(".edit");
-  var favoriteIcon = document.querySelector(".favorite");
-
-  btn.onclick = function (event) {
-    event.preventDefault();
-    modal.style.display = "flex";
-  };
-
-  span.onclick = function (event) {
-    event.preventDefault();
-    modal.style.display = "none";
-  };
-
-  closeLeftContainer.onclick = function (event) {
-    event.preventDefault();
-    leftContainer.style.display = "none";
-    rightContainer.style.width = "100%";
-    returnLeftContainer.style.display = "flex";
-    returnIcon.style.display = "inline";
-    editIcon.style.marginLeft = "40px";
-    editIcon.style.top = "52px";
-    favoriteIcon.style.top = "52px";
-    favoriteIcon.style.marginLeft = "36px";
-  };
-
-  returnLeftContainer.onclick = function (event) {
-    event.preventDefault();
-    leftContainer.style.display = "block";
-    rightContainer.style.width = "80%";
-    returnLeftContainer.style.display = "none";
-    returnIcon.style.display = "none";
-    editIcon.style.marginLeft = "0px";
-    editIcon.style.top = "50px";
-    favoriteIcon.style.marginLeft = "0px";
-    favoriteIcon.style.top = "50px";
-  };
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Initialize Quill editor
   const quill = new Quill("#editor", {
     theme: "snow",
     modules: {
@@ -288,6 +238,96 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
   }
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const copyIcon = document.getElementById("copyIcon");
+
+  const getEditorContent = () => document.getElementById("editor").innerText;
+
+  if (copyIcon) {
+    copyIcon.addEventListener("click", function () {
+      const editorContent = getEditorContent();
+      const tempInput = document.createElement("input");
+      tempInput.value = editorContent;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          console.log("Copied to clipboard!");
+          copyIcon.style.color = "green";
+          showFeedback("Copied to clipboard!");
+          setTimeout(() => {
+            copyIcon.style.color = "white";
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Error copying text: ", err);
+      } finally {
+        document.body.removeChild(tempInput);
+      }
+    });
+  }
+
+  function showFeedback(message) {
+    const feedbackDiv = document.createElement("div");
+    feedbackDiv.innerText = message;
+    feedbackDiv.style.position = "fixed";
+    feedbackDiv.style.bottom = "20px";
+    feedbackDiv.style.right = "20px";
+    feedbackDiv.style.backgroundColor = "#333";
+    feedbackDiv.style.color = "#fff";
+    feedbackDiv.style.padding = "10px";
+    feedbackDiv.style.borderRadius = "5px";
+    feedbackDiv.style.zIndex = "1000";
+    document.body.appendChild(feedbackDiv);
+    setTimeout(() => {
+      document.body.removeChild(feedbackDiv);
+    }, 2000);
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const openModalBtn = document.getElementById("openModalBtn");
+  const modal = document.getElementById("modal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+
+  // Open modal on icon click
+  openModalBtn.addEventListener("click", function () {
+    modal.classList.add("open");
+  });
+
+  // Close modal on close button click
+  closeModalBtn.addEventListener("click", function () {
+    modal.classList.remove("open");
+  });
+
+  // Close modal on clicking outside of the modal content
+  window.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      modal.classList.remove("open");
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  function updateNotificationBadge() {
+    fetch("/get_notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        const badge = document.getElementById("notificationBadge");
+        if (badge) {
+          badge.textContent = data.unread_count;
+          badge.style.display = data.unread_count > 0 ? "inline" : "none";
+        }
+      })
+      .catch((error) => console.error("Error fetching notifications:", error));
+  }
+
+  updateNotificationBadge();
+
+  setInterval(updateNotificationBadge, 60000);
 });
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -3,22 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notifications</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/user_home.css') }}"
-    />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='img/notewave.ico') }}"
-      type="image/x-icon"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+    <title>{{ current_user.full_name }} Profile</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
@@ -26,6 +11,30 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/platform.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='profile_pics/' + (current_user.profile_picture or 'default_profile.png')) }}"
+    />
+    type="image/x-icon" />
+
+    <style>
+      a {
+        color: #fff;
+      }
+      a:hover {
+        color: darkcyan;
+      }
+    </style>
   </head>
   <body>
     <main>
@@ -67,7 +76,7 @@
           </div>
 
           <button class="info_more-btn" data-sidebar-btn>
-            <span>Show Contacts</span>
+            <span>Show Info</span>
 
             <ion-icon name="chevron-down"></ion-icon>
           </button>
@@ -158,129 +167,225 @@
                 {% endif %}
               </a>
             </li>
-
             <li class="social-item">
               <a href="/user_home" style="color: #fff"
                 ><i class="bx bx-notepad" title="Notepad Mode"></i
               ></a>
             </li>
-
-            <li class="social-item">
-              <a href="{{ url_for('views.search_users')}}" class="social-link">
-                <i class="fas fa-comments" title="Socialize"></i>
-              </a>
-            </li>
           </ul>
         </div>
       </aside>
-
       <div class="main-content">
         <nav class="navbar">
           <ul class="navbar-list">
             <li class="navbar-item">
-              <a href="/user_home" class="navbar-link">
-                <p>
-                  All notes
-                  <span
-                    style="--background-: {{ current_user.generated_color }}"
-                  >
-                    ({{ current_user.notes|length }})
-                  </span>
-                </p>
+              <a href="{{ url_for('views.search_users')}}" class="navbar-link">
+                <p>Users</p>
               </a>
             </li>
 
             <li class="navbar-item">
               <a
-                href="{{ url_for('views.show_todo_page') }}"
+                href="{{ url_for('views.friend_requests') }}"
                 class="navbar-link"
               >
-                <p style="--background-: {{ current_user.generated_color }}">
-                  To-dos
-                  <span> (<span id="todoCount">0</span>)</span>
-                </p>
-              </a>
-            </li>
-
-            <li class="navbar-item">
-              <a href="/favorites" class="navbar-link" id="favoriteLink">
-                <p style="--background-: {{ current_user.generated_color }}">
-                  My favorites
-                  <span> (<span id="favoriteCount">0</span>) </span>
+                <p
+                  style="--background-: {{ current_user.generated_color }}; position: relative;"
+                >
+                  Friend Requests {% if has_pending_requests %}
+                  <span class="red-dot"></span>
+                  {% endif %}
                 </p>
               </a>
             </li>
             <li class="navbar-item">
               <a
-                href="{{url_for('views.settings')}}"
+                href="#"
                 class="navbar-link"
                 style="--background-: {{ current_user.generated_color }}"
               >
-                <p>Settings</p>
+                <p>Posts</p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.view_friends') }}"
+                class="navbar-link active"
+                id="favoriteLink"
+              >
+                <p style="--background-: {{ current_user.generated_color }}">
+                  Friends
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>Groups</p></a
+              >
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="#"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Messages</p>
               </a>
             </li>
           </ul>
         </nav>
-        <article class="about active" id="notifications">
-          <section class="testimonials">
-            <div class="tags">
-              <p class="section-title">
-                BOOKMARKS
-              </p>
-              <div class="tags-wrapper">
-                {% for tag in tags %}
-                <a href="{{ url_for('views.tag_notes', tag_id=tag.id) }}" class="tag" data-tag-id="{{ tag.id }}">
-                  <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
-                  <span class="tag-name">{{ tag.name }}</span>
-                  <span class="note-count">({{ tag_counts.get(tag.id, 0) }})</span>
-                </a>
-                {% endfor %}
-              </div>
-              <button class="toggle-tags">
-                <i class="fas fa-chevron-down"></i> 
-              </button>
-            </div>
-          </section>
+        <article class="about active" id="friends">
           <header>
-            <h2 class="h2 article-title">Notifications</h2>
+            <h2 class="h2 article-title">Your Friends</h2>
           </header>
-          <section class="service">
-            <div class="notication-list">
-              <ul
-                style="--background-: {{ current_user.generated_color }}"
-                id="notificationList"
-              >
-                {% for notification in notifications %}
-                <li
-                  class="notification-item {% if notification.is_read %}read{% endif %}"
-                  data-notification-id="{{ notification.id }}"
+          <section class="about-text">
+            <div class="search-container">
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search users by username..."
+                class="search-input"
+                autocomplete="off"
+              />
+              <button id="searchBtn" class="search-button">Search</button>
+            </div>
+            <ul class="user-list" id="userList">
+              {% if friends %} {% for friend in friends %}
+              <li class="user-item">
+                <figure
+                  class="avatar-box2"
+                  {%
+                  if
+                  friend.profile_picture
+                  %}onclick="showImage('{{ friend.profile_picture }}')"
+                  {%
+                  endif
+                  %}
                 >
-                  <p>{{ notification.message | striptags  | truncate(30, True, '...')}}...</p>
-                  <p>
-                    <small
-                      >{{ notification.created_at.strftime('%Y-%m-%d %H:%M')
-                      }}</small
-                    >
-                  </p>
-                  
-                </li>
-                <hr />
-                {% endfor %}
-              </ul>
+                  {% if friend.profile_picture %}
+                  <img
+                    src="/static/profile_pics/{{ friend.profile_picture }}"
+                    alt="Profile Picture"
+                    class="profile-image"
+                  />
+                  {% else %}
+                  <i
+                    class="fas fa-5x"
+                    style="--background-: {{ friend.generated_color }}"
+                    >{{ friend.full_name[0] }}</i
+                  >
+                  {% endif %}
+                </figure>
+                <p>
+                  <a
+                    href="{{ url_for('views.user_profile', user_id=friend.id) }}"
+                    >{{ friend.full_name }} <br />{{ friend.user_name }}</a
+                  >
+                </p>
+                <button
+                  class="friend-btn remove-friend"
+                  data-id="{{ friend.id }}"
+                >
+                  Unfriend
+                </button>
+              </li>
+              {% endfor %} {% else %}
+              <p>You have no friends yet.</p>
+              {% endif %}
+            </ul>
+
+            <div id="myModal" class="modal">
+              <div class="modal-content">
+                <img id="modalImage" src="" alt="Profile Picture" />
+              </div>
             </div>
           </section>
         </article>
       </div>
     </main>
+    <script>
+      function showImage(src) {
+        const modal = document.getElementById("myModal");
+        const modalImage = document.getElementById("modalImage");
+        modal.style.display = "block";
+        modalImage.src = "/static/profile_pics/" + src;
+      }
+
+      function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+      }
+      window.onclick = function (event) {
+        const modal = document.getElementById("myModal");
+        if (event.target == modal) {
+          closeModal();
+        }
+      };
+    </script>
+    <script>
+      document.addEventListener("click", function (e) {
+        // Remove Friend Button
+        if (e.target.classList.contains("remove-friend")) {
+          const userId = e.target.getAttribute("data-id");
+          const friendItem = e.target.closest(".user-item");
+
+          fetch(`/remove_friend/${userId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                friendItem.remove();
+              } else {
+                alert(data.message);
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "There was a problem with the fetch operation:",
+                error
+              );
+              alert("Something went wrong. Please try again.");
+            });
+        }
+      });
+    </script>
+
+    <!-- <script>
+const userId = {{ current_user.id }}; 
+
+document.getElementById("searchBtn").addEventListener("click", function () {
+    const query = document.getElementById("searchInput").value.trim();
+    if (query) {
+        window.location.href = `/user/${userId}/friends?q=` + encodeURIComponent(query);
+    } else {
+        alert("Please enter a search query.");
+    }
+});
+
+document.getElementById("searchInput").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        document.getElementById("searchBtn").click();
+    }
+});
+
+  </script> -->
     <script
       type="module"
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
     ></script>
+
     <script
       nomodule
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
     ></script>
-    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     <script>
       "use strict";
       const elementToggleFunc = function (elem) {
@@ -339,6 +444,26 @@
             }
           });
         });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        function updateNotificationBadge() {
+          fetch("/get_notifications")
+            .then((response) => response.json())
+            .then((data) => {
+              const badge = document.getElementById("notificationBadge");
+              if (badge) {
+                badge.textContent = data.unread_count;
+                badge.style.display = data.unread_count > 0 ? "inline" : "none";
+              }
+            })
+            .catch((error) =>
+              console.error("Error fetching notifications:", error)
+            );
+        }
+
+        updateNotificationBadge();
+
+        setInterval(updateNotificationBadge, 60000);
       });
     </script>
   </body>

@@ -177,33 +177,11 @@
         </li>
 
         <li class="social-item">
-          <a href="#" class="social-link">
-            <i class="bx bx-message" title="Messages"></i>
+          <a href="{{ url_for('views.search_users')}}" class="social-link">
+            <i class="fas fa-comments" title="Socialize"></i>
           </a>
         </li>
-
-        <li class="social-item">
-          <a href="#" class="social-link">
-            <i class="bx bx-user" title="Followers"></i>
-          </a>
-        </li>
-        <li class="social-item">
-          <a href="#" class="social-link" title="Show Friends">
-            <i class="bx bx-user-check"></i>
-          </a>
-        </li>
-        <li class="social-item">
-          <a href="#" class="social-link">
-            <i class="bx bx-user-plus" title="Following"></i>
-          </a>
-        </li>
-        <li class="social-item">
-          <form action="{{ url_for('auth.logout') }}" method="post">
-            <button type="submit" class="log-item">
-              <i class="bx bx-power-off" title="Logout"></i>
-            </button>
-          </form>
-        </li>
+        
       </ul>
     </div>
   </aside>

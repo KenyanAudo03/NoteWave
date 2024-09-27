@@ -21,7 +21,7 @@ import smtplib
 import pytz
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from .models import User, NoteTag, Notification, Note, LoginActivity, PushPreferences
+from .models import User, NoteTag, Notification, Note, LoginActivity, PushPreferences, Friendship, Message
 import random
 from pytz import timezone
 from datetime import datetime
@@ -1853,3 +1853,76 @@ def update_push_notifications():
 
     flash("Push notifications preferences updated.", category="success")
     return redirect(url_for("views.settings"))
+
+@auth.route('/select_chat', methods=['GET'])
+@login_required
+def select_chat():
+    users = User.query.filter(User.id != current_user.id).all()  
+    return render_template('list_message_user.html', users=users)
+
+@auth.route('/chat/<int:receiver_id>', methods=['GET', 'POST'])
+@login_required
+def chat(receiver_id):
+    receiver = User.query.get_or_404(receiver_id)
+    
+    # Fetch friendship status between current user and receiver
+    friendship = Friendship.query.filter(
+        ((Friendship.user_id == current_user.id) & (Friendship.friend_id == receiver_id)) |
+        ((Friendship.user_id == receiver_id) & (Friendship.friend_id == current_user.id))
+    ).first()
+    
+    # Get the sender's and receiver's timezone, fallback to UTC if not available
+    sender_tz = pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
+    receiver_tz = pytz.timezone(receiver.time_zone) if receiver.time_zone else pytz.UTC
+
+    if request.method == 'POST':
+        content = request.form.get('content')
+        
+        # Restrict multiple messages if no response from receiver yet
+        if not friendship or not friendship.is_accepted:
+            last_message = Message.query.filter_by(sender_id=current_user.id, receiver_id=receiver_id)\
+                                        .order_by(Message.timestamp.desc()).first()
+            # Check if the sender has already sent a message and the receiver hasn't replied yet
+            if last_message and not Message.query.filter_by(sender_id=receiver_id, receiver_id=current_user.id).first():
+                flash("You cannot send another message until the receiver replies.")
+                return redirect(url_for('auth.chat', receiver_id=receiver_id))
+    
+        # Get the current time in the sender's timezone
+        created_at = datetime.now(sender_tz)
+        
+        new_message = Message(sender_id=current_user.id, receiver_id=receiver_id, content=content, timestamp=created_at)
+        db.session.add(new_message)
+        db.session.commit()
+
+        flash("Message sent.")
+        return redirect(url_for('auth.chat', receiver_id=receiver_id))
+
+    messages = Message.query.filter(
+        ((Message.sender_id == current_user.id) & (Message.receiver_id == receiver_id)) |
+        ((Message.sender_id == receiver_id) & (Message.receiver_id == current_user.id))
+    ).order_by(Message.timestamp.asc()).all()
+
+    for message in messages:
+        if message.sender_id == current_user.id:
+            message.local_timestamp = message.timestamp.astimezone(sender_tz)  # Sender's timezone
+        else:
+            message.local_timestamp = message.timestamp.astimezone(receiver_tz)  # Receiver's timezone
+
+    return render_template('chat.html', receiver=receiver, messages=messages)
+
+
+
+@auth.route('/edit_message/<int:message_id>', methods=['POST'])
+@login_required
+def edit_message(message_id):
+    message = Message.query.get_or_404(message_id)
+
+    if message.sender_id != current_user.id:
+        abort(403)  #
+
+    new_content = request.form.get('content')
+    message.content = new_content  
+    db.session.commit()
+
+    flash("Message edited.")
+    return redirect(url_for('chat', receiver_id=message.receiver_id))

@@ -429,7 +429,7 @@ main {
 
 .social-list {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   gap: 23px;
   padding-bottom: 4px;

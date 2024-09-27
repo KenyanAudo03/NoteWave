@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 import re
-from .models import User, NoteTag, Note, Notification, ToDo, Subtask
+from .models import User, NoteTag, Note, Notification, ToDo, Subtask, Friendship
 import pytz
 from html import escape
 from pytz import timezone
@@ -84,11 +84,12 @@ def user_home():
         }
         for tag in tags
     ]
-    notes = Note.query.filter_by(user_id=current_user.id).order_by(
-        Note.created_at.desc(),
-        Note.updated_at.desc()
-    ).all()
-    
+    notes = (
+        Note.query.filter_by(user_id=current_user.id)
+        .order_by(Note.created_at.desc(), Note.updated_at.desc())
+        .all()
+    )
+
     return render_template("user_home.html", tags=tags_with_counts, notes=notes)
 
 
@@ -356,7 +357,7 @@ def search_notes():
 
     result = []
     for note in notes:
-         result.append(
+        result.append(
             {
                 "id": note.id,
                 "title": note.title,
@@ -445,6 +446,7 @@ def add_favorite():
 
 from flask import url_for
 
+
 @views.route("/toggle_favorite", methods=["POST"])
 def toggle_favorite():
     note_id = request.json.get("note_id")
@@ -472,14 +474,20 @@ def toggle_favorite():
             )
             db.session.add(notification)
             db.session.commit()
-        flash(notification_message, 'success')
-        return jsonify({
-            "is_favorite": note.is_favorite,
-            "redirect_url": url_for('views.view_note', note_id=note_id)
-        }), 200
+        flash(notification_message, "success")
+        return (
+            jsonify(
+                {
+                    "is_favorite": note.is_favorite,
+                    "redirect_url": url_for("views.view_note", note_id=note_id),
+                }
+            ),
+            200,
+        )
     else:
-        flash("Note not found.", 'error')
+        flash("Note not found.", "error")
         return jsonify({"message": "Note not found."}), 404
+
 
 @views.route("/get_favorite_count", methods=["GET"])
 def get_favorite_count():
@@ -649,11 +657,14 @@ def notifications():
         tag_counts=tag_counts,
     )
 
+
 @views.route("/mark_all_as_read", methods=["POST"])
 @login_required
 def mark_all_as_read():
     try:
-        notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).all()
+        notifications = Notification.query.filter_by(
+            user_id=current_user.id, is_read=False
+        ).all()
         for notification in notifications:
             notification.is_read = True
         db.session.commit()
@@ -661,6 +672,7 @@ def mark_all_as_read():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 @views.route("/mark_as_read/<int:notification_id>", methods=["POST"])
 @login_required
@@ -1071,30 +1083,23 @@ def settings():
     users = User.query.all()
     return render_template("setting.html", users=users)
 
-@views.route('/send_email', methods=['POST'])
+
+@views.route("/send_email", methods=["POST"])
 def send_email():
-    name = request.form.get('name')
-    email = request.form.get('mail')
-    phone = request.form.get('phone')
-    query = request.form.get('query')
+    name = request.form.get("name")
+    email = request.form.get("mail")
+    phone = request.form.get("phone")
+    query = request.form.get("query")
 
-    api_key = 'd432cee9047e3ce258e59b81514864cc'
-    api_secret = '3ed35d6a4a8972eddaa96b89e130c39a'
-    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-    
+    api_key = "d432cee9047e3ce258e59b81514864cc"
+    api_secret = "3ed35d6a4a8972eddaa96b89e130c39a"
+    mailjet = Client(auth=(api_key, api_secret), version="v3.1")
+
     data = {
-        'Messages': [
+        "Messages": [
             {
-                "From": {
-                    "Email": "vo4685336@gmail.com",
-                    "Name": "NoteWave"
-                },
-                "To": [
-                    {
-                        "Email": "vo4685336@gmail.com",
-                        "Name": "Support Team"
-                    }
-                ],
+                "From": {"Email": "vo4685336@gmail.com", "Name": "NoteWave"},
+                "To": [{"Email": "vo4685336@gmail.com", "Name": "Support Team"}],
                 "Subject": "New Support Request",
                 "TextPart": f"Name: {name}\nEmail: {email}\nPhone: {phone}\nQuery: {query}",
                 "HTMLPart": f"""
@@ -1104,7 +1109,7 @@ def send_email():
                     <p><strong>Phone:</strong> {phone}</p>
                     <p><strong>Query:</strong></p>
                     <p>{query}</p>
-                """
+                """,
             }
         ]
     }
@@ -1116,32 +1121,25 @@ def send_email():
     else:
         flash("Failed to send message. Please try again.", category="error")
 
-    return redirect(url_for('views.settings'))
+    return redirect(url_for("views.settings"))
 
-@views.route('/send_email_contact', methods=['POST'])
+
+@views.route("/send_email_contact", methods=["POST"])
 def send_email_contact():
-    name = request.form.get('name')
-    email = request.form.get('mail')
-    phone = request.form.get('phone')
-    query = request.form.get('query')
+    name = request.form.get("name")
+    email = request.form.get("mail")
+    phone = request.form.get("phone")
+    query = request.form.get("query")
 
-    api_key = 'd432cee9047e3ce258e59b81514864cc'
-    api_secret = '3ed35d6a4a8972eddaa96b89e130c39a'
-    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-    
+    api_key = "d432cee9047e3ce258e59b81514864cc"
+    api_secret = "3ed35d6a4a8972eddaa96b89e130c39a"
+    mailjet = Client(auth=(api_key, api_secret), version="v3.1")
+
     data = {
-        'Messages': [
+        "Messages": [
             {
-                "From": {
-                    "Email": "vo4685336@gmail.com",
-                    "Name": "NoteWave"
-                },
-                "To": [
-                    {
-                        "Email": "vo4685336@gmail.com",
-                        "Name": "Support Team"
-                    }
-                ],
+                "From": {"Email": "vo4685336@gmail.com", "Name": "NoteWave"},
+                "To": [{"Email": "vo4685336@gmail.com", "Name": "Support Team"}],
                 "Subject": "New Support Request",
                 "TextPart": f"Name: {name}\nEmail: {email}\nPhone: {phone}\nQuery: {query}",
                 "HTMLPart": f"""
@@ -1151,7 +1149,7 @@ def send_email_contact():
                     <p><strong>Phone:</strong> {phone}</p>
                     <p><strong>Query:</strong></p>
                     <p>{query}</p>
-                """
+                """,
             }
         ]
     }
@@ -1163,18 +1161,369 @@ def send_email_contact():
     else:
         flash("Failed to send message. Please try again.", category="error")
 
-    return redirect(url_for('views.contact'))
+    return redirect(url_for("views.contact"))
 
 
-@views.route('/contact')
+@views.route("/contact")
 def contact():
-    return render_template('contact.html')
+    return render_template("contact.html")
 
 
-@views.route('/privacy_policy')
+@views.route("/privacy_policy")
 def privacy_policy():
-    return render_template('privacy_policy.html')
+    return render_template("privacy_policy.html")
 
-@views.route('speech_text')
+
+@views.route("speech_text")
 def speech_text():
-    return render_template('speech-to-text.html')
+    return render_template("speech-to-text.html")
+
+
+@views.route("/search_users", methods=["GET"])
+@login_required
+def search_users():
+    search_query = request.args.get("q")
+    users = User.query.filter(User.id != current_user.id).all()
+    has_pending_requests = (
+        Friendship.query.filter_by(friend_id=current_user.id, is_accepted=False).count()
+        > 0
+    )
+
+    if search_query:
+        search_query = search_query.lower()
+        users = [
+            user
+            for user in users
+            if (
+                search_query in user.user_name.lower()
+                or search_query in user.full_name.lower()
+                or search_query in user.first_name.lower()
+            )
+        ]
+
+    users_data = []
+    for user in users:
+        friendship = Friendship.query.filter(
+            (Friendship.user_id == user.id) & (Friendship.friend_id == current_user.id)
+        ).first()
+
+        if friendship:
+            friendship_status = "friends" if friendship.is_accepted else "pending"
+        else:
+            friendship_status = None
+
+        users_data.append(
+            {
+                "id": user.id,
+                "full_name": user.full_name,
+                "user_name": user.user_name,
+                "friendship_status": friendship_status,
+                "profile_picture": user.profile_picture,
+                "generated_color": user.generated_color,
+                "first_name": user.first_name,
+            }
+        )
+
+    return render_template(
+        "platform_users.html",
+        users=users_data,
+        has_pending_requests=has_pending_requests,
+    )
+
+
+@views.route("/send_friend_request/<int:user_id>", methods=["POST"])
+@login_required
+def send_friend_request(user_id):
+    user_to_follow = User.query.get_or_404(user_id)
+    if Friendship.query.filter_by(
+        user_id=current_user.id, friend_id=user_to_follow.id
+    ).first():
+        return jsonify(success=False, message="Already sent a request or are friends.")
+    new_friendship = Friendship(user_id=current_user.id, friend_id=user_to_follow.id)
+    db.session.add(new_friendship)
+    recipient_time_zone = user_to_follow.time_zone
+    created_at = datetime.utcnow()
+
+    if recipient_time_zone:
+        try:
+            recipient_tz = timezone(recipient_time_zone)
+            created_at = created_at.replace(tzinfo=pytz.utc).astimezone(recipient_tz)
+        except Exception as e:
+            created_at = created_at
+    notification_message = f"{current_user.user_name} has sent you a friend request."
+    notification = Notification(
+        user_id=user_to_follow.id, message=notification_message, created_at=created_at
+    )
+    db.session.add(notification)
+    db.session.commit()
+
+    return jsonify(success=True, message="Friend request sent.")
+
+
+@views.route("/remove_friend/<int:user_id>", methods=["POST"])
+@login_required
+def remove_friend(user_id):
+    friendship_1 = Friendship.query.filter(
+        (Friendship.user_id == current_user.id) & (Friendship.friend_id == user_id)
+    ).first()
+
+    friendship_2 = Friendship.query.filter(
+        (Friendship.user_id == user_id) & (Friendship.friend_id == current_user.id)
+    ).first()
+    if not friendship_1 and not friendship_2:
+        return jsonify(success=False, message="You are not friends with this user.")
+    if friendship_1:
+        db.session.delete(friendship_1)
+
+    if friendship_2:
+        db.session.delete(friendship_2)
+    db.session.commit()
+
+    return jsonify(
+        success=True, message="You have removed this user from your friends."
+    )
+
+
+@views.route("/friend_requests", methods=["GET"])
+@login_required
+def friend_requests():
+    pending_requests = Friendship.query.filter_by(
+        friend_id=current_user.id, is_accepted=False
+    ).all()
+    has_pending_requests = (
+        Friendship.query.filter_by(friend_id=current_user.id, is_accepted=False).count()
+        > 0
+    )
+
+    requests_data = []
+    for friendship in pending_requests:
+        user = User.query.get(friendship.user_id)
+        if user:
+            requests_data.append(
+                {
+                    "id": user.id,
+                    "full_name": user.full_name,
+                    "user_name": user.user_name,
+                    "friendship_status": "pending",
+                    "profile_picture": user.profile_picture,
+                    "generated_color": user.generated_color,
+                    "first_name": user.first_name,
+                }
+            )
+
+    return render_template(
+        "friend_requests.html",
+        requests=requests_data,
+        has_pending_requests=has_pending_requests,
+    )
+
+
+@views.route("/accept_friend_request/<int:user_id>", methods=["POST"])
+@login_required
+def accept_friend_request(user_id):
+    friendship = Friendship.query.filter_by(
+        user_id=user_id, friend_id=current_user.id, is_accepted=False
+    ).first()
+
+    if friendship:
+        friendship.is_accepted = True
+        reverse_friendship = Friendship.query.filter_by(
+            user_id=current_user.id, friend_id=user_id
+        ).first()
+
+        if not reverse_friendship:
+            reverse_friendship = Friendship(
+                user_id=current_user.id, friend_id=user_id, is_accepted=True
+            )
+            db.session.add(reverse_friendship)
+        else:
+            reverse_friendship.is_accepted = True
+
+        db.session.commit()
+        user_to_notify = User.query.get_or_404(user_id)
+        user_time_zone = user_to_notify.time_zone
+        created_at = datetime.utcnow()
+        if user_time_zone:
+            try:
+                user_tz = timezone(user_time_zone)
+                created_at = created_at.replace(tzinfo=pytz.utc).astimezone(user_tz)
+            except Exception as e:
+                created_at = created_at
+
+        notification_message = (
+            f"{current_user.user_name} has accepted your friend request!"
+        )
+        notification = Notification(
+            user_id=user_id, message=notification_message, created_at=created_at
+        )
+        db.session.add(notification)
+        db.session.commit()
+
+        return jsonify(success=True, message="Friend request accepted.")
+
+    return jsonify(success=False, message="Friend request not found.")
+
+
+@views.route("/decline_friend_request/<int:user_id>", methods=["POST"])
+@login_required
+def decline_friend_request(user_id):
+    friendship = Friendship.query.filter_by(
+        user_id=user_id, friend_id=current_user.id, is_accepted=False
+    ).first()
+
+    if friendship:
+        db.session.delete(friendship)
+        db.session.commit()
+        user_to_notify = User.query.get_or_404(user_id)
+        user_time_zone = user_to_notify.time_zone
+        created_at = datetime.utcnow()
+
+        if user_time_zone:
+            try:
+                user_tz = timezone(user_time_zone)
+                created_at = created_at.replace(tzinfo=pytz.utc).astimezone(user_tz)
+            except Exception:
+                created_at = created_at
+        notification_message = (
+            f"{current_user.user_name} has declined your friend request."
+        )
+        notification = Notification(
+            user_id=user_id, message=notification_message, created_at=created_at
+        )
+        db.session.add(notification)
+        db.session.commit()
+
+        return jsonify(success=True, message="Friend request declined.")
+
+    return jsonify(success=False, message="Friend request not found.")
+
+
+
+
+@views.route("/friends", methods=["GET"])
+@login_required
+def view_friends():
+    has_pending_requests = (
+        Friendship.query.filter_by(friend_id=current_user.id, is_accepted=False).count()
+        > 0
+    )
+
+    # Fetch friends from both directions
+    friends_as_user = db.session.query(User).join(Friendship, User.id == Friendship.friend_id).filter(
+        Friendship.user_id == current_user.id, 
+        Friendship.is_accepted == True
+    ).all()
+
+    friends_as_friend = db.session.query(User).join(Friendship, User.id == Friendship.user_id).filter(
+        Friendship.friend_id == current_user.id, 
+        Friendship.is_accepted == True
+    ).all()
+
+    # Merge the two lists and remove duplicates by using a dictionary keyed on 'id'
+    unique_friends = {friend.id: friend for friend in friends_as_user + friends_as_friend}
+
+    # Check for potential None values and handle them
+    friends_data = []
+    for friend in unique_friends.values():
+        full_name = friend.full_name or "Unknown"  # Handle None full_name
+        user_name = friend.user_name or "No username"  # Handle None user_name
+        profile_picture = friend.profile_picture or "/static/default_profile.png"  # Handle None profile picture
+        generated_color = friend.generated_color or "#000000"  # Handle None generated color
+        
+        # Log any potential None values to diagnose issues
+        print(f"Friend ID: {friend.id}, Full Name: {full_name}, Username: {user_name}, Profile Picture: {profile_picture}, Generated Color: {generated_color}")
+
+        # Add the friend data to the list
+        friends_data.append({
+            "id": friend.id,
+            "full_name": full_name,
+            "user_name": user_name,
+            "profile_picture": profile_picture,
+            "generated_color": generated_color
+        })
+
+    # Render the template with friends data
+    return render_template("your_friends.html", friends=friends_data, has_pending_requests=has_pending_requests, current_user=current_user)
+
+@views.route("/user/<int:user_id>", methods=["GET"])
+@login_required
+def user_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    has_pending_requests = (
+        Friendship.query.filter_by(friend_id=current_user.id, is_accepted=False).count() > 0
+    )
+    
+    # Get the search query from request arguments
+    query = request.args.get('q', '').strip()
+
+    # Followers
+    followers_query = (
+        db.session.query(User)
+        .join(Friendship, User.id == Friendship.user_id)
+        .filter(Friendship.friend_id == user_id, Friendship.is_accepted == True)
+    )
+    
+    # If there's a search query, filter followers
+    if query:
+        followers_query = followers_query.filter(
+            User.username.ilike(f'%{query}%') |
+            User.full_name.ilike(f'%{query}%') |
+            User.first_name.ilike(f'%{query}%')
+        )
+    
+    followers = followers_query.all()
+    followers_data = [
+        {
+            "id": follower.id,
+            "full_name": follower.full_name,
+            "user_name": follower.user_name,
+            "profile_picture": follower.profile_picture,
+            "generated_color": follower.generated_color,
+            "friendship": Friendship.query.filter_by(user_id=current_user.id, friend_id=follower.id).first(),
+        }
+        for follower in followers
+    ]
+
+    # Following
+    following_query = (
+        db.session.query(User)
+        .join(Friendship, User.id == Friendship.friend_id)
+        .filter(Friendship.user_id == user_id, Friendship.is_accepted == True)
+    )
+
+    # If there's a search query, filter following
+    if query:
+        following_query = following_query.filter(
+            User.username.ilike(f'%{query}%') |
+            User.full_name.ilike(f'%{query}%') |
+            User.first_name.ilike(f'%{query}%')
+        )
+
+    following = following_query.all()
+    following_data = [
+        {
+            "id": follow.id,
+            "full_name": follow.full_name,
+            "user_name": follow.user_name,
+            "profile_picture": follow.profile_picture,
+            "generated_color": follow.generated_color,
+            "friendship": Friendship.query.filter_by(user_id=current_user.id, friend_id=follow.id).first(),
+        }
+        for follow in following
+    ]
+
+    # Friendship status
+    friendship_status = Friendship.query.filter(
+        ((Friendship.user_id == current_user.id) & (Friendship.friend_id == user_id)) |
+        ((Friendship.user_id == user_id) & (Friendship.friend_id == current_user.id))
+    ).first()
+
+    return render_template(
+        "user_profile.html",
+        user=user,
+        followers=followers_data,
+        following=following_data,
+        friendship_status=friendship_status,
+        has_pending_requests=has_pending_requests,
+        query=query  # Pass the query to the template
+    )

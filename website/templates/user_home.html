@@ -28,7 +28,7 @@
     />
   </head>
   <body>
-    {% if not current_user.email_verified %}
+    <!-- {% if not current_user.email_verified %}
     <div class="message-container">
         <div class="email-verification-alert" role="alert">
             <i class="fas fa-exclamation-circle"></i> Your email is not verified.
@@ -38,7 +38,6 @@
                 method="POST"
                 class="resend-verification"
             >
-                <!-- Hidden field for email -->
                 <div class="form-group" style="display: none">
                     <input
                         type="email"
@@ -51,7 +50,6 @@
                         style="--background-: {{ current_user.generated_color }}"
                     />
                 </div>
-                <!-- Resend Verification Button -->
                 <button
                     type="submit"
                     class="btn btn-primary"
@@ -72,7 +70,7 @@
                     class="alert alert-{{ category }} alert-dismissible fade show"
                     role="alert"
                 >
-                    <!-- Icons for success and error messages -->
+
                     {% if category == 'success' %}
                         <i class="fas fa-check-circle"></i>
                     {% else %}
@@ -83,7 +81,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-</div>
+</div> -->
 
 
     <main>
@@ -218,32 +216,9 @@
             </li>
 
             <li class="social-item">
-              <a href="#" class="social-link">
-                <i class="bx bx-message" title="Messages"></i>
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
               </a>
-            </li>
-
-            <li class="social-item">
-              <a href="#" class="social-link">
-                <i class="bx bx-user" title="Followers"></i>
-              </a>
-            </li>
-            <li class="social-item">
-              <a href="#" class="social-link" title="Show Friends">
-                <i class="bx bx-user-check"></i>
-              </a>
-            </li>
-            <li class="social-item">
-              <a href="#" class="social-link">
-                <i class="bx bx-user-plus" title="Following"></i>
-              </a>
-            </li>
-            <li class="social-item">
-              <form action="{{ url_for('auth.logout') }}" method="post">
-                <button type="submit" class="log-item">
-                  <i class="bx bx-power-off" title="Logout"></i>
-                </button>
-              </form>
             </li>
           </ul>
         </div>

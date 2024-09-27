@@ -29,11 +29,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/6.2.0/docx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 
-    <style>
-      #editor {
-        display: none;
-      }
-    </style>
+    <style></style>
   </head>
   <body>
     <div class="messages-container">
@@ -51,115 +47,185 @@
       </div>
       {% endfor %} {% endif %} {% endwith %}
     </div>
-    <div class="page">
-      <div class="left-container">
-        <div class="tab">
-          <div class="tab-header">
-            <h2 style="--background-: {{ current_user.generated_color }}">
-              Other Notes
-            </h2>
-            <div class="return">
-              <a
-                href="{{url_for('views.tag_notes', tag_id=tag.id, note_id=note.id)}}"
-                ><i
-                  class="fas fa-arrow-left"
-                  style="--background-: {{ current_user.generated_color }}"
-                ></i
-              ></a>
-            </div>
-            <div class="close-left-container" id="closeLeftContainer">
-              <i
-                class="bx bx-sidebar"
-                data-tooltip="Close sidebar"
-                style="--background-: {{ current_user.generated_color }}"
-              ></i>
-            </div>
-          </div>
-          <div class="search">
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search notes..."
-              data-tag-id="{{ tag.id }}"
-              style="--background-: {{ current_user.generated_color }}"
-              class="input-search"
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
             />
-          </div>
-        </div>
-
-        <div class="notes-section">
-          <ul id="notesList">
-            {% if notes %} {% for note in notes %}
-            <li
-              class="note-item"
-              data-note-id="{{ note.id }}"
-              data-tag-color="{{ note.tag.color }}"
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ current_user.generated_color }}"
+              >{{ current_user.first_name[0] }}</i
             >
-              <h3 style="--bookmark-: {{ note.tag.color }}">
-                {{ note.title.split('\t')[0][:10] }}
-              </h3>
-              <p id="noteContent">
-                {{ note.content.split('\n')[0][:60] | safe |striptags}}
-              </p>
-
-              <hr />
-            </li>
-            {% endfor %} {% else %}
-            <p class="no-notes" style="--bookmark-: {{ tag.color }}">
-              No Available notes In this Bookmark
-            </p>
             {% endif %}
-          </ul>
-          <div class="add-note-toggle">
-            <a
-              href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
-              class="toggle-add-note"
-              style="--background-: {{ current_user.generated_color }}"
-              >+</a
-            >
-          </div>
-        </div>
-      </div>
+          </figure>
 
-      <div class="right-container">
-        <div
-          class="return-left-container"
-          id="returnLeftContainer"
-          style="--background-: {{ current_user.generated_color }}"
-        >
-          <i class="bx bx-sidebar" data-tooltip="Open sidebar"></i>
-        </div>
-        <div class="edit">
-          <a
-            href="{{ url_for('views.edit_note', note_id=note.id) }}"
-            data-tooltip="Edit note"
-          >
-            <i
-              class="fas fa-edit"
-              style="--background-: {{ current_user.generated_color }}"
-            ></i>
-          </a>
-        </div>
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
 
-        <div class="note-view">
-          {% if current_user.email_verified %}
-          <div class="menu">
-            <i
-              class="fas fa-bars"
-              id="openModalBtn"
-              style="--background-: {{ current_user.generated_color }}"
-            ></i>
-          </div>
-          {% endif %}
-
-          <div class="not-moving">
-            <p class="note-time">
-              {% if note.updated_at %} Updated at: {{
-              note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %} Created
-              at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }} {% endif %}
+            <p class="title" title="{{ current_user.bio }}">
+              {% if current_user.bio %} {{ current_user.bio }} {% else %}
+              <a
+                href="{{ url_for('views.settings') }}"
+                style="color: #f1c40f; text-decoration: underline"
+              >
+                Add your bio
+              </a>
+              {% endif %}
             </p>
+          </div>
 
-            <div class="favorite">
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Notifications on"></i>
+                <span id="notificationBadge" class="badge">0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="Notifications off"></i>
+                {% endif %}
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
+              </a>
+            </li>
+
+          </ul>
+        </div>
+      </aside>
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link">
+                <p>
+                  <i class="bx bx-home-alt-2"></i>
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              <form
+                action="{{ url_for('views.delete_note', note_id=note.id) }}"
+                method="post"
+                onsubmit="return confirm('Are you sure you want to delete this note?');"
+              >
+                <button
+                  class="del"
+                  style="--background-: {{ current_user.generated_color }}"
+                  type="submit"
+                >
+                  <i class="bx bx-trash" style="color: red"></i>
+                </button>
+              </form>
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.edit_note', note_id=note.id) }}"
+                data-tooltip="Edit note"
+              >
+                <i
+                  class="fas fa-edit"
+                  style="--background-: {{ current_user.generated_color }}"
+                ></i>
+              </a>
+            </li>
+
+            <li class="navbar-item">
               <button
                 id="favoriteButton{{ note.id }}"
                 class="favorite-btn {{ 'favorite' if note.is_favorite else 'not-favorite' }}"
@@ -172,114 +238,129 @@
                 <i class="bx bx-star"></i>
                 {% endif %}
               </button>
-            </div>
-
-            <h1 id="noteTitle" style="--bookmark-: {{ note.tag.color }}">
-              <span>Title: </span> {{ note.title }}
-            </h1>
-          </div>
-          <p style="--bookmark-: {{ note.tag.color }}">Content:</p>
-          <pre id="noteContent">{{ note.content | safe }}</pre>
-          <div id="editor">{{ note.content | safe}}</div>
-          <i class="fa-solid fa-sidebar-flip" id="returnIcon"></i>
-        </div>
-      </div>
-    </div>
-
-    <div id="menuModal" class="modal">
-      <div class="modal-content">
-        <span
-          class="close"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <ul>
-          <li>
-            <button
-              id="addFavoriteButton"
-              style="--background-: {{ current_user.generated_color }}"
-              data-note-id="{{ note.id }}"
-            >
-              <i class="bx bxs-star"></i> ADD FAVORITE
-              <i class="bx bxs-star"></i>
-            </button>
-          </li>
-          <li>
-            <a
-              href="{{ url_for('views.edit_note', note_id=note.id) }}"
-              style="--background-: {{ current_user.generated_color }}"
-            >
-              <i class="bx bxs-edit"></i> EDIT NOTE <i class="bx bxs-edit"></i>
-            </a>
-          </li>
-          <li>
-            <form
-              action="{{ url_for('views.delete_note', note_id=note.id) }}"
-              method="post"
-              onsubmit="return confirm('Are you sure you want to delete this note?');"
-            >
+            </li>
+            <li class="navbar-item">
               <button
-                class="del"
+                id="addToDoButton"
                 style="--background-: {{ current_user.generated_color }}"
-                type="submit"
+                data-note-id="{{ note.id }}"
               >
-                <i class="bx bx-trash"></i> DELETE <i class="bx bx-trash"></i>
+                <i class="bx bxs-check-circle"></i>
               </button>
-            </form>
-          </li>
-          <li>
-            <button
-              id="addToDoButton"
-              style="--background-: {{ current_user.generated_color }}"
-              data-note-id="{{ note.id }}"
-            >
-              <i class="bx bxs-check-circle"></i> Add to To-Dos
-              <i class="bx bxs-check-circle"></i>
-            </button>
-          </li>
-          <li>
-            <button
-              style="--background-: {{ current_user.generated_color }}"
-              id="downloadTextButton"
-            >
-              <i class="bx bxs-share-alt"></i> SHARE
-              <i class="bx bxs-share-alt"></i>
-            </button>
-          </li>
-        </ul>
+            </li>
+            <li class="navbar-item">
+              <i class="bx bx-copy" id="copyIcon" style="cursor: pointer"></i>
+            </li>
+            <li class="navbar-item">
+              <i
+                style="cursor: pointer"
+                class="fas fa-bars"
+                id="openModalBtn"
+                style="--background-: {{ current_user.generated_color }}"
+              ></i>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="view_note">
+          <!-- <section class="testimonials">
+            <p class="section-title">
+              OTHER NOTES
+            </p>
+          </section> -->
+          <header class="h2 article-title" style="--bookmark-: {{ tag.color }}">
+            <h2>Title: <span>{{ note.title }}</span></h2>
+          </header>
+          <p>Content:</p>
+          <div id="editor">{{ note.content | safe}}</div>
+        </article>
+        <!-- <div id="modal" class="modal">
+          <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <div class="notes-section">
+              <ul id="notesList">
+                {% if notes %} {% for note in notes %}
+                <li
+                  class="note-item"
+                  data-note-id="{{ note.id }}"
+                  data-tag-color="{{ note.tag.color }}"
+                >
+                  <h3 style="--bookmark-: {{ note.tag.color }}">
+                    {{ note.title.split('\t')[0][:10] }}
+                  </h3>
+                  <p id="noteContent">
+                    {{ note.content.split('\n')[0][:60] | safe |striptags }}
+                  </p>
+                  <hr />
+                </li>
+                {% endfor %} {% else %}
+                <p class="no-notes" style="--bookmark-: {{ tag.color }}">
+                  No Available notes In this Bookmark
+                </p>
+                {% endif %}
+              </ul>
+              <div class="add-note-toggle">
+                <a
+                  href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
+                  class="toggle-add-note"
+                  style="--background-: {{ current_user.generated_color }}"
+                  >+</a
+                >
+              </div>
+            </div>
+          </div>
+        </div> -->
       </div>
-    </div>
+    </main>
 
-    <!-- Download Format -->
-    <div id="fileTypeModal" class="modal2" style="display: none">
-      <div class="modal-content2">
-        <span
-          class="close2"
-          id="span"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <ul>
-          <li><label for="fileTypeSelect">CHOOSE FILE TYPE:</label></li>
-          <select id="fileTypeSelect">
-            <option value="txt">Text (.txt)</option>
-            <option value="docx">Word (.docx)</option>
-            <option value="pdf">PDF (.pdf)</option>
-            <option value="html">HTML (.html)</option>
-          </select>
-          <br /><br />
-          <li>
-            <button
-              id="downloadFileButton"
-              style="--background-: {{ current_user.generated_color }}"
-            >
-              DOWNLOAD
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
 
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
     <script src="{{ url_for('static', filename='js/view_note.js') }}"></script>
   </body>
 </html>

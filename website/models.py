@@ -152,6 +152,44 @@ class User(db.Model, UserMixin):
             },
         }
 
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    edited_at = db.Column(db.DateTime, onupdate=datetime.utcnow)  
+    is_deleted = db.Column(db.Boolean, default=False)  
+    reply_to_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)  
+    reactions = db.Column(db.JSON, default=dict)  
+
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    receiver = db.relationship('User', foreign_keys=[receiver_id])
+    reply_to = db.relationship('Message', remote_side=[id], backref='replies', foreign_keys=[reply_to_id])
+
+class Friendship(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Who sent the request
+    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Who received the request
+    is_accepted = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+    friend = db.relationship('User', foreign_keys=[friend_id])
+
+class Following(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User who is following
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User being followed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    follower = db.relationship('User', foreign_keys=[follower_id])
+    followed = db.relationship('User', foreign_keys=[followed_id])
+
+
+
 
 class PushPreferences(db.Model):
     id = db.Column(db.Integer, primary_key=True)
