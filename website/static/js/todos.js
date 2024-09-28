@@ -1,34 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const rightContainer = document.querySelector(".right-container");
-  const userTimezone = rightContainer.getAttribute("data-user-timezone");
-  const userName = rightContainer.getAttribute("data-user-fullname");
-
-  function updateGreeting() {
-    const greetingElement = document.querySelector(".left");
-    const datetimeElement = document.querySelector(".right");
-    const now = moment().tz(userTimezone);
-    const hours = now.hours();
-    let greeting = "Hello";
-
-    if (hours < 12) {
-      greeting = "Good Morning";
-    } else if (hours < 18) {
-      greeting = "Good Afternoon";
-    } else {
-      greeting = "Good Evening";
-    }
-
-    const dateString = now.format("DD/MM/YYYY");
-    const timeString = now.format("HH:mm");
-
-    greetingElement.textContent = `${greeting}, ${userName}!`;
-    datetimeElement.textContent = `${dateString} ${timeString}`;
-  }
-
-  setInterval(updateGreeting, 1000);
-  updateGreeting();
-});
-document.addEventListener("DOMContentLoaded", function () {
   function updateTodoCount() {
     fetch("/get_todo_count")
       .then((response) => response.json())
@@ -190,58 +160,58 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((error) => console.error("Error fetching todos:", error));
   }
-
   function renderTodos(todos) {
-    todosList.innerHTML = "";
+    todosList.innerHTML = ""; // Clear the current list
+    if (todos.length === 0) {
+      const noNotesMessage = document.createElement('p');
+      noNotesMessage.classList.add('no-notes');
+      noNotesMessage.textContent = "No Available To-Do";
+      todosList.appendChild(noNotesMessage);
+      return;
+    }
+  
     todos.forEach((todo) => {
       const li = document.createElement("li");
-      li.classList.add("todo-item");
+      li.classList.add("note-item");
       li.style.setProperty("--background-", todo.color);
       li.setAttribute("data-note-id", todo.id);
-
-      // Process the content
-      const firstLine = processTodoContent(todo.content);
-
+      const truncatedTitle = todo.title.split('\n')[0].slice(0, 13);
+      const dueDate = todo.due_date ? new Date(todo.due_date).toLocaleDateString() : "";
       li.innerHTML = `
-        <input
-          type="checkbox"
-          ${todo.is_completed ? "checked" : ""}
-          onclick="updateTodoStatus(${todo.id}, this.checked)"
-          id="todo-${todo.id}"
-        />
-        <label for="todo-${todo.id}" style="--background-: ${todo.color};">
-          <span class="todo-title">${todo.title}</span>
-          ${todo.due_date ? `<span class="due-date">Due: ${new Date(todo.due_date).toLocaleDateString()}</span>` : ""}
-        </label>
-        <p class="todo-content">${firstLine}</p>
+        <div class="note-header">
+          <h3>${truncatedTitle}</h3>
+          ${todo.due_date ? `
+            <span class="note-tag">
+              <input type="checkbox"
+                ${todo.is_completed ? "checked" : ""}
+                onclick="updateTodoStatus(${todo.id}, this.checked)"
+                id="todo-${todo.id}" />
+              Due: ${dueDate}
+            </span>
+          ` : ""}
+        </div>
+        <pre class="note-content">${processTodoContent(todo.content)}</pre>
         <div class="todo-actions">
           <a href="/todos/edit/${todo.id}" class="edit-button" style="--background-: ${todo.color};">Edit</a>
-          <form action="/delete_todo/${todo.id}" method="post" onsubmit="return confirm('Are you sure you want to delete this To-Do?');">
+          <form action="/todos/delete/${todo.id}" method="post" onsubmit="return confirm('Are you sure you want to delete this To-Do?');">
             <button type="submit" class="delete-button" style="--background-: ${todo.color};">Delete</button>
           </form>
         </div>
       `;
-      li.addEventListener("click", function (event) {
-        if (!event.target.closest("input, a, button, form")) {
-          const noteId = this.getAttribute("data-note-id");
-          window.location.href = `/todo_viewer/${noteId}`;
-        }
-      });
-
+  
+      // Add the list item to the list
       todosList.appendChild(li);
+  
+      // Create the separator line
       const separator = document.createElement("hr");
       separator.style.setProperty("--background-", todo.color);
       todosList.appendChild(separator);
-
-      li.addEventListener("mouseenter", function () {
-        separator.style.borderColor = todo.color;
-      });
-
-      li.addEventListener("mouseleave", function () {
-        separator.style.borderColor = "#fff";
-      });
     });
   }
+  
+
+  
+
 
   function processTodoContent(content) {
     const lines = content.replace(/<br\s*\/?>/gi, '\n').split('\n');

@@ -83,8 +83,9 @@ def on_leave(data):
     leave_room(room)
 @socketio.on('reply_message')
 def handle_reply_message(data):
-    reply_to_id = data['reply_to_id']
+    reply_to_id = data['reply_to']
     content = data['content']
+    
     new_message = Message(
         sender_id=data['sender_id'],
         receiver_id=data['receiver_id'],
@@ -93,8 +94,12 @@ def handle_reply_message(data):
     )
     db.session.add(new_message)
     db.session.commit()
-    # Emit new message to the receiver
-    socket.emit('new_message', new_message.to_dict(), room=new_message.receiver_id)
+    
+    message_data = new_message.to_dict()
+    # Emit new message with reply reference to both sender and receiver
+    socket.emit('new_message', message_data, room=new_message.receiver_id)
+    socket.emit('new_message', message_data, room=new_message.sender_id)
+
 @socketio.on('add_reaction')
 def handle_add_reaction(data):
     message_id = data['message_id']
@@ -107,8 +112,10 @@ def handle_add_reaction(data):
         else:
             message.reactions[reaction] = 1  # Initialize reaction count
         db.session.commit()
-        # Emit updated message with reactions
+        # Emit updated reactions to both sender and receiver
         socket.emit('reaction_added', {'message_id': message.id, 'reactions': message.reactions}, room=message.receiver_id)
+        socket.emit('reaction_added', {'message_id': message.id, 'reactions': message.reactions}, room=message.sender_id)
+
 @socketio.on('edit_message')
 def handle_edit_message(data):
     message_id = data['message_id']
@@ -118,8 +125,10 @@ def handle_edit_message(data):
     if message:
         message.content = new_content
         db.session.commit()
-        # Emit the edited message to the chat
+        # Emit the edited message to both sender and receiver
         socket.emit('message_edited', {'message_id': message.id, 'new_content': new_content}, room=message.receiver_id)
+        socket.emit('message_edited', {'message_id': message.id, 'new_content': new_content}, room=message.sender_id)
+
 @socketio.on('delete_message')
 def handle_delete_message(data):
     message_id = data['message_id']
@@ -127,9 +136,9 @@ def handle_delete_message(data):
     if message:
         message.is_deleted = True
         db.session.commit()
-        # Notify other user that the message was deleted
-        socket.emit('message_deleted', {'message_id': message_id}, room=message.receiver_id)
-
+        # Notify both sender and receiver about the deletion
+        socketio.emit('message_deleted', {'message_id': message_id}, room=message.receiver_id)
+        socketio.emit('message_deleted', {'message_id': message_id}, room=message.sender_id)
 
 
 # Run the SocketIO app

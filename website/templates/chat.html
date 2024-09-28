@@ -60,56 +60,58 @@
               </div>
             </div>
             <div class="card-body msg_card_body">
-              {% for message in messages %}
-              <div class="d-flex {% if message.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %} mb-4">
-                  {% if message.sender_id == current_user.id %}
-                  <div class="msg-wrapper" onclick="toggleOptions(event)">
-                      <div class="msg_cotainer_send message-content">
-                          <pre class="message-text">{{ message.content }}</pre>
-                      </div>
-                      <small>{{ message.local_timestamp.strftime('%Y-%m-%d %I:%M %p') }}</small>
-                      <!-- Options Menu -->
-                      <div class="options-menu" style="display: none;">
-                          <button onclick="editMessage({{ message.id }})">Edit</button>
-                          <button onclick="deleteMessage({{ message.id }})">Delete</button>
-                          <button onclick="replyMessage({{ message.id }})">Reply</button>
-                          <button onclick="reactToMessage({{ message.id }})">React</button>
-                      </div>
-                  </div>
-                  <div class="img_cont_msg">
-                      {% if current_user.profile_picture %}
-                      <img src="/static/profile_pics/{{ current_user.profile_picture }}" class="rounded-circle user_img_msg" />
-                      {% else %}
-                      <i class="fas fa-5x" style="--background-: {{ current_user.generated_color }}">{{ current_user.first_name[0] }}</i>
-                      {% endif %}
-                  </div>
-                  {% else %}
-                  <!-- Receiver Message (Received) -->
-                  <div class="img_cont_msg">
-                      {% if receiver.profile_picture %}
-                      <img src="/static/profile_pics/{{ receiver.profile_picture }}" class="rounded-circle user_img_msg" />
-                      {% else %}
-                      <i class="fas fa-5x" style="--background-: {{ receiver.generated_color }}">{{ receiver.first_name[0] }}</i>
-                      {% endif %}
-                  </div>
-                  <div class="msg-wrapper" onclick="toggleOptions(event)">
-                      <div class="msg_cotainer message-content">
-                          <pre class="message-text">{{ message.content }}</pre>
-                      </div>
-                      <small>{{ message.local_timestamp.strftime('%Y-%m-%d %I:%M %p') }}</small>
-                      <!-- Options Menu -->
-                      <div class="options-menu" style="display: none;">
-                          <button onclick="editMessage({{ message.id }})">Edit</button>
-                          <button onclick="deleteMessage({{ message.id }})">Delete</button>
-                          <button onclick="replyMessage({{ message.id }})">Reply</button>
-                          <button onclick="reactToMessage({{ message.id }})">React</button>
-                      </div>
-                  </div>
-                  {% endif %}
-              </div>
-              {% endfor %}
-          </div>
-          
+                {% for message in messages %}
+                <div class="d-flex {% if message.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %} mb-4 message-container" data-message-id="{{ message.id }}">
+                    {% if message.sender_id == current_user.id %}
+                    <div class="msg-wrapper" onclick="toggleOptions(event)">
+                        <div class="msg_cotainer_send message-content">
+                            <pre class="message-text">{{ message.content }}</pre>
+                        </div>
+                        <small>{{ message.local_timestamp.strftime('%Y-%m-%d %I:%M %p') }}</small>
+            
+                        <!-- Options Menu -->
+                        <div class="options-menu" style="display: none;">
+                            <button onclick="editMessage({{ message.id }})">Edit</button>
+                            <button onclick="deleteMessage({{ message.id }})">Delete</button>
+                            <button onclick="replyMessage({{ message.id }})">Reply</button>
+                            <button onclick="reactToMessage({{ message.id }}, event)">React</button>
+                        </div>
+                    </div>
+                    <div class="img_cont_msg">
+                        {% if current_user.profile_picture %}
+                        <img src="/static/profile_pics/{{ current_user.profile_picture }}" class="rounded-circle user_img_msg" />
+                        {% else %}
+                        <i class="fas fa-5x" style="--background-: {{ current_user.generated_color }}">{{ current_user.first_name[0] }}</i>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <!-- Receiver Message (Received) -->
+                    <div class="img_cont_msg">
+                        {% if receiver.profile_picture %}
+                        <img src="/static/profile_pics/{{ receiver.profile_picture }}" class="rounded-circle user_img_msg" />
+                        {% else %}
+                        <i class="fas fa-5x" style="--background-: {{ receiver.generated_color }}">{{ receiver.first_name[0] }}</i>
+                        {% endif %}
+                    </div>
+                    <div class="msg-wrapper" onclick="toggleOptions(event)">
+                        <div class="msg_cotainer message-content">
+                            <pre class="message-text">{{ message.content }}</pre>
+                        </div>
+                        <small>{{ message.local_timestamp.strftime('%Y-%m-%d %I:%M %p') }}</small>
+            
+                        <!-- Options Menu -->
+                        <div class="options-menu" style="display: none;">
+                            <button onclick="editMessage({{ message.id }})">Edit</button>
+                            <button onclick="deleteMessage({{ message.id }})">Delete</button>
+                            <button onclick="replyMessage({{ message.id }})">Reply</button>
+                            <button onclick="reactToMessage({{ message.id }}, event)">React</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
 
             <div class="card-footer">
               <form id="message-form" class="message-form">
@@ -152,280 +154,257 @@
         });
       });
     </script>
-    <script>
-      var socket = io();
-      socket.emit('join', { receiver_id: {{ receiver.id }} });
+  <script>
+    var socket = io();
+    socket.emit('join', { receiver_id: {{ receiver.id }} });
 
-      var typingTimeout;
-      var typingIndicatorDuration = 2000; // 2 seconds delay before stop typing is emitted
+    var typingTimeout;
+    var typingIndicatorDuration = 2000; // 2 seconds delay before stop typing is emitted
 
-      // Function to scroll to the bottom of the chat box
-      function scrollToBottom() {
-          var messageBox = document.querySelector('.msg_card_body');
-          messageBox.scrollTop = messageBox.scrollHeight;
-      }
+    // Function to scroll to the bottom of the chat box
+    function scrollToBottom() {
+        var messageBox = document.querySelector('.msg_card_body');
+        messageBox.scrollTop = messageBox.scrollHeight;
+    }
 
-      // Handle input event (typing) in real-time
-      document.getElementById('message-input').addEventListener('input', function() {
-          var messageContent = this.value.trim();
+    // Typing indicator handler
+    document.getElementById('message-input').addEventListener('input', function() {
+        var messageContent = this.value.trim();
 
-          if (messageContent) {
-              // Emit 'typing' when there is text in the textarea
-              socket.emit('typing', { receiver_id: {{ receiver.id }} });
+        if (messageContent) {
+            socket.emit('typing', { receiver_id: {{ receiver.id }} });
+            clearTimeout(typingTimeout);
+            document.getElementById('typing-indicator').style.display = 'flex';
 
-              // Clear the previous timeout to avoid prematurely stopping typing
-              clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(function() {
+                socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
+                document.getElementById('typing-indicator').style.display = 'none';
+            }, typingIndicatorDuration);
+        } else {
+            socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
+            clearTimeout(typingTimeout);
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+    });
 
-              // Show typing indicator immediately
-              document.getElementById('typing-indicator').style.display = 'flex';
+    document.getElementById('message-input').addEventListener('focus', function() {
+        if (this.value.trim()) {
+            socket.emit('typing', { receiver_id: {{ receiver.id }} });
+            document.getElementById('typing-indicator').style.display = 'flex';
+        }
+    });
 
-              // Set a new timeout to emit 'stop_typing' after a delay when user stops typing
-              typingTimeout = setTimeout(function() {
-                  socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
-                  document.getElementById('typing-indicator').style.display = 'none'; // Hide typing indicator after delay
-              }, typingIndicatorDuration);
-          } else {
-              // Emit 'stop_typing' immediately if the textarea is cleared
-              socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
-              clearTimeout(typingTimeout);  // Clear any existing timeout
-              document.getElementById('typing-indicator').style.display = 'none'; // Hide typing indicator
-          }
-      });
+    document.getElementById('message-input').addEventListener('blur', function() {
+        socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
+        clearTimeout(typingTimeout);
+        document.getElementById('typing-indicator').style.display = 'none';
+    });
 
-      // Show typing indicator when the textarea is focused
-      document.getElementById('message-input').addEventListener('focus', function() {
-          if (this.value.trim()) {
-              socket.emit('typing', { receiver_id: {{ receiver.id }} });
-              document.getElementById('typing-indicator').style.display = 'flex'; // Ensure indicator is shown when focused
-          }
-      });
+    // Listen for typing and stop_typing events
+    socket.on('typing', function(data) {
+        if (data.sender_id !== {{ current_user.id }}) {
+            var typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.textContent = `${data.sender_name} is typing...`;
+            typingIndicator.style.display = 'block';
+        }
+    });
 
-      // Emit 'stop_typing' when the user moves away from the textarea (blur event)
-      document.getElementById('message-input').addEventListener('blur', function() {
-          socket.emit('stop_typing', { receiver_id: {{ receiver.id }} });
-          clearTimeout(typingTimeout);  // Clear any existing timeout
-          document.getElementById('typing-indicator').style.display = 'none'; // Hide typing indicator
-      });
+    socket.on('stop_typing', function(data) {
+        if (data.sender_id !== {{ current_user.id }}) {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+    });
 
-      // Listen for typing events from the server
-      socket.on('typing', function(data) {
-          if (data.sender_id !== {{ current_user.id }}) {
-              var typingIndicator = document.getElementById('typing-indicator');
-              typingIndicator.textContent = `${data.sender_name} is typing...`;
-              typingIndicator.style.display = 'block';
-          }
-      });
+    // Handle form submission to send messages
+    document.getElementById('message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var messageInput = document.getElementById('message-input');
+        var messageContent = messageInput.value.trim();
+        if (!messageContent) return;
 
-      // Listen for stop typing events from the server
-      socket.on('stop_typing', function(data) {
-          if (data.sender_id !== {{ current_user.id }}) {
-              document.getElementById('typing-indicator').style.display = 'none';
-          }
-      });
+        var messageId = Date.now(); // Create a unique message ID
+        var timestamp = new Date().toISOString(); // Create timestamp
 
-      // Handle form submission to send messages
-      document.getElementById('message-form').addEventListener('submit', function(event) {
-          event.preventDefault();
-          var messageInput = document.getElementById('message-input');
-          var messageContent = messageInput.value.trim();
-          if (!messageContent) return;
+        socket.emit('send_message', {
+            receiver_id: {{ receiver.id }},
+            content: messageContent,
+            id: messageId,
+            timestamp: timestamp
+        });
 
-          var messageId = Date.now(); // Create a unique message ID
-          var timestamp = new Date().toISOString(); // Create timestamp
+        appendMessage({
+            id: messageId,
+            sender_id: {{ current_user.id }},
+            sender_name: 'You',
+            content: messageContent,
+            timestamp: timestamp
+        });
 
-          // Emit the message to the server
-          socket.emit('send_message', {
-              receiver_id: {{ receiver.id }},
-              content: messageContent,
-              id: messageId,
-              timestamp: timestamp // Send timestamp with message
-          });
+        messageInput.value = '';
+        document.getElementById('typing-indicator').style.display = 'none';
+        scrollToBottom();
+    });
 
-          // Append the message immediately to the chat window
-          appendMessage({
-              id: messageId,
-              sender_id: {{ current_user.id }},
-              sender_name: 'You',
-              content: messageContent,
-              timestamp: timestamp // Use the actual timestamp
-          });
+    // Listen for received messages
+    socket.on('receive_message', function(data) {
+        if (data.sender_id !== {{ current_user.id }}) {
+            appendMessage(data);
+            scrollToBottom();
+        }
+    });
 
-          // Clear the input and hide typing indicator
-          messageInput.value = '';
-          document.getElementById('typing-indicator').style.display = 'none'; // Hide typing indicator
+    // Format timestamp for display
+    function formatTimestamp(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date)) return "Invalid Date";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = date.getHours() % 12 || 12;
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        const period = date.getHours() >= 12 ? 'PM' : 'AM';
+        return `${year}-${month}-${day} ${hour}:${minute} ${period}`;
+    }
 
-          // Scroll to the bottom after sending
-          scrollToBottom();
-      });
+    // Append messages to the chat box
+    function appendMessage(data) {
+        var messageBox = document.querySelector('.msg_card_body');
+        var existingMessages = messageBox.getElementsByClassName('message-container');
 
-      // Listen for received messages
-      socket.on('receive_message', function(data) {
-          if (data.sender_id !== {{ current_user.id }}) {
-              appendMessage(data); // Append received message immediately
-              scrollToBottom(); // Scroll to the bottom after receiving a message
-          }
-      });
+        // Prevent duplicate messages
+        for (var i = 0; i < existingMessages.length; i++) {
+            if (existingMessages[i].dataset.messageId == data.id) return;
+        }
 
-      // Format timestamp for display
-      function formatTimestamp(dateString) {
-          const date = new Date(dateString);
-          if (isNaN(date)) {
-              return "Invalid Date"; // Return an error message if the date is invalid
-          }
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          const hour = date.getHours() % 12 || 12;
-          const minute = String(date.getMinutes()).padStart(2, '0');
-          const period = date.getHours() >= 12 ? 'PM' : 'AM';
+        var messageDiv = document.createElement('div');
+        messageDiv.classList.add('d-flex', 'mb-4', 'message-container');
+        messageDiv.dataset.messageId = data.id;
 
-          return `${year}-${month}-${day} ${hour}:${minute} ${period}`;
-      }
-
-      // Function to append messages to the chat box
-      function appendMessage(data) {
-          var messageBox = document.querySelector('.msg_card_body');
-          var existingMessages = messageBox.getElementsByClassName('message-container');
-
-          // Check for duplicate messages
-          for (var i = 0; i < existingMessages.length; i++) {
-              if (existingMessages[i].dataset.messageId == data.id) {
-                  return; // Exit if message already exists
-              }
-          }
-
-          // Create a message container
-          var messageDiv = document.createElement('div');
-          messageDiv.classList.add('d-flex', 'mb-4', 'message-container');
-          messageDiv.dataset.messageId = data.id;
-
-          // Handle message display based on sender
-          if (data.sender_id === {{ current_user.id }}) {
-              messageDiv.classList.add('justify-content-end');
-              messageDiv.innerHTML = `
-                  <div class="msg-wrapper">
-                      <div class="msg_cotainer_send message-content">
-                          <pre class="message-text">${data.content}</pre>
-                      </div>
-                      <small>${formatTimestamp(data.timestamp)}</small>
-                  </div>
-                  <div class="img_cont_msg">
+        if (data.sender_id === {{ current_user.id }}) {
+            messageDiv.classList.add('justify-content-end');
+            messageDiv.innerHTML = `
+                <div class="msg-wrapper">
+                    <div class="msg_cotainer_send message-content">
+                        <pre class="message-text">${data.content}</pre>
+                    </div>
+                    <small>${formatTimestamp(data.timestamp)}</small>
+                </div>
+                <div class="img_cont_msg">
                     {% if current_user.profile_picture %}
                     <img src="/static/profile_pics/{{ current_user.profile_picture }}" class="rounded-circle user_img_msg" />
                     {% else %}
                     <i class="fas fa-5x" style="--background-: {{ current_user.generated_color }}">{{ current_user.first_name[0] }}</i>
                     {% endif %}
-                  </div>
-              `;
-          } else {
-              messageDiv.classList.add('justify-content-start');
-              messageDiv.innerHTML = `
-                  <div class="img_cont_msg">
+                </div>
+            `;
+        } else {
+            messageDiv.classList.add('justify-content-start');
+            messageDiv.innerHTML = `
+                <div class="img_cont_msg">
                     {% if receiver.profile_picture %}
                     <img src="/static/profile_pics/{{ receiver.profile_picture }}" class="rounded-circle user_img_msg" />
                     {% else %}
                     <i class="fas fa-5x" style="--background-: {{ receiver.generated_color }}">{{ receiver.first_name[0] }}</i>
                     {% endif %}
-                  </div>
-                  <div class="msg-wrapper">
-                      <div class="msg_cotainer message-content">
-                          <pre class="message-text">${data.content}</pre>
-                      </div>
-                      <small>${formatTimestamp(data.timestamp)}</small>
-                  </div>
-              `;
-          }
+                </div>
+                <div class="msg-wrapper">
+                    <div class="msg_cotainer message-content">
+                        <pre class="message-text">${data.content}</pre>
+                    </div>
+                    <small>${formatTimestamp(data.timestamp)}</small>
+                </div>
+            `;
+        }
 
-          // Append the new message to the chat box
-          messageBox.appendChild(messageDiv);
-          scrollToBottom(); // Scroll to the bottom after appending
-      }
+        messageBox.appendChild(messageDiv);
+        scrollToBottom();
+    }
 
-      // Cleanup on page unload
-      window.addEventListener('beforeunload', function() {
-          socket.emit('leave', { receiver_id: {{ receiver.id }} });
-      });
+    // Toggle message options menu
+    function toggleOptions(event) {
+        event.stopPropagation();
+        const messageElement = event.currentTarget;
+        const optionsMenu = messageElement.querySelector('.options-menu');
+        document.querySelectorAll('.options-menu').forEach(menu => menu.style.display = 'none');
+        optionsMenu.style.display = optionsMenu.style.display === 'block' ? 'none' : 'block';
+    }
 
-      // Scroll to the bottom on page load
-      window.addEventListener('load', function() {
-          scrollToBottom();
-      });
-    </script>
-<script>
-  // Function to toggle options
-  function toggleOptions(event) {
-      event.stopPropagation();
-      const messageElement = event.currentTarget;
-      const optionsMenu = messageElement.querySelector('.options-menu');
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.options-menu').forEach(menu => menu.style.display = 'none');
+    });
 
-      // Toggle visibility
-      optionsMenu.style.display = (optionsMenu.style.display === 'none' || optionsMenu.style.display === '') ? 'block' : 'none';
-  }
+    let editingMessageId = null;
 
-  // Hide options when clicking outside
-  document.addEventListener('click', function() {
-      const optionsMenus = document.querySelectorAll('.options-menu');
-      optionsMenus.forEach(menu => menu.style.display = 'none');
-  });
+    function editMessage(messageId) {
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"] .message-text`);
+        const originalContent = messageElement.textContent.trim();
 
-  // Edit message
-  function editMessage(messageId) {
-      const newContent = prompt("Edit your message:");
-      if (newContent) {
-          // Emit event to server to edit the message
-          socket.emit('edit_message', { message_id: messageId, content: newContent });
-      }
-  }
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
 
-  // Delete message
-  function deleteMessage(messageId) {
-      if (confirm("Are you sure you want to delete this message?")) {
-          socket.emit('delete_message', { message_id: messageId });
-      }
-  }
+        messageInput.value = originalContent;
+        messageInput.focus();
+        editingMessageId = messageId;
+        sendButton.textContent = "Save";
 
-  // Reply to message
-  function replyMessage(messageId) {
-      const replyText = prompt("Reply to the message:");
-      if (replyText) {
-          socket.emit('send_message', { receiver_id: {{ receiver.id }}, content: replyText, reply_to: messageId });
-      }
-  }
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = "Cancel";
+        cancelButton.id = "cancel-edit";
+        cancelButton.classList.add('btn', 'btn-secondary');
+        messageInput.parentElement.appendChild(cancelButton);
 
-  // React to message
-  function reactToMessage(messageId) {
-      const reaction = prompt("React to the message with an emoji:");
-      if (reaction) {
-          socket.emit('react_to_message', { message_id: messageId, reaction: reaction });
-      }
-  }
+        sendButton.onclick = function() {
+            const newContent = messageInput.value.trim();
+            if (newContent && newContent !== originalContent) {
+                socket.emit('edit_message', { message_id: editingMessageId, new_content: newContent });
+                messageElement.textContent = newContent;
+            }
+            finishEditing();
+        };
 
-  // Listen for message updates from the server
-  socket.on('message_updated', function(updatedMessage) {
-      updateMessageInUI(updatedMessage);
-  });
+        cancelButton.onclick = function() {
+            finishEditing();
+        };
+    }
 
-  socket.on('message_deleted', function(messageId) {
-      removeMessageFromUI(messageId);
-  });
+    function finishEditing() {
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
 
-  // Function to update the message in UI
-  function updateMessageInUI(updatedMessage) {
-      const messageElement = document.querySelector(`[data-message-id="${updatedMessage.id}"]`);
-      if (messageElement) {
-          const messageTextElement = messageElement.querySelector('.message-text');
-          messageTextElement.textContent = updatedMessage.content;
-          // Optionally, update timestamp or any other data
-      }
-  }
+        messageInput.value = '';
+        sendButton.textContent = "Send";
 
-  // Function to remove the message from UI
-  function removeMessageFromUI(messageId) {
-      const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-      if (messageElement) {
-          messageElement.remove(); // Or any other way to visually indicate deletion
-      }
-  }
+        const cancelButton = document.getElementById('cancel-edit');
+        if (cancelButton) cancelButton.remove();
+
+        editingMessageId = null;
+    }
+
+    function deleteMessage(messageId) {
+        socket.emit('delete_message', { message_id: messageId });
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"] .message-text`);
+        messageElement.textContent = '[This message was deleted]';
+    }
+
+    function replyMessage(messageId) {
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"] .message-text`);
+        const replyContent = messageElement.textContent;
+
+        const messageInput = document.getElementById('message-input');
+        messageInput.value = `Replying to: ${replyContent}\n`;
+        messageInput.focus();
+    }
+
+    // Listen for message edits or deletions
+    socket.on('message_edited', function(data) {
+        const messageElement = document.querySelector(`[data-message-id="${data.message_id}"] .message-text`);
+        messageElement.textContent = data.new_content;
+    });
+
+    socket.on('message_deleted', function(data) {
+        const messageElement = document.querySelector(`[data-message-id="${data.message_id}"] .message-text`);
+        messageElement.textContent = '[This message was deleted]';
+    });
 </script>
 
   </body>

@@ -217,6 +217,7 @@ html {
 
 .msg-wrapper {
   max-width: 70%;
+  position: relative;
 }
 
 .msg_cotainer,
@@ -364,3 +365,15 @@ pre.message-text {
     max-height: 70vh;
   }
 }
+.options-menu {
+  position: absolute;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  display: none;
+  z-index: 100;
+}
+
+
+

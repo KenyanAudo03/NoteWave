@@ -2519,3 +2519,78 @@ textarea.form-input::-webkit-resizer {
   cursor: not-allowed;
   pointer-events: none;
 }
+.todo-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.edit-button,
+.delete-button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button {
+  background-color: #007bff;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+#todosList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.todo-item {
+  background-color: #3c4049;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.todo-item:hover {
+  background-color: var(--background-);
+  transform: translateY(-5px);
+}
+.note-item + hr {
+  border: none;
+  border-top: 1px solid #555;
+  margin: 10px 0;
+}
+#todosList hr {
+  border: none;
+  border-top: 1px solid #555;
+  transition: border-color 0.3s ease;
+}
+
+#todosList li:hover + hr {
+  border-color: #fff;
+}
+
+.notes-list hr {
+  border-color: #555;
+  transition: border-color 0.3s;
+}
+
+#todosList li:hover + hr {
+  border-color: #fff;
+}
+.toggle-add:hover {
+  transform: scale(1.1);
+}

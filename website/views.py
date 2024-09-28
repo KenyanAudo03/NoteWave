@@ -764,7 +764,6 @@ def search_todos():
 
     return jsonify(result)
 
-
 @views.route("/update_todo_status/<int:todo_id>", methods=["POST"])
 @login_required
 def update_todo_status(todo_id):
@@ -782,13 +781,15 @@ def update_todo_status(todo_id):
         return jsonify({"error": "Invalid data"}), 400
 
     todo.is_completed = is_completed
-    todo.updated_at = datetime.utcnow()
+
+    # Make sure to set the updated_at field to an aware datetime
+    todo.updated_at = datetime.now(timezone.utc)  # Use timezone-aware datetime
 
     if is_completed:
         # Mark all subtasks as completed
         for subtask in todo.subtasks:
             subtask.is_completed = True
-            subtask.updated_at = datetime.utcnow()
+            subtask.updated_at = datetime.now(timezone.utc)  # Use timezone-aware datetime
 
     db.session.commit()
 

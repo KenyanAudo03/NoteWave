@@ -360,7 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event.key === "Escape") {
       modal.style.display = "none";
     }
-  });
 });
 
 document.addEventListener("DOMContentLoaded", function () {
