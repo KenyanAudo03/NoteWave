@@ -81,7 +81,7 @@ def on_leave(data):
     receiver_id = data['receiver_id']
     room = f"chat_{min(current_user.id, receiver_id)}_{max(current_user.id, receiver_id)}"
     leave_room(room)
-@socket.on('reply_message')
+@socketio.on('reply_message')
 def handle_reply_message(data):
     reply_to_id = data['reply_to_id']
     content = data['content']
@@ -95,7 +95,7 @@ def handle_reply_message(data):
     db.session.commit()
     # Emit new message to the receiver
     socket.emit('new_message', new_message.to_dict(), room=new_message.receiver_id)
-@socket.on('add_reaction')
+@socketio.on('add_reaction')
 def handle_add_reaction(data):
     message_id = data['message_id']
     reaction = data['reaction']
@@ -109,7 +109,7 @@ def handle_add_reaction(data):
         db.session.commit()
         # Emit updated message with reactions
         socket.emit('reaction_added', {'message_id': message.id, 'reactions': message.reactions}, room=message.receiver_id)
-@socket.on('edit_message')
+@socketio.on('edit_message')
 def handle_edit_message(data):
     message_id = data['message_id']
     new_content = data['content']
@@ -120,7 +120,7 @@ def handle_edit_message(data):
         db.session.commit()
         # Emit the edited message to the chat
         socket.emit('message_edited', {'message_id': message.id, 'new_content': new_content}, room=message.receiver_id)
-@socket.on('delete_message')
+@socketio.on('delete_message')
 def handle_delete_message(data):
     message_id = data['message_id']
     message = Message.query.get(message_id)
