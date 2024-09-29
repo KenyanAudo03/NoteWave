@@ -537,6 +537,7 @@ def search_favorite_notes():
     return jsonify(result)
 
 
+
 @views.route("/favorites")
 @login_required
 def favorites():
@@ -773,27 +774,55 @@ def update_todo_status(todo_id):
         abort(403)
 
     data = request.get_json()
-    if not data or "is_completed" not in data:
+    if not data or "is_completed" not in data or not isinstance(data["is_completed"], bool):
         return jsonify({"error": "Invalid data"}), 400
+    user_timezone = pytz.timezone(current_user.time_zone)
+    current_time = datetime.now(user_timezone)
+    if todo.due_date is not None:
+        if todo.due_date.tzinfo is None:
+            due_date_aware = user_timezone.localize(todo.due_date)
+        else:
+            due_date_aware = todo.due_date.astimezone(user_timezone) 
+        if due_date_aware > current_time and not data["is_completed"]:
+            return jsonify({"error": "Cannot mark as completed; due date has not been reached."}), 400
 
-    is_completed = data.get("is_completed")
-    if not isinstance(is_completed, bool):
-        return jsonify({"error": "Invalid data"}), 400
-
-    todo.is_completed = is_completed
-
-    # Make sure to set the updated_at field to an aware datetime
-    todo.updated_at = datetime.now(timezone.utc)  # Use timezone-aware datetime
-
-    if is_completed:
-        # Mark all subtasks as completed
+    todo.is_completed = data["is_completed"]
+    todo.updated_at = current_time
+    if todo.is_completed:
         for subtask in todo.subtasks:
             subtask.is_completed = True
-            subtask.updated_at = datetime.now(timezone.utc)  # Use timezone-aware datetime
+            subtask.updated_at = current_time  
+    else:
+        for subtask in todo.subtasks:
+            subtask.is_completed = False
+            subtask.updated_at = current_time 
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to update todo status"}), 500
 
-    return jsonify({"message": "To-Do status updated"}), 200
+    return jsonify({"message": "To-Do status updated", "is_completed": todo.is_completed}), 200
+
+@views.route('/delete_subtask/<int:subtask_id>', methods=['POST'])
+@login_required
+def delete_subtask(subtask_id):
+    subtask = Subtask.query.get_or_404(subtask_id)
+    if subtask.parent_todo.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    try:
+        todo_id = subtask.todo_id  
+        db.session.delete(subtask)
+        db.session.commit()
+        flash("Subtask deleted successfully.", "success") 
+        return redirect(url_for('views.todo_viewer', id=todo_id))  # Use 'id' here
+    except Exception as e:
+        db.session.rollback()
+        flash("Failed to delete subtask.", "error") 
+        return redirect(url_for('views.todo_viewer', id=todo_id))  # Use 'id' here
+
 
 
 @views.route("/get_todo_count", methods=["GET"])
@@ -812,13 +841,22 @@ def add_to_do():
     note = Note.query.get(note_id)
 
     if note:
+        existing_to_do = ToDo.query.filter_by(user_id=current_user.id, title=note.title).first()
+        if existing_to_do:
+            return jsonify({"success": False, "message": "Already a to-do."}), 400
+
         user_time_zone = current_user.time_zone
 
         if user_time_zone:
             user_tz = timezone(user_time_zone)
             created_at = datetime.now(user_tz)
+            due_date = created_at.date()
         else:
             created_at = datetime.utcnow()
+            due_date = datetime.utcnow().date()
+        due_date_str = request.json.get("due_date")
+        if due_date_str:
+            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
 
         to_do = ToDo(
             title=note.title,
@@ -826,13 +864,15 @@ def add_to_do():
             user_id=current_user.id,
             is_completed=False,
             created_at=created_at,
+            due_date=due_date 
         )
+
         db.session.add(to_do)
         db.session.commit()
-        flash("To-do added successfully", "success")
-        return jsonify({"success": True}), 200
+        return jsonify({"success": True, "message": "To-do added successfully!"}), 200
     else:
         return jsonify({"success": False, "message": "Note not found."}), 404
+
 
 
 @views.route("/delete_todo/<int:todo_id>", methods=["POST"])
@@ -867,21 +907,32 @@ def delete_todo(todo_id):
 
 
 @views.route("/todos/edit/<int:id>", methods=["GET", "POST"])
+@login_required  
 def edit_todo(id):
-    todo = ToDo.query.get_or_404(id)
+    todo = ToDo.query.get_or_404(id)  
+    user_time_zone = current_user.time_zone  
+
     if request.method == "POST":
-        todo.title = request.form.get("title")
-        todo.content = request.form.get("content")
-        due_date_str = request.form.get("due_date")
+        todo.title = request.form.get("title") 
+        todo.content = request.form.get("content") 
+        due_date_str = request.form.get("due_date") 
+
         if due_date_str:
             todo.due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
         else:
             todo.due_date = None
+        if user_time_zone:
+            user_tz = timezone(user_time_zone)
+            todo.updated_at = datetime.now(user_tz)  
+        else:
+            todo.updated_at = datetime.utcnow() 
 
-        db.session.commit()
-        return redirect(url_for("views.show_todo_page"))
+        db.session.commit()  
+        flash("To-do updated successfully!", "success")  # Flash success message
+        return redirect(url_for("views.show_todo_page"))  # Redirect to the todo page
 
-    return render_template("edit_todo.html", todo=todo)
+    return render_template("edit_todo.html", todo=todo)  # Render the edit page
+
 
 
 @views.route("/add_todo_page", methods=["GET", "POST"])
@@ -893,7 +944,6 @@ def add_todo_page():
         due_date = request.form.get("due_date")
         due_date = datetime.strptime(due_date, "%Y-%m-%d") if due_date else None
         user_time_zone = current_user.time_zone
-
         if user_time_zone:
             user_tz = timezone(user_time_zone)
             created_at = datetime.now(user_tz)
@@ -905,24 +955,29 @@ def add_todo_page():
             content=content,
             user_id=current_user.id,
             is_completed=False,
-            created_at=datetime.utcnow(),
+            created_at=created_at,  
+            updated_at=None,       
             due_date=due_date,
         )
+        
         db.session.add(new_todo)
         db.session.commit()
         flash("To-do added successfully", "success")
 
+        # Notification logic
         if current_user.push_preferences and current_user.push_preferences.new_message:
             notification = Notification(
                 user_id=current_user.id,
-                message=f"New To-do added {title}",
+                message=f"New To-do added: {title}",
                 created_at=created_at,
             )
             db.session.add(notification)
             db.session.commit()
+
         return redirect(url_for("views.show_todo_page"))
 
     return render_template("add_todo.html")
+
 
 
 @views.route("/update_tag/<int:tag_id>", methods=["POST"])

@@ -8,6 +8,7 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/view_note.css') }}"
     />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -16,6 +17,7 @@
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
+
     <link
       href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
       rel="stylesheet"
@@ -28,11 +30,9 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/6.2.0/docx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
-    <style></style>
   </head>
   <body>
-    <div class="messages-container">
+    <!-- <div class="messages-container">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
       <div
@@ -46,7 +46,7 @@
         {% endif %} {{ message }}
       </div>
       {% endfor %} {% endif %} {% endwith %}
-    </div>
+    </div> -->
     <main>
       <aside class="sidebar" data-sidebar>
         <div class="sidebar-info">
@@ -183,7 +183,6 @@
                 <i class="fas fa-comments" title="Socialize"></i>
               </a>
             </li>
-
           </ul>
         </div>
       </aside>
@@ -252,66 +251,118 @@
               <i class="bx bx-copy" id="copyIcon" style="cursor: pointer"></i>
             </li>
             <li class="navbar-item">
-              <i
-                style="cursor: pointer"
-                class="fas fa-bars"
-                id="openModalBtn"
-                style="--background-: {{ current_user.generated_color }}"
-              ></i>
+              <button type="button" id="openModal">
+                <i
+                  style="cursor: pointer; --background-: {{ current_user.generated_color }}"
+                  class="fas fa-bars"
+                ></i>
+              </button>
             </li>
           </ul>
         </nav>
+
         <article class="about active" id="view_note">
-          <!-- <section class="testimonials">
-            <p class="section-title">
-              OTHER NOTES
-            </p>
-          </section> -->
           <header class="h2 article-title" style="--bookmark-: {{ tag.color }}">
             <h2>Title: <span>{{ note.title }}</span></h2>
           </header>
           <p>Content:</p>
           <div id="editor">{{ note.content | safe}}</div>
+          <small
+            style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
+          >
+            {% if note.updated_at and note.updated_at > note.created_at %}
+            Updated on: {{ note.updated_at.strftime('%Y/%m/%d %H:%M') }} {% else
+            %} Created on: {{ note.created_at.strftime('%Y/%m/%d %H:%M') }} {%
+            endif %}
+          </small>
         </article>
-        <!-- <div id="modal" class="modal">
-          <div class="modal-content">
-            <span class="close-button" id="closeModalBtn">&times;</span>
-            <div class="notes-section">
-              <ul id="notesList">
+      </div>
+
+      <div class="modal" id="scrollableModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <span class="close" id="closeModalButton" style="color: #fff">&times;</span>
+            <header>
+            <h2 class="modal-title" style="--bookmark-: {{ tag.color }}">Other Notes</h2>
+          </header>
+          </div>
+         
+
+          <section class="about-text">
+            <div class="search">
+              <input
+                style="--bookmark-: {{ tag.color }}"
+                type="text"
+                data-tag-id="{{ tag.id }}"
+                id="searchInput"
+                placeholder="Search notes..."
+                class="input-search"  
+                autocomplete="off"
+              />
+            </div>
+          </section>
+          <section class="service">
+            <div
+              class="notes-list"
+              style="--bookmark-: {{ tag.color }}; margin-top: 15px;"
+            >
+              <ul id="notesList" data-color="{{current_user.generated_color}}">
                 {% if notes %} {% for note in notes %}
                 <li
-                  class="note-item"
                   data-note-id="{{ note.id }}"
                   data-tag-color="{{ note.tag.color }}"
+                  class="note-item"
+                  style="--background-: {{ current_user.generated_color }}"
                 >
-                  <h3 style="--bookmark-: {{ note.tag.color }}">
-                    {{ note.title.split('\t')[0][:10] }}
-                  </h3>
-                  <p id="noteContent">
-                    {{ note.content.split('\n')[0][:60] | safe |striptags }}
+                  <div class="note-header">
+                    <h3>{{ note.title.split('\n')[0][:13] }} ...</h3>
+                    <span class="note-tag"
+                      >Tag: {{ note.tag.name.split('\n')[0][:20] }}</span
+                    >
+                  </div>
+                  <pre class="note-content">
+{{ note.content | striptags  | truncate(20, True, '...')}}</pre
+                  >
+
+                  <p class="note-time">
+                    {% if note.updated_at %} Updated at: {{
+                    note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %}
+                    Created at: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% endif %}
                   </p>
-                  <hr />
                 </li>
+                <hr />
                 {% endfor %} {% else %}
-                <p class="no-notes" style="--bookmark-: {{ tag.color }}">
-                  No Available notes In this Bookmark
-                </p>
+                <p class="no-notes">No Available Notes</p>
                 {% endif %}
               </ul>
               <div class="add-note-toggle">
                 <a
                   href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
-                  class="toggle-add-note"
                   style="--background-: {{ current_user.generated_color }}"
+                  class="toggle-add"
                   >+</a
                 >
               </div>
+              <div class="speech-text">
+                <a
+                  href="{{ url_for('views.show_add_note', tag_id=tag.id) }}"
+                  style="--background-: {{ current_user.generated_color }}"
+                  class="speech-text-toggle-add"
+                  ><i class="bx bxs-microphone-alt" title="Speech-Text"></i
+                ></a>
+              </div>
             </div>
-          </div>
-        </div> -->
+          </section>
+        </div>
       </div>
     </main>
-
+    
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
     <script>
       "use strict";
       const elementToggleFunc = function (elem) {
@@ -362,5 +413,55 @@
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
     ></script>
     <script src="{{ url_for('static', filename='js/view_note.js') }}"></script>
+    <script>
+      // Get modal elements
+      const modal = document.getElementById("scrollableModal");
+      const openModalBtn = document.getElementById("openModal");
+      
+      // Close buttons
+      const closeModalBtn = document.getElementById("closeModalButton"); 
+      const closeModalFooterBtn = document.getElementById("closeModalFooter");
+    
+      // Check if elements exist and log if they don't
+      if (!modal || !openModalBtn || !closeModalBtn) {
+        console.error('Some elements are missing: modal, openModalBtn, or closeModalBtn.');
+      }
+    
+      // Open modal
+      if (openModalBtn) {
+        openModalBtn.onclick = function () {
+          modal.style.display = "block";
+        };
+      }
+      if (closeModalBtn) {
+        closeModalBtn.onclick = function () {
+          modal.style.display = "none";
+          console.log('Modal closed by close button');
+        };
+      }
+    
+      // Close modal when the close button in footer is clicked
+      if (closeModalFooterBtn) {
+        closeModalFooterBtn.onclick = function () {
+          modal.style.display = "none";
+          console.log('Modal closed by footer button');
+        };
+      }
+    
+      // Close modal when clicking outside of the modal
+      window.onclick = function (event) {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+    
+      // Close modal when the Escape key is pressed
+      window.onkeydown = function (event) {
+        if (event.key === "Escape") {
+          modal.style.display = "none";
+        }
+      };
+    </script>
+    
   </body>
 </html>

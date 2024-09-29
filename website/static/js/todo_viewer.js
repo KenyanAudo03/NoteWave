@@ -1,47 +1,50 @@
 document.addEventListener("DOMContentLoaded", function () {
-  var modal = document.getElementById("menuModal");
-  var btn = document.getElementById("openModalBtn");
-  var span = document.querySelector(".close");
-  var closeLeftContainer = document.getElementById("closeLeftContainer");
-  var returnLeftContainer = document.getElementById("returnLeftContainer");
-  var leftContainer = document.querySelector(".left-container");
-  var rightContainer = document.querySelector(".right-container");
-  var editIcon = document.querySelector(".edit");
-  var favoriteIcon = document.querySelector(".done");
-  var subTask = document.querySelector(".add_subtask");
+  const copyIcon = document.getElementById("copyIcon");
 
-  btn.onclick = function (event) {
-    event.preventDefault();
-    modal.style.display = "flex";
-  };
+  const getEditorContent = () => document.getElementById("editor").innerText;
 
-  span.onclick = function (event) {
-    event.preventDefault();
-    modal.style.display = "none";
-  };
+  if (copyIcon) {
+    copyIcon.addEventListener("click", function () {
+      const editorContent = getEditorContent();
+      const tempInput = document.createElement("input");
+      tempInput.value = editorContent;
+      document.body.appendChild(tempInput);
+      tempInput.select();
 
-  closeLeftContainer.onclick = function (event) {
-    event.preventDefault();
-    leftContainer.style.display = "none";
-    rightContainer.style.width = "100%";
-    returnLeftContainer.style.display = "flex";
-    editIcon.style.marginLeft = "40px";
-    editIcon.style.top = "52px";
-    favoriteIcon.style.top = "52px";
-    favoriteIcon.style.marginLeft = "36px";
-    subTask.style.marginLeft = "66px";
-  };
-  returnLeftContainer.onclick = function (event) {
-    event.preventDefault();
-    leftContainer.style.display = "block";
-    rightContainer.style.width = "80%";
-    returnLeftContainer.style.display = "none";
-    editIcon.style.marginLeft = "0px";
-    editIcon.style.top = "50px";
-    favoriteIcon.style.marginLeft = "0px";
-    favoriteIcon.style.top = "50px";
-    subTask.style.marginLeft = "30px";
-  };
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          console.log("Copied to clipboard!");
+          copyIcon.style.color = "green";
+          showFeedback("Copied to clipboard!");
+          setTimeout(() => {
+            copyIcon.style.color = "white";
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Error copying text: ", err);
+      } finally {
+        document.body.removeChild(tempInput);
+      }
+    });
+  }
+
+  function showFeedback(message) {
+    const feedbackDiv = document.createElement("div");
+    feedbackDiv.innerText = message;
+    feedbackDiv.style.position = "fixed";
+    feedbackDiv.style.bottom = "20px";
+    feedbackDiv.style.right = "20px";
+    feedbackDiv.style.backgroundColor = "#333";
+    feedbackDiv.style.color = "#fff";
+    feedbackDiv.style.padding = "10px";
+    feedbackDiv.style.borderRadius = "5px";
+    feedbackDiv.style.zIndex = "1000";
+    document.body.appendChild(feedbackDiv);
+    setTimeout(() => {
+      document.body.removeChild(feedbackDiv);
+    }, 2000);
+  }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -119,23 +122,113 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-function updateTodoStatus(todoId, isCompleted) {
+function updateTodoStatus(todoId, isCompleted, dueDate) {
+  const currentDate = new Date();
+
+  // Check if the due date is set and if it's in the future
+  if (dueDate && new Date(dueDate) > currentDate && !isCompleted) {
+    console.warn("Cannot mark as completed; due date has not been reached.");
+    alert(
+      "You cannot mark this todo as completed until the due date has been reached."
+    );
+    return;
+  }
+
+  // If already completed and trying to mark it again
+  if (isCompleted) {
+    displayAlreadyCompletedNote();
+    return; // Prevent further execution if already completed
+  }
+
+  const newStatus = !isCompleted;
+
   fetch(`/update_todo_status/${todoId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ is_completed: isCompleted }),
+    body: JSON.stringify({ is_completed: newStatus }),
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data.message);
-      location.reload();
+      if (data.message) {
+        console.log(data.message);
+        displayCompletionNote(); // Show the completion note
+        setTimeout(() => {
+          location.reload(); // Reload after the note is displayed
+        }, 3000); // Adjust the duration as necessary
+      } else {
+        console.error("Update failed:", data.error || "Unknown error");
+      }
     })
     .catch((error) => {
       console.error("Error:", error);
     });
 }
+
+// Function to display a completion note
+function displayCompletionNote() {
+  const note = document.createElement("div");
+  note.innerText = `Completed on ${new Date().toLocaleString()}`;
+  note.style.position = "fixed";
+  note.style.bottom = "10px";
+  note.style.right = "10px";
+  note.style.padding = "10px";
+  note.style.backgroundColor = "lightgreen";
+  note.style.border = "1px solid green";
+  note.style.zIndex = "1000";
+
+  document.body.appendChild(note);
+
+  setTimeout(() => {
+    document.body.removeChild(note);
+  }, 3000);
+}
+
+// Function to display a message if already completed
+function displayAlreadyCompletedNote() {
+  const note = document.createElement("div");
+  note.innerText = "This todo is already marked as completed.";
+  note.style.position = "fixed";
+  note.style.bottom = "10px";
+  note.style.right = "10px";
+  note.style.padding = "10px";
+  note.style.backgroundColor = "lightcoral"; // Different color for distinction
+  note.style.border = "1px solid red";
+  note.style.zIndex = "1000";
+
+  document.body.appendChild(note);
+
+  setTimeout(() => {
+    document.body.removeChild(note);
+  }, 3000);
+}
+
+function toggleDeleteOption(subtaskId) {
+  const deleteOption = document.getElementById(`delete-option-${subtaskId}`);
+  if (
+    deleteOption.style.display === "none" ||
+    deleteOption.style.display === ""
+  ) {
+    deleteOption.style.display = "block";
+  } else {
+    deleteOption.style.display = "none";
+  }
+}
+
+document.addEventListener("click", function (event) {
+  const deleteOptions = document.querySelectorAll('[id^="delete-option-"]');
+
+  deleteOptions.forEach((option) => {
+    const subtaskId = option.id.split("-")[2];
+    const header = document.querySelector(
+      `[onclick="toggleDeleteOption(${subtaskId})"]`
+    );
+    if (!option.contains(event.target) && !header.contains(event.target)) {
+      option.style.display = "none";
+    }
+  });
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
@@ -182,52 +275,60 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((error) => console.error("Error fetching todos:", error));
   }
-
   function renderTodos(todos) {
-    todosList.innerHTML = "";
+    todosList.innerHTML = ""; // Clear the current list
+    if (todos.length === 0) {
+      const noNotesMessage = document.createElement("p");
+      noNotesMessage.classList.add("no-notes");
+      noNotesMessage.textContent = "No Available To-Do";
+      todosList.appendChild(noNotesMessage);
+      return;
+    }
+
     todos.forEach((todo) => {
       const li = document.createElement("li");
-      li.classList.add("todo-item");
+      li.classList.add("note-item");
       li.style.setProperty("--background-", todo.color);
       li.setAttribute("data-note-id", todo.id);
+      const truncatedTitle =
+        todo.title.split("\n")[0].slice(0, 6) +
+        (todo.title.length > 13 ? "..." : "");
 
-      // Process the content
-      const firstLine = processTodoContent(todo.content);
+      const truncatedContent =
+        processTodoContent(todo.content).slice(0, 20) +
+        (todo.content.length > 20 ? "..." : "");
+
+      const dueDate = todo.due_date
+        ? new Date(todo.due_date).toLocaleDateString()
+        : "";
 
       li.innerHTML = `
-          <span class="todo-title">${todo.title.slice(0, 10) + (todo.title.length > 10 ? '...' : '')}</span>
+        <div class="note-header">
+          <h3>${truncatedTitle}</h3>
           ${
             todo.due_date
-              ? `<span class="due-date">Due: ${new Date(
-                  todo.due_date
-                ).toLocaleDateString()}</span>`
+              ? `
+            <span class="note-tag">
+              <input type="checkbox"
+              class="checkbox"
+                ${todo.is_completed ? "checked" : ""}
+                onclick="updateTodoStatus(${todo.id}, this.checked)"
+                id="todo-${todo.id}" disabled/>
+              Due: ${dueDate}
+            </span>
+          `
               : ""
           }
-        </label>
-        <pre class="todo-content">${firstLine}</pre>
-      `;
-      li.addEventListener("click", function (event) {
-        if (!event.target.closest("input, a, button, form")) {
-          const noteId = this.getAttribute("data-note-id");
-          window.location.href = `/todo_viewer/${noteId}`;
-        }
-      });
+        </div>
+        <pre class="note-content">${truncatedContent}</pre>
 
+      `;
       todosList.appendChild(li);
       const separator = document.createElement("hr");
       separator.style.setProperty("--background-", todo.color);
       todosList.appendChild(separator);
-
-      li.addEventListener("mouseenter", function () {
-        separator.style.borderColor = todo.color;
-      });
-
-      li.addEventListener("mouseleave", function () {
-        separator.style.borderColor = "#fff";
-      });
     });
   }
-
   function processTodoContent(content) {
     const lines = content.replace(/<br\s*\/?>/gi, "\n").split("\n");
     const firstLine = lines[0] ? lines[0].slice(0, 20) : "";

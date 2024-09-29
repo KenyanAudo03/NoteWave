@@ -13,7 +13,7 @@
   --bg-gradient-jet: linear-gradient(
       to bottom right,
       hsla(240, 1%, 18%, 0.251) 0%,
-      hsla(240, 2%, 11%, 0) 100%
+      hsla(240, 2%, 11%, 0) 1@medi00%
     ),
     hsl(240, 2%, 13%);
   --bg-gradient-yellow-1: linear-gradient(

@@ -6,17 +6,16 @@
     <title>{{ todo.title }}</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/view_todo.css') }}"
+      href="{{ url_for('static', filename='css/view_note.css') }}"
     />
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/todos.css') }}"
+  />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <link
-    rel="icon"
-    href="{{ url_for('static', filename='img/notewave.ico') }}"
-    type="image/x-icon"
-  />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
@@ -25,14 +24,14 @@
       href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
       rel="stylesheet"
     />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/6.2.0/docx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <style>
-      #editor {
-        display: none;
-      }
-    </style>
   </head>
   <body>
     <div class="messages-container">
@@ -50,245 +49,554 @@
       </div>
       {% endfor %} {% endif %} {% endwith %}
     </div>
-    <div class="page">
-      <div class="left-container">
-        <div class="tab">
-          <div class="tab-header">
-            <h2 style="--background-: {{ current_user.generated_color }}">
-              Other Todos
-            </h2>
-            <div class="return">
-              <a href="{{ url_for('views.show_todo_page') }}">
+
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ current_user.generated_color }}"
+              >{{ current_user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
+
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
+
+            <p class="title" title="{{ current_user.bio }}">
+              {% if current_user.bio %} {{ current_user.bio }} {% else %}
+              <a
+                href="{{ url_for('views.settings') }}"
+                style="color: #f1c40f; text-decoration: underline"
+              >
+                Add your bio
+              </a>
+              {% endif %}
+            </p>
+          </div>
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Notifications on"></i>
+                <span id="notificationBadge" class="badge">0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="Notifications off"></i>
+                {% endif %}
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link">
+                <p>
+                  <i class="bx bx-home-alt-2"></i>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <form
+                action="{{ url_for('views.delete_todo', todo_id=todo.id) }}"
+                method="post"
+                onsubmit="return confirm('Are you sure you want to delete this To-Do?');"
+              >
+                <button
+                  class="del"
+                  style="--background-: {{ current_user.generated_color }}"
+                  type="submit"
+                >
+                  <i class="bx bx-trash" style="color: red"></i>
+                </button>
+              </form>
+            </li>
+
+            {% if not todo.is_completed %}
+            <!-- Edit option enabled only if the to-do is not completed -->
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.edit_todo', id=todo.id) }}"
+                data-tooltip="Edit todo"
+              >
                 <i
-                  class="fas fa-arrow-left"
+                  class="fas fa-edit"
                   style="--background-: {{ current_user.generated_color }}"
                 ></i>
               </a>
-            </div>
-            <div class="close-left-container" id="closeLeftContainer">
-              <i
-                class="bx bx-sidebar"
-                data-tooltip="Close sidebar"
-                style="--background-: {{ current_user.generated_color }}"
-              ></i>
-            </div>
-          </div>
-          <div class="search">
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search todos..."
-              style="--background-: {{ current_user.generated_color }}"
-              class="input-search"
-            />
-          </div>
-        </div>
-
-        <div class="todos">
-          <ul id="todosList">
-            {% if todos %} {% for todo in todos %}
-            <li
-              style="--background-: {{ current_user.generated_color }}"
-              class="todo-item"
-              data-note-id="{{ todo.id }}"
-            >
-              <label
-                for="todo-{{ todo.id }}"
-                style="--background-: {{ current_user.generated_color }};"
-              >
-                <span class="todo-title">{{ todo.title.split('\n')[:20] }}</span>
-                {% if todo.due_date %}
-                <span class="due-date"
-                  >Due: {{ todo.due_date.strftime('%Y-%m-%d') }}</span
-                >
-                {% endif %}
-              </label>
-              <pre class="todo-content">
-                {{ todo.content.split('\n')[0][:30] | safe |striptags}}
-              </pre>
             </li>
-            <hr style="--background-: {{ current_user.generated_color }}" />
-            {% endfor %} {% else %}
-            <p
-              class="no-notes"
-              style="--background-: {{ current_user.generated_color }}"
-            >
-              No Available To-Do
-            </p>
-            {% endif %}
-          </ul>
-          <div class="add-note-toggle">
-            <a
-              href="{{ url_for('views.add_todo_page') }}"
-              style="--background-: {{ current_user.generated_color }}"
-              class="toggle-add"
-              >+</a
-            >
-          </div>
-        </div>
-      </div>
 
-      <div class="right-container">
-        <div
-          class="return-left-container"
-          id="returnLeftContainer"
-          style="--background-: {{ current_user.generated_color }}"
-        >
-          <i class="bx bx-sidebar" data-tooltip="Open sidebar"></i>
-        </div>
-        <div class="edit">
-          <a
-            href="{{ url_for('views.edit_todo', id=todo.id) }}"
-            data-tooltip="Edit todo"
-          >
-            <i
-              class="fas fa-edit"
-              style="--background-: {{ current_user.generated_color }}"
-            ></i>
-          </a>
-        </div>
-        <div class="todo-view">
-          {% if current_user.email_verified %}
-          <div class="menu">
-            <i
-              class="fas fa-bars"
-              id="openModalBtn"
-              style="--background-: {{ current_user.generated_color }}"
-            ></i>
-          </div>
-          {% endif %}
-          <div class="not-moving">
-            <p class="todo-time">
-              {% if todo.due_date %} Due Date: {{ todo.due_date.strftime('%Y-%m-%d') }} {% endif %}
-            </p>
-            <div class="done">
-              {% if todo.is_completed or (todo.due_date and todo.due_date <= current_date) %}
-              <i class="bx bx-calendar-check" style="--background-: {{ current_user.generated_color }}" title="Done"></i>
-              {% else %}
-              <i class="bx bxs-checkbox" style="--background-: {{ current_user.generated_color }}" title="Not Done"></i>
-              {% endif %}
-            </div>
-            {% if current_user.email_verified %}
-            <div class="add_subtask">
+            <!-- Add Subtask option enabled only if the to-do is not completed -->
+            <li class="navbar-item">
               <a href="{{ url_for('views.add_subtask', todo_id=todo.id) }}">
-                <i class="bx bxs-file-plus" title="Add Subtask" style="--background-: {{ current_user.generated_color }}"></i>
+                <i
+                  class="bx bxs-file-plus"
+                  title="Add Subtask"
+                  style="--background-: {{ current_user.generated_color }}"
+                ></i>
               </a>
-            </div>
-            {% endif %}
-            <h1 id="todoTitle" style="--background-: {{ current_user.generated_color }}">
-              <span>Title: </span> {{ todo.title }}
-            </h1>
-          </div>
-          <p style="--background-: {{ current_user.generated_color }}" class="view">
-            Content:
-          </p>
-          <pre id="todoContent">{{ todo.content | safe}}</pre>
-          <div id="editor"> {{todo.content | safe }}</div>
-          {% if current_user.email_verified %}
-          <hr />
-          <h2 style="--background-: {{ current_user.generated_color }}">Subtasks</h2>
-          <ul id="todosList" style="margin-top: -35px">
-            {% if todo.subtasks %} {% for subtask in todo.subtasks %}
-            <li style="--background-: {{ current_user.generated_color }}" class="todo-item">
-              <h1 id="todoTitle" style="--background-: {{ current_user.generated_color }}">
-                <span>Title: </span>{{ subtask.title }}
-              </h1>
-              <p style="--background-: {{ current_user.generated_color }}" class="view">
-                Content:
-              </p>
-              <pre class="subtaskContent">{{ subtask.content | safe }}</pre>
-              <div id="editor"> {{subtask.content | safe }}</div>
             </li>
-            <hr style="--background-: {{ current_user.generated_color }}" />
-            {% endfor %} {% else %}
-            <p style="margin-top: 30px; color: #fff">No subtasks available.</p>
-            {% endif %}
-          </ul>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    <div id="menuModal" class="modal">
-      <div class="modal-content">
-        <span
-          class="close"
-          style="--background-: {{ current_user.generated_color }}"
-          >&times;</span
-        >
-        <ul>
-          <li>
-            <a
-              href="{{ url_for('views.edit_todo', id=todo.id) }}"
-              style="--background-: {{ current_user.generated_color }}"
-              ><i class="bx bxs-edit"></i> EDIT To-Do <i class="bx bxs-edit"></i
-            ></a>
-          </li>
+            {% else %}
+            <!-- Icons for completed to-dos -->
+            <li class="navbar-item">
+              <i
+                class="fas fa-edit"
+                style="color: lightgray; cursor: not-allowed"
+                title="Editing disabled for completed to-dos"
+                onclick="showDisabledNote()"
+              ></i>
+            </li>
 
-          <li>
+            <li class="navbar-item">
+              <i
+                class="bx bxs-file-plus"
+                title="Adding subtasks disabled for completed to-dos"
+                style="color: lightgray; cursor: not-allowed"
+                onclick="showDisabledNote()"
+              ></i>
+            </li>
+            {% endif %}
+
+            <!-- Toggle Completion Status -->
+            <li class="navbar-item">
+              <div
+                class="icon-wrapper"
+                onclick="updateTodoStatus({{ todo.id }}, {{ todo.is_completed | lower }})"
+                style="cursor: pointer; color: {{ current_user.generated_color }};"
+              >
+                {% if todo.is_completed %}
+                <i class="bx bxs-check-circle"></i>
+                <!-- Icon for completed -->
+                {% else %}
+                <i class="bx bxs-circle"></i>
+                <!-- Icon for not completed -->
+                {% endif %}
+              </div>
+            </li>
+
+            <!-- Copy and Menu Options -->
+            <li class="navbar-item">
+              <i class="bx bx-copy" id="copyIcon" style="cursor: pointer"></i>
+            </li>
+            <li class="navbar-item">
+              <button type="button" id="openModal">
+                <i
+                  style="cursor: pointer; --background-: {{ current_user.generated_color }}"
+                  class="fas fa-bars"
+                ></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="view_note">
+          <header
+            class="h2 article-title"
+            style="--bookmark-: {{ current_user.generated_color }}"
+          >
+            <h2>Title: <span>{{ todo.title }}</span></h2>
+          </header>
+          <p>Content:</p>
+          <div id="editor">{{ todo.content | safe }}</div>
+
+          <small
+            style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
+          >
+            {% if todo.updated_at and todo.updated_at > todo.created_at %}
+            Updated on: {{ todo.updated_at.strftime('%Y/%m/%d %H:%M') }} {% else
+            %} Created on: {{ todo.created_at.strftime('%Y/%m/%d %H:%M') }} {%
+            endif %} {% if todo.due_date %}
+            <br />Due on: {{ todo.due_date.strftime('%Y/%m/%d %H:%M') }} {%
+            endif %}
+          </small>
+        </article>
+
+        {% if todo.subtasks %} {% for subtask in todo.subtasks %}
+        <article
+          class="about active"
+          style="margin-top: 6%; position: relative"
+          onclick="toggleDeleteOption({{ subtask.id }})"
+        >
+          <header
+            class="h2 article-title"
+            style="--bookmark-: {{ current_user.generated_color }}"
+          >
+            <h2>SubTask: <span>{{ subtask.title }}</span></h2>
+          </header>
+          <p>Content:</p>
+          <div id="editor2">{{ subtask.content | safe }}</div>
+          <small style="float: right; color: hsl(0, 0%, 84%); margin-top: -5px">
+            {% if subtask.updated_at and subtask.updated_at > subtask.created_at
+            %} Updated on: {{ subtask.updated_at.strftime('%Y/%m/%d %H:%M') }}
+            {% else %} Created on: {{ subtask.created_at.strftime('%Y/%m/%d
+            %H:%M') }} {% endif %}
+          </small>
+          <div
+            id="delete-option-{{ subtask.id }}"
+            style="
+              display: none;
+              text-align: center;
+              position: absolute;
+              bottom: 10px;
+              left: 50%;
+              transform: translateX(-50%);
+            "
+          >
             <form
-              action="{{ url_for('views.delete_todo', todo_id=todo.id) }}"
+              action="{{ url_for('views.delete_subtask', subtask_id=subtask.id) }}"
               method="post"
-              onsubmit="return confirm('Are you sure you want to delete this To-Do?');"
+              onsubmit="return confirm('Are you sure you want to delete this subtask?');"
             >
               <button
-                class="del"
-                style="--background-: {{ current_user.generated_color }}"
                 type="submit"
+                style="
+                  color: red;
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 34px;
+                "
               >
-                <i class="bx bx-trash"></i> DELETE <i class="bx bx-trash"></i>
+                <i class="bx bx-trash"></i>
               </button>
             </form>
-          </li>
-          <li>
-            <input class="checkbox-label"
-              type="checkbox"
-              {% if todo.is_completed or (todo.due_date and todo.due_date <= current_date) %}
-              checked
-              {% endif %}
-              onclick="updateTodoStatus({{ todo.id }}, this.checked)"
-              id="todo-{{ todo.id }}"
-            />
-            <label for="todo-{{ todo.id }}" style="--background-: {{ current_user.generated_color }}">
-              <i class='bx bxs-calendar'></i> Mark Done
-              <i class='bx bxs-calendar'></i> 
-            </label>
-          </li>          
-          <li>
-            <button
-              style="--background-: {{ current_user.generated_color }}"
-              id="downloadTextButton"
-            >
-              <i class="bx bxs-share-alt"></i> SHARE
-              <i class="bx bxs-share-alt"></i>
-            </button>
-          </li>
-        </ul>
+          </div>
+        </article>
+        {% endfor %} {% endif %}
       </div>
-    </div>
- <!-- Download Format -->
- <div id="fileTypeModal" class="modal2" style="display: none">
-  <div class="modal-content2">
-    <span class="close" id="closeModal"
-    style="--background-: {{ current_user.generated_color }}">&times;</span>
-    <ul>
-    <li><label for="fileTypeSelect">CHOOSE FILE TYPE:</label></li>
-    <select id="fileTypeSelect">
-      <option value="txt">Text (.txt)</option>
-      <option value="docx">Word (.docx)</option>
-      <option value="pdf">PDF (.pdf)</option>
-      <option value="html">HTML (.html)</option>
-    </select>
-    <br /><br />
-    <li>
-    <button id="confirmDownloadButton"
-    style="--background-: {{ current_user.generated_color }}">Download</button>
-  </li>
-</ul>
-  </div>
-</div>
+      <div class="modal" id="scrollableModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <span class="close" id="closeModalButton" style="color: #fff">&times;</span>
+            <header>
+            <h2 class="modal-title" style="--bookmark-: {{ current_user.generated_color  }}">Other To-Dos</h2>
+          </header>
+          </div>
+          <section class="about-text">
+            <div class="search">
+              <input
+                style="--bookmark-: {{ current_user.generated_color }}"
+                type="text"
+                id="searchInput"
+                placeholder="Search todo..."
+                class="input-search"
+                autocomplete="off"
+              />
+            </div>
+          </section>
+          <section class="service">
+            <div
+              class="notes-list"
+              style="--bookmark-: {{ current_user.generated_color }}"
+            >
+              <ul id="todosList" data-color="{{current_user.generated_color}}">
+                {% if todos %} {% for todo in todos %}
+                <li
+                  style="--background-: {{ current_user.generated_color }}"
+                  class="note-item"
+                  data-note-id="{{ todo.id }}"
+                >
+                <div class="note-header">
+                  <h3>{{ todo.title.split('\n')[0][:6] }}..</h3>
+                  {% if todo.due_date %}
+                      <span class="note-tag">
+                          <input type="checkbox"
+                          class="checkbox"
+                              {% if todo.is_completed or (todo.due_date and todo.due_date <= current_date) %}
+                              checked
+                              {% endif %}
+                              onclick="updateTodoStatus({{ todo.id }}, this.checked)"
+                              id="todo-{{ todo.id }}" 
+                              disabled/>
+                          Due: {{ todo.due_date.strftime('%Y-%m-%d') }}
+                      </span>
+                  {% endif %}
+              </div>
+              
+                  <pre class="note-content">{{ todo.content | striptags  | truncate(20, True, '...') }}</pre>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                </li>
+                <hr style="--background-: {{ current_user.generated_color }}" />
+
+                {% endfor %}{% else %}<p class="no-notes">No Available To-Do</p>{% endif %}
+              </ul>
+              <div class="add-note-toggle">
+                <a href="{{ url_for('views.add_todo_page') }}" style="--background-: {{ current_user.generated_color }}" class="toggle-add">+</a>
+            </div>
+
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+
+    </main>
+    <script>
+      function showDisabledNote() {
+        const note = document.createElement("div");
+        note.innerText =
+          "This action cannot be performed because the to-do is already completed.";
+        note.style.position = "fixed";
+        note.style.bottom = "10px";
+        note.style.right = "10px";
+        note.style.padding = "10px";
+        note.style.backgroundColor = "lightcoral";
+        note.style.color = "white";
+        note.style.borderRadius = "5px";
+        note.style.zIndex = "1000";
+
+        document.body.appendChild(note);
+
+        setTimeout(() => {
+          document.body.removeChild(note);
+        }, 3000);
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        function updateNotificationBadge() {
+          fetch("/get_notifications")
+            .then((response) => response.json())
+            .then((data) => {
+              const badge = document.getElementById("notificationBadge");
+              if (badge) {
+                badge.textContent = data.unread_count;
+                badge.style.display = data.unread_count > 0 ? "inline" : "none";
+              }
+            })
+            .catch((error) =>
+              console.error("Error fetching notifications:", error)
+            );
+        }
+
+        updateNotificationBadge();
+
+        setInterval(updateNotificationBadge, 60000);
+      });
+    </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
 
     <script src="{{ url_for('static', filename='js/todo_viewer.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+  const todosList = document.getElementById("todosList");
+
+  todosList.addEventListener("click", function (event) {
+    const item = event.target.closest(".note-item"); 
+    if (event.target.matches('.edit-button, .delete-button, .delete-button *')) {
+      return; 
+    }
+
+    if (item) {
+      const noteId = item.getAttribute("data-note-id");
+      window.location.href = `/todo_viewer/${noteId}`;
+    }
+  });
+});
+
+    </script>
+    <script>
+      // Get modal elements
+      const modal = document.getElementById("scrollableModal");
+      const openModalBtn = document.getElementById("openModal");
+      
+      // Close buttons
+      const closeModalBtn = document.getElementById("closeModalButton"); 
+      const closeModalFooterBtn = document.getElementById("closeModalFooter");
+    
+      // Check if elements exist and log if they don't
+      if (!modal || !openModalBtn || !closeModalBtn) {
+        console.error('Some elements are missing: modal, openModalBtn, or closeModalBtn.');
+      }
+    
+      // Open modal
+      if (openModalBtn) {
+        openModalBtn.onclick = function () {
+          modal.style.display = "block";
+        };
+      }
+      if (closeModalBtn) {
+        closeModalBtn.onclick = function () {
+          modal.style.display = "none";
+          console.log('Modal closed by close button');
+        };
+      }
+    
+      // Close modal when the close button in footer is clicked
+      if (closeModalFooterBtn) {
+        closeModalFooterBtn.onclick = function () {
+          modal.style.display = "none";
+          console.log('Modal closed by footer button');
+        };
+      }
+    
+      // Close modal when clicking outside of the modal
+      window.onclick = function (event) {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+    
+      // Close modal when the Escape key is pressed
+      window.onkeydown = function (event) {
+        if (event.key === "Escape") {
+          modal.style.display = "none";
+        }
+      };
+    </script>
+    
   </body>
 </html>

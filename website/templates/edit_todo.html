@@ -6,139 +6,257 @@
     <title>Add To-Do</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/add_todo.css') }}"
-    />
-    <link
-    rel="icon"
-    href="{{ url_for('static', filename='img/notewave.ico') }}"
-    type="image/x-icon"
-  />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-    href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
-    rel="stylesheet"
-  />
-    <link
-      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
       integrity="sha512-..."
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/add_all.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="page">
-      <div class="left-container">
-        <div class="close-left-container" id="closeLeftContainer">
-          <i
-            class="bx bx-sidebar"
-            data-tooltip="Close sidebar"
-            style="--background-: {{ current_user.generated_color }}"
-          ></i>
-        </div>
-        <div class="all">
-          <div class="profile">
-            <div class="cover-photo">
-              {% if current_user.cover_picture %}
-              <img
-                src="/static/profile_pics/{{ current_user.cover_picture }}"
-                alt="Cover Photo"
-                class="cover-image"
-              />
-              {% else %}
-              <div class="default-cover">
-                <p>Default Cover Photo</p>
-              </div>
-              {% endif %}
-            </div>
-            <div class="profile-pic">
-              {% if current_user.profile_picture %}
-              <img
-                src="/static/profile_pics/{{ current_user.profile_picture }}"
-                alt="Profile Picture"
-                class="profile-image"
-              />
-              {% else %}
-              <i
-                class="fas fa-5x"
-                style="--background-: {{ current_user.generated_color }}"
-                >{{ current_user.first_name[0] }}</i
-              >
-              {% endif %}
-            </div>
-          </div>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
 
-          <div class="profile-info">
-            <p class="username">
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ current_user.generated_color }}"
+              >{{ current_user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
+
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
               {{ current_user.full_name }} {% if current_user.email_verified %}
               <i class="bx bxs-badge-check" style="color: #1877f2"></i>
               {% endif %}
+            </h1>
+
+            <p class="title" title="{{ current_user.bio }}">
+              {% if current_user.bio %} {{ current_user.bio }} {% else %}
+              <a
+                href="{{ url_for('views.settings') }}"
+                style="color: #f1c40f; text-decoration: underline"
+              >
+                Add your bio
+              </a>
+              {% endif %}
             </p>
           </div>
-          <hr class="separation" />
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
         </div>
-        <div class="nav-links">
-          <a href="/user_home" class="nav-item">
-            <i class="bx bx-home"></i>Home
-          </a>
-          <a href="/settings" class="nav-item">
-            <i class="bx bxs-cog"></i>Settings
-          </a>
-          <form
-            action="{{ url_for('auth.logout') }}"
-            method="post"
-            class="logout-form"
-          >
-            <button type="submit" class="log-item">
-              <i class="bx bx-log-out-circle"></i> Logout
-            </button>
-          </form>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Notifications on"></i>
+                <span id="notificationBadge" class="badge">0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="Notifications off"></i>
+                {% endif %}
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
+              </a>
+            </li>
+          </ul>
         </div>
-        <div class="quick-access">
-          <button class="quick-btn" id="createNoteBtn">Create Note</button>
-          <button class="quick-btn" id="notificationBtn">Notification</button>
-        </div>
-        <div class="user-stats">
-          <p
-            class="stat-item"
-            style="--background: {{ current_user.generated_color }}"
-          >
-            Total Notes: <span>({{ current_user.notes | length }})</span>
-          </p>
-          <p
-            class="stat-item"
-            style="--background: {{ current_user.generated_color }}"
-          >
-            Tags Used: <span>({{ current_user.note_tags | length }})</span>
-          </p>
-          <p
-            class="stat-item"
-            style="--background: {{ current_user.generated_color }}"
-          >
-            To-dos: <span>({{ current_user.todos | length }})</span>
-          </p>
-        </div>
-      </div>
-      <div class="right-container">
-        <div
-          class="return-left-container"
-          id="returnLeftContainer"
-          style="--background-: {{ current_user.generated_color }}"
-        >
-          <i class="bx bx-sidebar" data-tooltip="Open sidebar"></i>
-        </div>
-        <div class="content">
-          <div class="container_title">
-            <h1 style="--background-: {{ current_user.generated_color }}">
-              <span class="back-arrow"><i class="fas fa-arrow-left"></i></span>
-              Edit To-do
-            </h1>
-          </div>
-          <div class="form_container">
-            <!-- Add To-Do Form -->
+      </aside>
+
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link">
+                <p>
+                  All notes
+                  <span
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    ({{ current_user.notes|length }})
+                  </span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.show_todo_page') }}"
+                class="navbar-link"
+              >
+                <p style="--background-: {{ current_user.generated_color }}">
+                  To-dos
+                  <span> (<span id="todoCount">0</span>)</span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a href="/favorites" class="navbar-link" id="favoriteLink">
+                <p style="--background-: {{ current_user.generated_color }}">
+                  My favorites
+                  <span> (<span id="favoriteCount">0</span>) </span>
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              {% if current_user.email_verified %}
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>
+                  Tag Used
+                  <span> ({{ current_user.note_tags | length }}) </span>
+                </p></a
+              >
+              {% endif %}
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{url_for('views.settings')}}"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Settings</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="all_add">
+          <header>
+            <h2
+              class="h2 article-title"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Edit To-Do
+            </h2>
+          </header>
+          <section class="about-text">
             <form
               action="{{ url_for('views.edit_todo', id=todo.id) }}"
               method="post"
@@ -152,7 +270,6 @@
                 placeholder="To-do title"
                 value="{{ todo.title }}"
               />
-              <br /><br />
               <input
                 type="date"
                 id="due_date"
@@ -161,87 +278,210 @@
                 placeholder="Due date (optional)"
                 value="{{ todo.due_date.strftime('%Y-%m-%d') if todo.due_date else '' }}"
               />
-              <br /><br />
               <div id="quillEditor">{{ todo.content | safe}}</div>
               <input name="content" id="content" type="hidden" />
               <br />
               <button
                 type="submit"
+                class="submit"
                 style="--background-: {{ current_user.generated_color }}"
               >
                 Update ToDo
               </button>
             </form>
-          </div>
-        </div>
+          </section>
+        </article>
       </div>
-    </div>
+    </main>
     <script src="{{ url_for('static', filename='js/add_todos.js') }}"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-   document.addEventListener("DOMContentLoaded", () => {
-      const quill = new Quill("#quillEditor", {
-        theme: "snow",
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, false] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["link", "image"],
-            [{ color: [] }, { background: [] }],
-            [{ align: [] }],
-            [{ font: [] }],
-            [{ size: ["small", "medium", "large", "huge"] }],
-            [{ indent: "-1" }, { indent: "+1" }],
-            ["clean"],
-          ],
-        },
-      });
-
-      const contentField = document.getElementById("content");
-
-      quill.on("text-change", () => {
-        const html = quill.root.innerHTML;
-        contentField.value = cleanUpContent(html);
-      });
-
-      const initialContent = contentField.value;
-      if (initialContent) {
-        quill.root.innerHTML = initialContent;
-      }
-
-      function cleanUpContent(content) {
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = content;
-
-        // Remove all <p> tags and replace them with <br> tags
-        const paragraphs = tempDiv.querySelectorAll("p");
-        paragraphs.forEach(p => {
-          if (p.innerHTML.trim()) {
-            const br = document.createElement("br");
-            p.replaceWith(...Array.from(p.childNodes).map(node => {
-              if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR") {
-                return node;
-              } else {
-                return node;
+      document.addEventListener("DOMContentLoaded", function () {
+        function updateNotificationBadge() {
+          fetch("/get_notifications")
+            .then((response) => response.json())
+            .then((data) => {
+              const badge = document.getElementById("notificationBadge");
+              if (badge) {
+                badge.textContent = data.unread_count;
+                badge.style.display = data.unread_count > 0 ? "inline" : "none";
               }
-            }).concat(br));
+            })
+            .catch((error) =>
+              console.error("Error fetching notifications:", error)
+            );
+        }
+
+        updateNotificationBadge();
+
+        setInterval(updateNotificationBadge, 60000);
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        function updateTodoCount() {
+          fetch("/get_todo_count")
+            .then((response) => response.json())
+            .then((data) => {
+              const todoCountElement = document.getElementById("todoCount");
+              if (todoCountElement) {
+                todoCountElement.textContent = data.count;
+              }
+            })
+            .catch((error) =>
+              console.error("Error fetching To-Do count:", error)
+            );
+        }
+
+        updateTodoCount();
+
+        setInterval(updateTodoCount, 60000);
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const favoriteCountSpan = document.getElementById("favoriteCount");
+
+        fetch("/get_favorite_count")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.favorite_count !== undefined) {
+              favoriteCountSpan.textContent = data.favorite_count;
+            } else {
+              console.error("Error fetching favorite count:", data.error);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const quill = new Quill("#quillEditor", {
+          theme: "snow",
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, false] }],
+              ["bold", "italic", "underline", "strike"],
+              [{ list: "ordered" }, { list: "bullet" }],
+              ["link", "image"],
+              [{ color: [] }, { background: [] }],
+              [{ align: [] }],
+              [{ font: [] }],
+              [{ size: ["small", "medium", "large", "huge"] }],
+              [{ indent: "-1" }, { indent: "+1" }],
+            ],
+          },
+        });
+
+        const contentField = document.getElementById("content");
+
+        quill.on("text-change", () => {
+          const html = quill.root.innerHTML;
+          contentField.value = cleanUpContent(html);
+        });
+
+        const initialContent = contentField.value;
+        if (initialContent) {
+          quill.root.innerHTML = initialContent;
+        }
+
+        function cleanUpContent(content) {
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = content;
+
+          const paragraphs = tempDiv.querySelectorAll("p");
+          paragraphs.forEach((p) => {
+            if (p.innerHTML.trim()) {
+              const br = document.createElement("br");
+              p.replaceWith(
+                ...Array.from(p.childNodes)
+                  .map((node) => {
+                    if (
+                      node.nodeType === Node.ELEMENT_NODE &&
+                      node.tagName === "BR"
+                    ) {
+                      return node;
+                    } else {
+                      return node;
+                    }
+                  })
+                  .concat(br)
+              );
+            }
+          });
+
+          return tempDiv.innerHTML;
+        }
+        const dueDateInput = document.getElementById("due_date");
+        const today = new Date().toISOString().split("T")[0];
+        dueDateInput.setAttribute("min", today);
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (event) {
+          const dueDateValue = dueDateInput.value;
+          if (dueDateValue) {
+            const dueDate = new Date(dueDateValue);
+            const currentDate = new Date(today);
+            if (dueDate < currentDate) {
+              event.preventDefault();
+              alert("Please select a valid due date.");
+            }
           }
         });
 
-        return tempDiv.innerHTML;
-      }
-    });
-
-    document.getElementById("createNoteBtn").addEventListener("click", () => {
-      window.history.back();
-    });
-
-    document
-      .getElementById("notificationBtn")
-      .addEventListener("click", () => {
-        window.location.href = "/notifications";
+        document
+          .getElementById("createNoteBtn")
+          .addEventListener("click", () => {
+            window.history.back();
+          });
       });
     </script>
+     <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
   </body>
 </html>

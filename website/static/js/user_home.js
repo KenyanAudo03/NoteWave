@@ -9,8 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-
-
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const notesList = document.getElementById("notesList");
@@ -111,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
-
 
 document.addEventListener("DOMContentLoaded", function () {
   const favoriteCountSpan = document.getElementById("favoriteCount");
@@ -427,7 +424,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   document.addEventListener("click", (event) => {
-    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
+    if (
+      !toggleButton.contains(event.target) &&
+      !tagsWrapper.contains(event.target)
+    ) {
       if (tagsWrapper.classList.contains("show")) {
         tagsWrapper.classList.remove("show");
         icon.classList.remove("fa-chevron-up");
@@ -436,7 +436,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 function logoutUser() {
   fetch("/auth/logout_idle", {

@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const noteItems = document.querySelectorAll(".note-item");
-  const searchInput = document.getElementById("searchInput");
-  const notesList = document.getElementById("notesList");
-  const tagId = searchInput.getAttribute("data-tag-id");
+
   noteItems.forEach((item) => {
     const tagColor = item.getAttribute("data-tag-color");
 
@@ -10,15 +8,13 @@ document.addEventListener("DOMContentLoaded", function () {
     item.style.setProperty("--tag-color", tagColor);
 
     item.addEventListener("mouseenter", function () {
-      this.style.setProperty("--bullet-color", tagColor);
       const hrElement = this.querySelector("hr");
       hrElement.style.borderColor = tagColor;
     });
 
     item.addEventListener("mouseleave", function () {
-      this.style.setProperty("--bullet-color", tagColor);
       const hrElement = this.querySelector("hr");
-      hrElement.style.borderColor = "white";
+      hrElement.style.borderColor = "#555";
     });
 
     item.addEventListener("click", function () {
@@ -26,13 +22,60 @@ document.addEventListener("DOMContentLoaded", function () {
       window.location.href = `/note_viewer/${noteId}`;
     });
   });
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("searchInput");
+  const notesList = document.getElementById("notesList");
+  const tagId = searchInput.getAttribute("data-tag-id");
 
-  // Add input event listener to search input
+  function stripTags(str) {
+    return str.replace(/<\/?[^>]+(>|$)/g, "");
+  }
+
+  function formatTime(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    return `${formattedDate} ${formattedTime}`;
+  }
+
+  function attachEventListeners(noteItems) {
+    noteItems.forEach((item) => {
+      const tagColor = item.getAttribute("data-tag-color");
+      item.style.setProperty("--bullet-color", tagColor);
+
+      item.addEventListener("mouseenter", function () {
+        const hrElement = this.nextElementSibling;
+        if (hrElement) hrElement.style.borderColor = tagColor;
+      });
+
+      item.addEventListener("mouseleave", function () {
+        const hrElement = this.nextElementSibling;
+        if (hrElement) hrElement.style.borderColor = "#555";
+      });
+
+      item.addEventListener("click", function () {
+        const noteId = this.getAttribute("data-note-id");
+        window.location.href = `/note_viewer/${noteId}`;
+      });
+    });
+  }
+
+  const noteItems = document.querySelectorAll(".note-item");
+  attachEventListeners(noteItems);
+
   searchInput.addEventListener("input", function () {
     const query = searchInput.value.trim();
 
     if (query) {
-      fetch(`/search_notes?query=${query}&tag_id=${tagId}`)
+      fetch(`/search_notes?query=${encodeURIComponent(query)}&tag_id=${tagId}`)
         .then((response) => response.json())
         .then((notes) => {
           notesList.innerHTML = "";
@@ -43,52 +86,56 @@ document.addEventListener("DOMContentLoaded", function () {
               listItem.dataset.noteId = note.id;
               listItem.dataset.tagColor = note.color;
 
+              const noteHeader = document.createElement("div");
+              noteHeader.className = "note-header";
+
               const title = document.createElement("h3");
               title.style.setProperty("--bookmark-", note.color);
-              title.innerHTML = `${note.title
-                .split("\t")[0]
-                .substring(0, 10)}...`.replace(
-                new RegExp(query, "gi"),
-                (match) => `<span class="highlight">${match}</span>`
-              );
-
-              const content = document.createElement("p");
-              content.innerHTML =
-                note.content
-                  .split("\n")[0]
-                  .substring(0, 27)
+              title.innerHTML =
+                note.title
+                  .split("\t")[0]
+                  .substring(0, 10)
                   .replace(
                     new RegExp(query, "gi"),
                     (match) => `<span class="highlight">${match}</span>`
                   ) + "...";
 
-              const hr = document.createElement("hr");
-              hr.style.borderColor = "#fff";
+              const noteTag = document.createElement("span");
+              noteTag.className = "note-tag";
+              noteTag.innerHTML = `Tag: ${note.tagName
+                .split("\n")[0]
+                .substring(0, 20)}`;
 
-              listItem.appendChild(title);
-              listItem.appendChild(content);
-              listItem.appendChild(hr);
+              const noteContent = document.createElement("pre");
+              noteContent.className = "note-content";
+              const strippedContent = stripTags(note.content);
+              noteContent.innerHTML =
+                strippedContent
+                  .split("\n")[0]
+                  .substring(0, 20)
+                  .replace(
+                    new RegExp(query, "gi"),
+                    (match) => `<span class="highlight">${match}</span>`
+                  ) + "...";
+
+              const noteTime = document.createElement("p");
+              noteTime.className = "note-time";
+              noteTime.innerHTML = note.updated_at
+                ? `Updated at: ${formatTime(note.updated_at)}`
+                : `Created at: ${formatTime(note.created_at)}`;
+
+              noteHeader.appendChild(title);
+              noteHeader.appendChild(noteTag);
+              listItem.appendChild(noteHeader);
+              listItem.appendChild(noteContent);
+              listItem.appendChild(noteTime);
               notesList.appendChild(listItem);
 
-              listItem.style.setProperty("--bullet-color", note.color);
-
-              // Add event listeners to maintain hover behavior
-              listItem.addEventListener("mouseenter", function () {
-                const hrElement = this.querySelector("hr");
-                hrElement.style.borderColor = note.color;
-              });
-
-              listItem.addEventListener("mouseleave", function () {
-                const hrElement = this.querySelector("hr");
-                hrElement.style.borderColor = "#fff";
-              });
-
-              // Add click event listener to newly created note-item
-              listItem.addEventListener("click", function () {
-                const noteId = this.getAttribute("data-note-id");
-                window.location.href = `/note_viewer/${noteId}`;
-              });
+              const hr = document.createElement("hr");
+              notesList.appendChild(hr);
             });
+            const newNoteItems = notesList.querySelectorAll(".note-item");
+            attachEventListeners(newNoteItems);
           } else {
             notesList.innerHTML = `<p class="no-notes" style="color: #fff;">No notes found</p>`;
           }
@@ -96,11 +143,18 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       notesList.innerHTML = "";
       noteItems.forEach((item) => {
-        notesList.appendChild(item);
+        const clonedItem = item.cloneNode(true);
+        notesList.appendChild(clonedItem);
+        const hr = document.createElement("hr");
+        notesList.appendChild(hr);
       });
+      // Reattach event listeners to cloned items
+      const clonedNoteItems = notesList.querySelectorAll(".note-item");
+      attachEventListeners(clonedNoteItems);
     }
   });
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const quill = new Quill("#editor", {
@@ -197,19 +251,42 @@ document.addEventListener("DOMContentLoaded", function () {
             this.classList.remove("not-favorite");
             this.classList.add("favorite");
             this.innerHTML = '<i class="bx bxs-star"></i>';
+            showFeedback("Note added to favorites!", "#4CAF50");  
           } else {
             this.classList.remove("favorite");
             this.classList.add("not-favorite");
             this.innerHTML = '<i class="bx bx-star"></i>';
+            showFeedback("Note removed from favorites!", "#FF6347"); // Optional: Different color for removal
           }
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
         })
         .catch((error) => {
           console.error("Error:", error);
         });
     });
   });
+  function showFeedback(message, backgroundColor = "#4CAF50") {
+    const feedbackDiv = document.createElement("div");
+    feedbackDiv.innerText = message;
+    feedbackDiv.style.position = "fixed";
+    feedbackDiv.style.bottom = "20px";
+    feedbackDiv.style.right = "20px";
+    feedbackDiv.style.backgroundColor = backgroundColor; 
+    feedbackDiv.style.color = "#fff";
+    feedbackDiv.style.padding = "10px";
+    feedbackDiv.style.borderRadius = "5px";
+    feedbackDiv.style.zIndex = "1000";
+    feedbackDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+    
+    document.body.appendChild(feedbackDiv);
+    setTimeout(() => {
+      document.body.removeChild(feedbackDiv);
+    }, 2000);
+  }
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const addToDoButton = document.getElementById("addToDoButton");
@@ -228,17 +305,41 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            window.location.reload();
+            showFeedback(data.message, "#4CAF50"); // Green for success
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           } else {
-            console.error("Failed to add note to To-Dos.");
+            showFeedback(data.message, "#FF6347"); 
           }
         })
         .catch((error) => {
           console.error("Error:", error);
+          showFeedback("An error occurred. Please try again.", "#FF6347");
         });
     });
   }
+  function showFeedback(message, backgroundColor = "#4CAF50") {
+    const feedbackDiv = document.createElement("div");
+    feedbackDiv.innerText = message;
+    feedbackDiv.style.position = "fixed";
+    feedbackDiv.style.bottom = "20px";
+    feedbackDiv.style.right = "20px";
+    feedbackDiv.style.backgroundColor = backgroundColor;
+    feedbackDiv.style.color = "#fff";
+    feedbackDiv.style.padding = "10px";
+    feedbackDiv.style.borderRadius = "5px";
+    feedbackDiv.style.zIndex = "1000";
+    feedbackDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+    
+    document.body.appendChild(feedbackDiv);
+
+    setTimeout(() => {
+      document.body.removeChild(feedbackDiv);
+    }, 2000);
+  }
 });
+
 document.addEventListener("DOMContentLoaded", function () {
   const copyIcon = document.getElementById("copyIcon");
 
@@ -289,29 +390,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const openModalBtn = document.getElementById("openModalBtn");
-  const modal = document.getElementById("modal");
-  const closeModalBtn = document.getElementById("closeModalBtn");
-
-  // Open modal on icon click
-  openModalBtn.addEventListener("click", function () {
-    modal.classList.add("open");
-  });
-
-  // Close modal on close button click
-  closeModalBtn.addEventListener("click", function () {
-    modal.classList.remove("open");
-  });
-
-  // Close modal on clicking outside of the modal content
-  window.addEventListener("click", function (event) {
-    if (event.target === modal) {
-      modal.classList.remove("open");
-    }
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
   function updateNotificationBadge() {
     fetch("/get_notifications")
       .then((response) => response.json())
@@ -340,21 +418,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }, 3000);
 });
-function logoutUser() {
-  fetch("/auth/logout_idle", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": "{{ csrf_token() }}",
-    },
-  }).then((response) => {
-    if (response.ok) {
-      window.location.href = "/auth/login";
-    }
-  });
-}
-window.onload = resetTimer;
-document.onmousemove = resetTimer;
-document.onkeypress = resetTimer;
-document.onscroll = resetTimer;
-document.onclick = resetTimer;

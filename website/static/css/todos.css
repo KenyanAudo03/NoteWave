@@ -1,63 +1,42 @@
-.todos {
-  padding: 20px;
-}
-.todos h1 {
-  color: var(--background-);
+.checkbox {
+  -webkit-appearance: none;
+  outline: none;
+  background-color: #000000;
+  border: 1px solid #e3e3e3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  height: 30px;
 }
 
-#todosList li {
-  padding: 10px;
+.checkbox:focus,
+.checkbox:checked:focus,
+.checkbox:active,
+.checkbox:checked:active {
+  border-color: #ff7f50;
   cursor: pointer;
-  content: "•";
-  color: var(--background-);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-#todosList li:hover + hr {
-  border-color: var(--background-);
+.checkbox:checked {
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05),
+    inset 15px 10px -12px rgba(255, 255, 255, 0.1);
 }
 
-.todos p {
-  color: #fff;
-}
-.todo-title {
-  color: var(--background-);
-  font-size: 20px;
-  font-weight: bold;
-}
-.due-date {
-  color: #888 !important;
-  font-size: 0.9em;
-  margin-left: 10px;
-}
-#todosList input[type="checkbox"] {
-  margin-right: 10px;
-}
-
-.todo-actions {
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.delete-button,
-.edit-button {
-  background-color: transparent;
-  color: white;
-  padding: 10px 20px;
-  border: 1px solid var(--background-);
-  padding: 11px 16px;
-  cursor: pointer;
-  border-radius: 10px;
-}
-.todo-actions a {
-  text-decoration: none;
-}
-.delete-button:hover {
-  background: red;
-  color: #000;
-  border: none;
-}
-.edit-button:hover {
-  background: var(--background-);
-  color: #000;
+.checkbox:checked:after {
+  outline: none;
+  content: "✓";
+  color: #ff7f50;
+  font-size: 1.4em;
+  font-weight: 900;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

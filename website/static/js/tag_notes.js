@@ -38,7 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     const formattedDate = `${day}-${month}-${year}`;
-    const formattedTime = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
     return `${formattedDate} ${formattedTime}`;
   }
 
@@ -87,20 +91,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
               const title = document.createElement("h3");
               title.style.setProperty("--bookmark-", note.color);
-              title.innerHTML = note.title.split("\t")[0].substring(0, 10).replace(new RegExp(query, "gi"), (match) => `<span class="highlight">${match}</span>`) + "...";
+              title.innerHTML =
+                note.title
+                  .split("\t")[0]
+                  .substring(0, 10)
+                  .replace(
+                    new RegExp(query, "gi"),
+                    (match) => `<span class="highlight">${match}</span>`
+                  ) + "...";
 
               const noteTag = document.createElement("span");
               noteTag.className = "note-tag";
-              noteTag.innerHTML = `Tag: ${note.tagName.split("\n")[0].substring(0, 20)}`;
+              noteTag.innerHTML = `Tag: ${note.tagName
+                .split("\n")[0]
+                .substring(0, 20)}`;
 
               const noteContent = document.createElement("pre");
-              noteContent.className = "note-content"; 
+              noteContent.className = "note-content";
               const strippedContent = stripTags(note.content);
-              noteContent.innerHTML = strippedContent.split("\n")[0].substring(0, 27).replace(new RegExp(query, "gi"), (match) => `<span class="highlight">${match}</span>`) + "...";
+              noteContent.innerHTML =
+                strippedContent
+                  .split("\n")[0]
+                  .substring(0, 27)
+                  .replace(
+                    new RegExp(query, "gi"),
+                    (match) => `<span class="highlight">${match}</span>`
+                  ) + "...";
 
               const noteTime = document.createElement("p");
               noteTime.className = "note-time";
-              noteTime.innerHTML = note.updated_at ? `Updated at: ${formatTime(note.updated_at)}` : `Created at: ${formatTime(note.created_at)}`;
+              noteTime.innerHTML = note.updated_at
+                ? `Updated at: ${formatTime(note.updated_at)}`
+                : `Created at: ${formatTime(note.created_at)}`;
 
               noteHeader.appendChild(title);
               noteHeader.appendChild(noteTag);
@@ -110,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
               notesList.appendChild(listItem);
 
               const hr = document.createElement("hr");
-              notesList.appendChild(hr);  
+              notesList.appendChild(hr);
             });
             // Attach event listeners to newly created items
             const newNoteItems = notesList.querySelectorAll(".note-item");
@@ -123,9 +145,9 @@ document.addEventListener("DOMContentLoaded", function () {
       notesList.innerHTML = "";
       noteItems.forEach((item) => {
         const clonedItem = item.cloneNode(true);
-        notesList.appendChild(clonedItem); 
+        notesList.appendChild(clonedItem);
         const hr = document.createElement("hr");
-        notesList.appendChild(hr); 
+        notesList.appendChild(hr);
       });
       // Reattach event listeners to cloned items
       const clonedNoteItems = notesList.querySelectorAll(".note-item");
@@ -133,8 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
   const favoriteCountSpan = document.getElementById("favoriteCount");
@@ -170,7 +190,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setInterval(updateTodoCount, 60000);
 });
-
 
 document.addEventListener("DOMContentLoaded", function () {
   const editTagsModal = document.getElementById("editTagsModal");
@@ -360,108 +379,5 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event.key === "Escape") {
       modal.style.display = "none";
     }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".delete-tag").forEach((button) => {
-    button.addEventListener("click", function () {
-      const tagItem = this.closest(".tag-item");
-      const tagId = tagItem.getAttribute("data-tag-id");
-
-      if (confirm("Are you sure you want to delete this tag?")) {
-        fetch(`/delete_tag/${tagId}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              console.log("Tag deleted successfully:", data);
-              tagItem.remove(); 
-            } else {
-              console.error("Error deleting tag:", data);
-            }
-          })
-          .catch((error) => {
-            console.error("Error deleting tag:", error);
-          });
-      }
-    });
   });
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-  function updateNotificationBadge() {
-    fetch("/get_notifications")
-      .then((response) => response.json())
-      .then((data) => {
-        const badge = document.getElementById("notificationBadge");
-        if (badge) {
-          badge.textContent = data.unread_count;
-          badge.style.display = data.unread_count > 0 ? "inline" : "none";
-        }
-      })
-      .catch((error) => console.error("Error fetching notifications:", error));
-  }
-
-  updateNotificationBadge();
-
-  setInterval(updateNotificationBadge, 60000);
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleButton = document.querySelector(".toggle-tags");
-  const tagsWrapper = document.querySelector(".tags-wrapper");
-  const icon = toggleButton.querySelector("i");
-  toggleButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    tagsWrapper.classList.toggle("show");
-    if (tagsWrapper.classList.contains("show")) {
-      icon.classList.remove("fa-chevron-down");
-      icon.classList.add("fa-chevron-up");
-    } else {
-      icon.classList.remove("fa-chevron-up");
-      icon.classList.add("fa-chevron-down");
-    }
-  });
-  document.addEventListener("click", (event) => {
-    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
-      if (tagsWrapper.classList.contains("show")) {
-        tagsWrapper.classList.remove("show");
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
-      }
-    }
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  setTimeout(function () {
-    const alerts = document.querySelectorAll(".alert");
-    alerts.forEach((alert) => {
-      alert.classList.remove("show");
-      alert.classList.add("fade");
-      setTimeout(() => alert.remove(), 150);
-    });
-  }, 3000);
-});
-function logoutUser() {
-  fetch("/auth/logout_idle", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() }}"
-      }
-  }).then(response => {
-      if (response.ok) {
-        window.location.href = "/auth/login";
-      }
-  });
-}
-window.onload = resetTimer;
-document.onmousemove = resetTimer;
-document.onkeypress = resetTimer;
-document.onscroll = resetTimer;
-document.onclick = resetTimer;

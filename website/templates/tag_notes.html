@@ -5,31 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notes for {{ tag.name }}</title>
     <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    integrity="sha512-..."
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/user_home.css') }}"
-  />
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/todos.css') }}"
-  />
-  <link
-    href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-    rel="stylesheet"
-  />
-  <link
-  rel="icon"
-  href="{{ url_for('static', filename='img/notewave.ico') }}"
-  type="image/x-icon"
-/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tag_notes.css') }}"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
   </head>
   <body>
     <div class="messages-container">
@@ -610,6 +606,81 @@
           });
         });
       });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+  function updateNotificationBadge() {
+    fetch("/get_notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        const badge = document.getElementById("notificationBadge");
+        if (badge) {
+          badge.textContent = data.unread_count;
+          badge.style.display = data.unread_count > 0 ? "inline" : "none";
+        }
+      })
+      .catch((error) => console.error("Error fetching notifications:", error));
+  }
+
+  updateNotificationBadge();
+
+  setInterval(updateNotificationBadge, 60000);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButton = document.querySelector(".toggle-tags");
+  const tagsWrapper = document.querySelector(".tags-wrapper");
+  const icon = toggleButton.querySelector("i");
+  toggleButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    tagsWrapper.classList.toggle("show");
+    if (tagsWrapper.classList.contains("show")) {
+      icon.classList.remove("fa-chevron-down");
+      icon.classList.add("fa-chevron-up");
+    } else {
+      icon.classList.remove("fa-chevron-up");
+      icon.classList.add("fa-chevron-down");
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!toggleButton.contains(event.target) && !tagsWrapper.contains(event.target)) {
+      if (tagsWrapper.classList.contains("show")) {
+        tagsWrapper.classList.remove("show");
+        icon.classList.remove("fa-chevron-up");
+        icon.classList.add("fa-chevron-down");
+      }
+    }
+  });
+});
+document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".delete-tag").forEach((button) => {
+        button.addEventListener("click", function () {
+          const tagItem = this.closest(".tag-item");
+          const tagId = tagItem.getAttribute("data-tag-id");
+
+          if (confirm("Are you sure you want to delete this tag?")) {
+            fetch(`/delete_tag/${tagId}`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  console.log("Tag deleted successfully:", data);
+                  tagItem.remove();
+                } else {
+                  console.error("Error deleting tag:", data);
+                }
+              })
+              .catch((error) => {
+                console.error("Error deleting tag:", error);
+              });
+          }
+        });
+      });
+    });
     </script>
   </body>
 </html>

@@ -16,6 +16,10 @@
       href="{{ url_for('static', filename='css/user_home.css') }}"
     />
     <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/todos.css') }}"
+  />
+    <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
@@ -218,16 +222,7 @@
                 </p>
               </a>
             </li>
-            <li class="navbar-item">
-              {% if current_user.email_verified %}
-              <a
-                href="#"
-                class="navbar-link new-tag"
-                style="--background-: {{ current_user.generated_color }}"
-                ><p>New Tag</p></a
-              >
-              {% endif %}
-            </li>
+
 
             <li class="navbar-item">
               <a
@@ -244,11 +239,7 @@
           <section class="testimonials">
             <div class="tags">
               <p class="section-title">
-                BOOKMARKS {% if current_user.email_verified %}
-                <a href="" class="edit-notes" title="edit tags"
-                  ><i class="bx bxs-edit"></i
-                ></a>
-                {% endif %}
+                BOOKMARKS 
               </p>
               <div class="tags-wrapper">
                 {% for tag in tags %}
@@ -308,11 +299,13 @@
                   {% if todo.due_date %}
                       <span class="note-tag">
                           <input type="checkbox"
+                          class="checkbox"
                               {% if todo.is_completed or (todo.due_date and todo.due_date <= current_date) %}
                               checked
                               {% endif %}
                               onclick="updateTodoStatus({{ todo.id }}, this.checked)"
-                              id="todo-{{ todo.id }}" />
+                              id="todo-{{ todo.id }}" 
+                              disabled/>
                           Due: {{ todo.due_date.strftime('%Y-%m-%d') }}
                       </span>
                   {% endif %}
@@ -341,17 +334,22 @@
     </main>
     <script src="{{ url_for('static', filename='js/todos.js') }}"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const todosList = document.getElementById("todosList"); // Make sure to get the right element
+document.addEventListener("DOMContentLoaded", function () {
+  const todosList = document.getElementById("todosList");
 
-        todosList.addEventListener("click", function (event) {
-          const item = event.target.closest(".note-item"); // Match the class used in renderTodos
-          if (item) {
-            const noteId = item.getAttribute("data-note-id");
-            window.location.href = `/todo_viewer/${noteId}`;
-          }
-        });
-      });
+  todosList.addEventListener("click", function (event) {
+    const item = event.target.closest(".note-item"); 
+    if (event.target.matches('.edit-button, .delete-button, .delete-button *')) {
+      return; 
+    }
+
+    if (item) {
+      const noteId = item.getAttribute("data-note-id");
+      window.location.href = `/todo_viewer/${noteId}`;
+    }
+  });
+});
+
     </script>
     
     <script>
