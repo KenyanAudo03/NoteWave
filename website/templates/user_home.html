@@ -87,7 +87,7 @@
     <main>
       <aside class="sidebar" data-sidebar>
         <div class="sidebar-info">
-          <figure class="avatar-box">
+          <figure class="avatar-box"  id="avatar-box">
             {% if current_user.profile_picture %}
             <img
               src="/static/profile_pics/{{ current_user.profile_picture }}"
@@ -102,7 +102,8 @@
             >
             {% endif %}
           </figure>
-
+  
+          
           <div class="info-content">
             <h1 class="name" title="{{ current_user.full_name }}">
               {{ current_user.full_name }} {% if current_user.email_verified %}
@@ -370,7 +371,16 @@
                   ><i class="bx bxs-microphone-alt" title="Speech-Text"></i
                 ></a>
               </div>
+              <div class="scan-pdf">
+                <a
+                  href="{{url_for('views.pdf_text')}}"
+                  style="--background-: {{ current_user.generated_color }}"
+                  class="speech-text-toggle-add"
+                  ><i class='bx bx-scan' title="Scan-Pdf/Docz-Text"></i
+                ></a>
+              </div>
             </div>
+
 
             <div id="addTagModal" class="modal-overlay">
               <div class="modal-body">

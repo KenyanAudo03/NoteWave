@@ -68,6 +68,10 @@ def all_reviews():
     all_ratings = Rating.query.order_by(Rating.timestamp.desc()).all()
     return render_template("all_reviews.html", all_ratings=all_ratings)
 
+@views.route("/pdf-text")
+def pdf_text():
+    return render_template("scan.html")
+
 
 @views.route("/user_home")
 @login_required

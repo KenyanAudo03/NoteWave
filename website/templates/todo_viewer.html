@@ -302,7 +302,7 @@
           <p>Content:</p>
           <div id="editor">{{ todo.content | safe }}</div>
 
-          <small
+          <!-- <small
             style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
           >
             {% if todo.updated_at and todo.updated_at > todo.created_at %}
@@ -311,61 +311,63 @@
             endif %} {% if todo.due_date %}
             <br />Due on: {{ todo.due_date.strftime('%Y/%m/%d %H:%M') }} {%
             endif %}
-          </small>
+          </small> -->
+
+          {% if todo.subtasks %} {% for subtask in todo.subtasks %}
+          <article
+            class="about active"
+            style="margin-top: 6%; position: relative"
+            onclick="toggleDeleteOption({{ subtask.id }})"
+          >
+            <header
+              class="h2 article-title"
+              style="--bookmark-: {{ current_user.generated_color }}"
+            >
+              <h2>SubTask: <span>{{ subtask.title }}</span></h2>
+            </header>
+            <p>Content:</p>
+            <div id="editor2">{{ subtask.content | safe }}</div>
+            <!-- <small style="float: right; color: hsl(0, 0%, 84%); margin-top: -5px">
+              {% if subtask.updated_at and subtask.updated_at > subtask.created_at
+              %} Updated on: {{ subtask.updated_at.strftime('%Y/%m/%d %H:%M') }}
+              {% else %} Created on: {{ subtask.created_at.strftime('%Y/%m/%d
+              %H:%M') }} {% endif %}
+            </small> -->
+            <div
+              id="delete-option-{{ subtask.id }}"
+              style="
+                display: none;
+                text-align: center;
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+              "
+            >
+              <form
+                action="{{ url_for('views.delete_subtask', subtask_id=subtask.id) }}"
+                method="post"
+                onsubmit="return confirm('Are you sure you want to delete this subtask?');"
+              >
+                <button
+                  type="submit"
+                  style="
+                    color: red;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 34px;
+                  "
+                >
+                  <i class="bx bx-trash"></i>
+                </button>
+              </form>
+            </div>
+          </article>
+          {% endfor %} {% endif %}
         </article>
 
-        {% if todo.subtasks %} {% for subtask in todo.subtasks %}
-        <article
-          class="about active"
-          style="margin-top: 6%; position: relative"
-          onclick="toggleDeleteOption({{ subtask.id }})"
-        >
-          <header
-            class="h2 article-title"
-            style="--bookmark-: {{ current_user.generated_color }}"
-          >
-            <h2>SubTask: <span>{{ subtask.title }}</span></h2>
-          </header>
-          <p>Content:</p>
-          <div id="editor2">{{ subtask.content | safe }}</div>
-          <small style="float: right; color: hsl(0, 0%, 84%); margin-top: -5px">
-            {% if subtask.updated_at and subtask.updated_at > subtask.created_at
-            %} Updated on: {{ subtask.updated_at.strftime('%Y/%m/%d %H:%M') }}
-            {% else %} Created on: {{ subtask.created_at.strftime('%Y/%m/%d
-            %H:%M') }} {% endif %}
-          </small>
-          <div
-            id="delete-option-{{ subtask.id }}"
-            style="
-              display: none;
-              text-align: center;
-              position: absolute;
-              bottom: 10px;
-              left: 50%;
-              transform: translateX(-50%);
-            "
-          >
-            <form
-              action="{{ url_for('views.delete_subtask', subtask_id=subtask.id) }}"
-              method="post"
-              onsubmit="return confirm('Are you sure you want to delete this subtask?');"
-            >
-              <button
-                type="submit"
-                style="
-                  color: red;
-                  background: none;
-                  border: none;
-                  cursor: pointer;
-                  font-size: 34px;
-                "
-              >
-                <i class="bx bx-trash"></i>
-              </button>
-            </form>
-          </div>
-        </article>
-        {% endfor %} {% endif %}
+       
       </div>
       <div class="modal" id="scrollableModal">
         <div class="modal-content">

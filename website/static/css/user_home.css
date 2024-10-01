@@ -1994,6 +1994,14 @@ textarea.form-input::-webkit-resizer {
   justify-content: center;
   align-items: center;
 }
+.scan-pdf {
+  position: absolute;
+  bottom: 20px;
+  right: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .add-note-toggle {
   position: absolute;
@@ -2594,3 +2602,4 @@ textarea.form-input::-webkit-resizer {
 .toggle-add:hover {
   transform: scale(1.1);
 }
+

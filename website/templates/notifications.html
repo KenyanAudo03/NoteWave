@@ -224,26 +224,42 @@
         <article class="about active" id="notifications">
           <section class="testimonials">
             <div class="tags">
-              <p class="section-title">
-                BOOKMARKS
-              </p>
+              <p class="section-title">BOOKMARKS</p>
               <div class="tags-wrapper">
                 {% for tag in tags %}
-                <a href="{{ url_for('views.tag_notes', tag_id=tag.id) }}" class="tag" data-tag-id="{{ tag.id }}">
-                  <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
+                <a
+                  href="{{ url_for('views.tag_notes', tag_id=tag.id) }}"
+                  class="tag"
+                  data-tag-id="{{ tag.id }}"
+                >
+                  <i
+                    class="fas fa-bookmark"
+                    style="--bookmark-: {{ tag.color }}"
+                  ></i>
                   <span class="tag-name">{{ tag.name }}</span>
-                  <span class="note-count">({{ tag_counts.get(tag.id, 0) }})</span>
+                  <span class="note-count"
+                    >({{ tag_counts.get(tag.id, 0) }})</span
+                  >
                 </a>
                 {% endfor %}
               </div>
               <button class="toggle-tags">
-                <i class="fas fa-chevron-down"></i> 
+                <i class="fas fa-chevron-down"></i>
               </button>
             </div>
           </section>
           <header>
-            <h2 class="h2 article-title">Notifications</h2>
+            <h2 class="h2 article-title">
+              Notifications
+              <button
+                style="color: red; margin-left: 15px; font-size: 12px"
+                class="mark_all_read"
+              >
+                Mark All Read
+              </button>
+            </h2>
           </header>
+
           <section class="service">
             <div class="notication-list">
               <ul
@@ -255,14 +271,16 @@
                   class="notification-item {% if notification.is_read %}read{% endif %}"
                   data-notification-id="{{ notification.id }}"
                 >
-                  <p>{{ notification.message | striptags  | truncate(30, True, '...')}}...</p>
+                  <p>
+                    {{ notification.message | striptags | truncate(30, True,
+                    '...')}}...
+                  </p>
                   <p>
                     <small
                       >{{ notification.created_at.strftime('%Y-%m-%d %H:%M')
                       }}</small
                     >
                   </p>
-                  
                 </li>
                 <hr />
                 {% endfor %}

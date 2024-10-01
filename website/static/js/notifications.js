@@ -124,7 +124,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const notificationBell = document.querySelector(".notification a");
+  // Fix: Adding a dot for class selector
+  const notificationBell = document.querySelector(".mark_all_read");
 
   if (notificationBell) {
     notificationBell.addEventListener("click", function () {
@@ -141,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document
               .querySelectorAll(".notification-item")
               .forEach((item) => item.classList.add("read"));
-            updateNotificationBadge();
+            location.reload();
           } else {
             console.error("Failed to mark all notifications as read");
           }
@@ -152,6 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
 document.addEventListener("DOMContentLoaded", () => {
   const toggleButton = document.querySelector(".toggle-tags");
   const tagsWrapper = document.querySelector(".tags-wrapper");
