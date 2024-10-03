@@ -8,50 +8,114 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/setting.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
   </head>
   <body>
     <main>
+      <div class="messages-container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ category }} alert-dismissible fade show"
+          role="alert"
+        >
+          {% if category == 'success' %}
+          <i class="fas fa-check-circle"></i>
+          {% else %}
+          <i class="fas fa-times-circle"></i>
+          {% endif %} {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
+
       <div class="main-content">
         <nav class="navbar">
           <ul class="navbar-list">
             <li class="navbar-item">
-              <button class="navbar-link active" data-nav-link>Account</button>
+              <button class="navbar-link" data-nav-link>Dashboard.</button>
+            </li>
+            <li class="navbar-item">
+              <button class="navbar-link active" data-nav-link>Account.</button>
             </li>
 
             <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Notification</button>
+              <button class="navbar-link" data-nav-link>Notification.</button>
             </li>
 
             <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Billing</button>
+              <button class="navbar-link" data-nav-link>Billing.</button>
             </li>
 
             <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Privacy</button>
+              <button class="navbar-link" data-nav-link>Privacy.</button>
             </li>
 
             <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Data Management</button>
+              <button class="navbar-link" data-nav-link>Data.</button>
             </li>
           </ul>
         </nav>
 
-        <article class="about active" id="about">
+        <article class="about active" id="account.">
           <header>
             <h2 class="h2 article-title">Account</h2>
           </header>
           <section class="about-text">
-            <p>
-              Personal Information <br />
-              <small>Use a permanent address where you can receive mail.</small>
-            </p>
+            <h3>Personal Information <br /></h3>
+            <small>Use a permanent address where you can receive mail.</small>
+            <br />
             <div class="fields">
+              <form
+                id="profilePicForm"
+                action="{{ url_for('auth.update_profile_pic') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="picture-form"
+                style="display: none"
+              >
+                <input
+                  type="file"
+                  id="profilePic"
+                  name="profile_pic"
+                  accept="image/*"
+                  class="file-input"
+                />
+                <input
+                  type="hidden"
+                  id="userId"
+                  name="user_id"
+                  value="{{ current_user.id }}"
+                />
+                <button
+                  type="submit"
+                  class="submit-button"
+                  style="--background-color: {{ current_user.generated_color }}"
+                >
+                  Upload Pictures
+                </button>
+              </form>
               <figure class="avatar-box">
                 {% if current_user.profile_picture %}
                 <img
                   src="/static/profile_pics/{{ current_user.profile_picture }}"
                   alt="Profile Picture"
                   class="profile-image"
+                  id="profileImage"
                 />
                 {% else %}
                 <i
@@ -61,17 +125,52 @@
                 >
                 {% endif %}
               </figure>
+              <div id="imageModal" class="modal" style="display: none">
+                <img class="modal-content" id="modalImage" />
+              </div>
+
               <div class="form-place">
                 <p class="avatar-controls">
-                  <button class="update-profile">Change avatar</button>
+                  <button class="update-profile" id="editProfilePicButton">
+                    Change avatar
+                  </button>
                   <small>JPG, GIF, PNG, 5MB max</small>
                 </p>
-                <!-- <br /> -->
+                <div id="croppingContainer" style="display: none">
+                  <div class="cropbuttons">
+                    <button
+                      type="button"
+                      id="cropButton"
+                      class="crop-button"
+                      style="--background-: {{ current_user.generated_color }}"
+                    >
+                      Upload
+                    </button>
+                    <button
+                      type="button"
+                      id="cancelButton"
+                      class="cancel-button"
+                      style="--background-: {{ current_user.generated_color }}"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <div id="cropperWrapper">
+                    <img id="imageToCrop" src="" alt="Image to crop" />
+                    <div class="cropper-crop-box"></div>
+                  </div>
+                  <div id="progressContainer" style="display: none">
+                    <div class="progress-circle">
+                      <div class="progress-bar"></div>
+                      <div class="progress-text">0%</div>
+                    </div>
+                  </div>
+                </div>
                 <div class="form">
                   <form action="">
                     <div class="names">
                       <div class="name-field">
-                        <label for="firstName">First Name:</label>
+                        <label for="firstName">First Name</label>
                         <input
                           type="text"
                           id="firstName"
@@ -81,7 +180,7 @@
                         />
                       </div>
                       <div class="name-field">
-                        <label for="secondName">Second Name:</label>
+                        <label for="secondName">Second Name</label>
                         <input
                           type="text"
                           id="secondName"
@@ -104,7 +203,7 @@
                     >
 {{current_user.bio}}</textarea
                     >
-                    <label for="newEmail">Email:</label>
+                    <label for="newEmail">Email</label>
                     <input
                       type="text"
                       id="newEmail"
@@ -112,7 +211,7 @@
                       value="{{ current_user.email }}"
                       style="--background-: {{ current_user.generated_color }}"
                     />
-                    <label for="newUsername">New Username:</label>
+                    <label for="newUsername">New Username</label>
                     <input
                       type="text"
                       id="newUsername"
@@ -128,7 +227,7 @@
                       placeholder="Search for a time zone"
                       style="--background-: {{ current_user.generated_color }}"
                     />
-                    <label for="dobInput">Date of Birth:</label>
+                    <label for="dobInput">Date of Birth</label>
                     <input
                       type="text"
                       id="dobInput"
@@ -145,21 +244,46 @@
                       required
                       style="--background-: {{ current_user.generated_color }}"
                     >
-                      <option value="">Select Gender</option>
+                      <option value="">{{current_user.gender }}</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
-                      <option value="Non-Binary">Non-Binary</option>
                     </select>
-                    <div class="button-area">
-                      <button type="submit" class="submit">Save</button>
-                    </div>
+                    <label for="phoneNumber">Phone Number</label>
+                    <input
+                      type="text"
+                      id="phoneNumber"
+                      name="phone_number"
+                      placeholder="(555) 555-5555"
+                      readonly
+                      value="{{current_user.phone_number}}"
+                      style="--background-: {{ current_user.generated_color }}"
+                    />
+
+                    <button type="submit" class="submit">Save</button>
                   </form>
                 </div>
               </div>
             </div>
           </section>
+
           <section class="testimonials">
-            <h3 class="h3 testimonials-title">Change Password</h3>
+            <h3>Change Password</h3>
+            <div
+              id="notification"
+              style="
+                display: none;
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background-color: green;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                z-index: 1000;
+              "
+            >
+              Password has been successfully changed!
+            </div>
             <form
               id="passwordForm"
               action="{{ url_for('auth.update_password') }}"
@@ -172,13 +296,18 @@
                   id="currentPassword"
                   name="currentPassword"
                   style="--background-: {{ current_user.generated_color }}"
+                  required
                 />
                 <i
                   class="toggle-password fas fa-eye"
                   data-target="#currentPassword"
                 ></i>
               </div>
-              <div id="currentPasswordError" class="error-message"></div>
+              <div
+                id="currentPasswordError"
+                class="error-message"
+                style="color: red"
+              ></div>
 
               <label for="newPassword">New Password:</label>
               <div class="input-container">
@@ -187,13 +316,18 @@
                   id="newPassword"
                   name="newPassword"
                   style="--background-: {{ current_user.generated_color }}"
+                  required
                 />
                 <i
                   class="toggle-password fas fa-eye"
                   data-target="#newPassword"
                 ></i>
               </div>
-              <div id="newPasswordError" class="error-message"></div>
+              <div
+                id="newPasswordError"
+                class="error-message"
+                style="color: red"
+              ></div>
 
               <label for="confirmPassword">Confirm New Password:</label>
               <div class="input-container">
@@ -202,85 +336,971 @@
                   id="confirmPassword"
                   name="confirmPassword"
                   style="--background-: {{ current_user.generated_color }}"
+                  required
                 />
                 <i
                   class="toggle-password fas fa-eye"
                   data-target="#confirmPassword"
                 ></i>
               </div>
-              <div id="confirmPasswordError" class="error-message"></div>
+              <div
+                id="confirmPasswordError"
+                class="error-message"
+                style="color: red"
+              ></div>
+
+              <div
+                id="generalError"
+                class="error-message"
+                style="color: red; display: none"
+              ></div>
 
               <button
                 type="submit"
                 style="--background-: {{ current_user.generated_color }}"
+                class="submit"
               >
                 Update Password
               </button>
             </form>
-            </section>
+          </section>
+
+          <section class="about-text">
+            <div class="log-out">
+              <div class="title">
+                <h3>Log Out Other Sessions</h3>
+                <p>
+                  Please enter your password to confirm you would like to log
+                  out of your other sessions across all of your devices.
+                </p>
+              </div>
+              <div class="form-log_out">
+                <form
+                  action="{{ url_for('auth.logout_other_sessions') }}"
+                  method="POST"
+                  id="checkSessions"
+                >
+                  <label for="logOut">Your Password</label><br />
+                  <input
+                    type="password"
+                    id="sessionLog"
+                    name="password"
+                    required
+                  />
+                  <div
+                    id="sessionLogError"
+                    class="error-message"
+                    style="color: red; display: none"
+                  ></div>
+
+                  <button
+                    type="submit"
+                    style="--background: {{ current_user.generated_color }}"
+                    class="submit"
+                  >
+                    Log out sessions
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="about-text">
+            <div class="log-out">
+              <div class="title">
+                <h3>Deactivate Account</h3>
+                <p>
+                  Like want to deactivate your account? Instructions for
+                  activation will be sent to your mail.
+                </p>
+              </div>
+              <div class="form-log_out">
+                <form
+                  id="deactivateForm"
+                  action="{{ url_for('auth.deactivate_account') }}"
+                  method="POST"
+                >
+                  <label for="logOut">Your Password</label><br />
+                  <input type="password" id="logOut" name="password" required />
+                  <div
+                    id="passwordError"
+                    class="error-message"
+                    style="color: red; display: none"
+                  ></div>
+                  <button
+                    type="submit"
+                    style="--background-: {{ current_user.generated_color }}"
+                    class="submit"
+                  >
+                    Deactivate account
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="about-text last">
+            <div class="log-out">
+              <div class="title">
+                <h3>Delete account</h3>
+
+                <p>
+                  No longer want to use our service? You can delete your account
+                  here. This action is not reversible. All information related
+                  to this account will be deleted permanently.
+                </p>
+              </div>
+              <div class="form-log_out">
+                <form
+                  action="{{ url_for('auth.delete_account') }}"
+                  method="post"
+                  id="deleteForm"
+                >
+                  <label for="logOut">Your Password</label><br />
+                  <input type="password" id="delOut" required />
+                  <div
+                    id="deletepasswordError"
+                    class="error-message"
+                    style="color: red; display: none"
+                  ></div>
+
+                  <button
+                    type="submit"
+                    style="--background-: {{ current_user.generated_color }}"
+                    class="submit"
+                  >
+                    Delete account
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+          <div id="loadingOverlay" style="display: none">
+            <div class="spinner"></div>
+            <p>Deleting Data...</p>
+          </div>
+
+          <!-- <section id="activateUsers">
+            <h1>Manage Users</h1>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Full Name</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                  <th>Make Admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr>
+                  <td>{{ user.id }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.full_name }}</td>
+                  <td>
+                    {% if user.is_active %}
+                    <i
+                      class="fas fa-check-circle"
+                      style="color: green"
+                      title="Active"
+                    ></i>
+                    {% else %}
+                    <i
+                      class="fas fa-times-circle"
+                      style="color: red"
+                      title="Inactive"
+                    ></i>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not user.is_active %}
+                    <form
+                      action="{{ url_for('auth.activate_account', user_id=user.id) }}"
+                      method="post"
+                    >
+                      <button type="submit">Activate</button>
+                    </form>
+                    {% else %}
+                    <span>Active</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not user.is_admin %}
+                    <form
+                      action="{{ url_for('auth.make_admin', user_id=user.id) }}"
+                      method="post"
+                    >
+                      <button type="submit">Make Admin</button>
+                    </form>
+                    {% else %}
+                    <span>Admin</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </section> -->
+        </article>
+
+        <article class="portfolio" id="notification.">
+          <header>
+            <h2 class="h2 article-title">Notification</h2>
+          </header>
+          <!-- Email Notifications Section -->
+          <section id="emailNotifications" class="notification-section">
+            <h3 class="section-title">Email Notifications</h3>
+            <form
+              id="emailPreferencesForm"
+              method="POST"
+              action="{{ url_for('auth.update_email_preferences') }}"
+            >
+              <div class="form-group">
+                <label for="activity_alerts">
+                  <input
+                    type="checkbox"
+                    id="activity_alerts"
+                    name="activity_alerts"
+                    {%
+                    if
+                    current_user.email_preferences.activity_alerts
+                    %}
+                    checked
+                    {%
+                    endif
+                    %}
+                    onchange="this.form.submit();"
+                  />
+                  <span
+                    class="toggle-switch"
+                    style="margin-left: 8px; color: #fff"
+                  ></span>
+                  Receive Activity Alerts
+                </label>
+              </div>
+            </form>
+          </section>
+
+          <section id="pushNotifications" class="notification-section">
+            <h3 class="section-title">Push Notifications</h3>
+            <form
+              id="pushNotificationsForm"
+              method="POST"
+              action="{{ url_for('auth.update_push_notifications') }}"
+            >
+              <div class="form-group">
+                <label for="new_message">
+                  <input
+                    type="checkbox"
+                    id="new_message"
+                    name="new_message"
+                    {%
+                    if
+                    current_user.push_preferences.new_message
+                    %}
+                    checked
+                    {%
+                    endif
+                    %}
+                    onchange="this.form.submit();"
+                  />
+                  <span class="toggle-switch" style="margin-left: 8px"></span>
+                  New Message Alerts
+                </label>
+              </div>
+            </form>
+          </section>
+
+          <section class="account-activity-section">
+            <h3 class="section-title">Recent Account Activity (Logins)</h3>
+            <div class="table-container">
+              <table class="activity-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp ({{current_user.time_zone}})</th>
+                    <th>IP Address</th>
+                    <th>User Agent</th>
+                    <th>Browser</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for activity in current_user.login_activities %}
+                  <tr>
+                    <td>
+                      {{ activity.get_local_timestamp().strftime('%Y-%m-%d
+                      %H:%M:%S') }}
+                    </td>
+                    <td>{{ activity.ip_address }}</td>
+                    <td class="user-agent">{{ activity.user_agent }}</td>
+                    <td>{{ activity.browser_name }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </article>
+
+        <article class="portfolio" id="billing.">
+          <header>
+            <h2 class="h2 article-title">Billing</h2>
+          </header>
+
+          <section id="currentPlan">
+            <div class="card">
+              <h3 class="section-title-card">Your Current Plan</h3>
+              <p>
+                {% if current_user.email_verified %} You are currently on the
+                <strong>Free Plan</strong>. {% else %} You are currently on the
+                <strong>Testing Plan</strong>. Please verify your email to
+                upgrade your plan. {% endif %}
+              </p>
+
+              {% if not current_user.email_verified %}
+              <form
+                action="{{ url_for('auth.resend_verification') }}"
+                method="POST"
+              >
+                <div class="form-group-card">
+                  <label for="email">Email address:</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    value="{{ current_user.email }}"
+                    readonly
+                    required
+                    style="--background-color: {{ current_user.generated_color }}"
+                  />
+                </div>
+
+                <button type="submit" class="btn">
+                  Resend Verification Link
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </section>
+        </article>
+
+        <article class="portfolio" id="privacy.">
+          <header>
+            <h2 class="h2 article-title">Privacy</h2>
+          </header>
+
+          <section id="privacySettings" class="settings-card">
+            <div id="twoFactorAuthentication" class="setting-item">
+              <h3 class="setting-title">Two-Factor Authentication (2FA)</h3>
+              <div class="setting-content">
+                {% if current_user.is_2fa_enabled %}
+                <p>
+                  Your Two-Factor Authentication is enabled using
+                  <strong>{{ current_user.otp_method }}</strong>.
+                </p>
+                <form action="{{ url_for('auth.disable_2fa') }}" method="post">
+                  <button
+                    type="submit"
+                    id="disable2FAButton"
+                    class="btn-action"
+                    style="--background-color: {{ current_user.generated_color }}"
+                  >
+                    Disable 2FA
+                  </button>
+                </form>
+                {% else %}
+                <p>Your Two-Factor Authentication is not enabled.</p>
+
+                <form
+                  action="{{ url_for('auth.enable_2fa') }}"
+                  method="post"
+                  class="activeForm"
+                  id="2faForm"
+                >
+                  <div class="radio-group">
+                    <label class="radio-label">
+                      <input
+                        type="checkbox"
+                        name="otp_method"
+                        value="app"
+                        checked
+                      />
+                      Use Authenticator App
+                    </label>
+                    <label class="radio-label">
+                      <input type="checkbox" name="otp_method" value="email" />
+                      Send OTP to Email
+                    </label>
+                  </div>
+                </form>
+
+                {% endif %}
+                <div id="twoFAStatusMessage" class="status-message"></div>
+              </div>
+            </div>
+            <div class="setting-item" class="setting-item">
+              <h3 class="setting-title">Profile Visibility</h3>
+              <form
+                action="{{ url_for('auth.update_profile_visibility') }}"
+                method="POST"
+                class="activeForm"
+                id="visibilityForm"
+              >
+                <label class="radio-label">
+                  <input type="checkbox" name="profile_visibility"
+                  value="public" {% if current_user.profile_visibility ==
+                  "public" %} checked {% endif %} onclick="submitForm(this)">
+                  Public
+                </label>
+                <label class="radio-label">
+                  <input type="checkbox" name="profile_visibility"
+                  value="connections" {% if current_user.profile_visibility ==
+                  "connections" %} checked {% endif %}
+                  onclick="submitForm(this)"> Connections Only
+                </label>
+                <label class="radio-label">
+                  <input type="checkbox" name="profile_visibility"
+                  value="private" {% if current_user.profile_visibility ==
+                  "private" %} checked {% endif %} onclick="submitForm(this)">
+                  Private
+                </label>
+              </form>
+            </div>
+
+            <div class="setting-item">
+              <h3 class="setting-title">Encryption Password</h3>
+              {% if current_user.encrypt_password %}
+
+              <form
+                id="resetEncryptPasswordForm"
+                action="{{ url_for('auth.validate_reset_password') }}"
+                method="POST"
+              >
+                <p>
+                  Your encryption password is set. You can Change/Disable it
+                  here:
+                </p>
+                <div>
+                  <label for="reset_encrypt_password"
+                    >Reset Encryption Password:</label
+                  >
+                  <div class="password-container">
+                    <input
+                      type="password"
+                      name="reset_encrypt_password"
+                      id="reset_encrypt_password"
+                      required
+                      autocomplete="off"
+                      oninput="toggleEyeIcon(this, 'togglePasswordReset')"
+                    />
+                    <span
+                      id="togglePasswordReset"
+                      class="eye-icon-reset"
+                      onclick="togglePasswordVisibility('reset_encrypt_password', 'togglePasswordReset')"
+                      style="display: none; cursor: pointer"
+                    >
+                      👁️
+                    </span>
+                  </div>
+                </div>
+                <small id="reset-password-message" style="color: red"></small>
+                <button type="submit" class="btn-action-encrypt">
+                  Verify Password
+                </button>
+              </form>
+
+              <div id="changePasswordSection" style="display: none">
+                <h3>Change Password</h3>
+                <form
+                  action="{{ url_for('auth.change_encrypt_password') }}"
+                  method="POST"
+                  id="changeEncryptPasswordForm"
+                >
+                  <div>
+                    <label for="new_encrypt_password"
+                      >New Encryption Password:</label
+                    >
+                    <div class="password-container">
+                      <input
+                        type="password"
+                        name="new_encrypt_password"
+                        id="new_encrypt_password"
+                        required
+                        autocomplete="off"
+                        oninput="toggleEyeIcon(this, 'toggleNewPassword')"
+                      />
+                      <span
+                        id="toggleNewPassword"
+                        class="eye-icon"
+                        onclick="togglePasswordVisibility('new_encrypt_password', 'toggleNewPassword')"
+                        style="display: none; cursor: pointer"
+                      >
+                        👁️
+                      </span>
+                    </div>
+                    <small
+                      id="new-password-strength-message"
+                      style="color: red"
+                    ></small>
+                  </div>
+
+                  <div>
+                    <label for="confirm_encrypt_password"
+                      >Confirm Encryption Password:</label
+                    >
+                    <div class="password-container">
+                      <input
+                        type="password"
+                        name="confirm_encrypt_password"
+                        id="confirm_new_encrypt_password"
+                        required
+                        autocomplete="off"
+                        oninput="toggleEyeIcon(this, 'toggleConfirmNewPassword')"
+                      />
+                      <span
+                        id="toggleConfirmNewPassword"
+                        class="eye-icon"
+                        onclick="togglePasswordVisibility('confirm_new_encrypt_password', 'toggleConfirmNewPassword')"
+                        style="display: none; cursor: pointer"
+                      >
+                        👁️
+                      </span>
+                    </div>
+                    <small
+                      id="new-confirm-password-message"
+                      style="color: red"
+                    ></small>
+                  </div>
+
+                  <button type="submit" class="btn-action-encrypt">
+                    Change Encryption Password
+                  </button>
+                </form>
+
+                <form
+                  action="{{ url_for('auth.disable_encrypt_password') }}"
+                  method="POST"
+                  id="disableEncryptPasswordForm"
+                >
+                  <h3>Disable</h3>
+                  <button type="submit" class="btn-action-encrypt">
+                    Disable Encryption Password
+                  </button>
+                </form>
+              </div>
+              {% else %}
+
+              <p>
+                You do not have an encryption password set. Please set one
+                below:
+              </p>
+              <form
+                action="{{ url_for('auth.set_encrypt_password') }}"
+                method="POST"
+                id="setEncryptPasswordForm"
+              >
+                <div>
+                  <label for="new_encrypt_password"
+                    >Reset Encryption Password Key</label
+                  >
+                  <input
+                    type="text"
+                    name="new_encrypt_password"
+                    id="new_encrypt_password"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+                <div>
+                  <label for="set_encrypt_password"
+                    >Set Encryption Password</label
+                  >
+                  <div class="password-container">
+                    <input
+                      type="password"
+                      name="set_encrypt_password"
+                      id="set_encrypt_password"
+                      required
+                      autocomplete="off"
+                      oninput="toggleEyeIcon(this, 'togglePasswordSet')"
+                    />
+                    <span
+                      id="togglePasswordSet"
+                      class="eye-icon"
+                    
+                      onclick="togglePasswordVisibility('set_encrypt_password', 'togglePasswordSet')"
+                      style="display: none; cursor: pointer"
+                    >
+                      👁️
+                    </span>
+                  </div>
+                  <small
+                    id="password-strength-message"
+                    style="color: red"
+                  ></small>
+                </div>
+                <div>
+                  <label for="confirm_encrypt_password"
+                    >Confirm Encryption Password</label
+                  >
+                  <div class="password-container">
+                    <input
+                      type="password"
+                      name="confirm_encrypt_password"
+                      id="confirm_encrypt_password"
+                      required
+                      autocomplete="off"
+                      oninput="toggleEyeIcon(this, 'toggleConfirmPasswordSet')"
+                    />
+                    <span
+                      id="toggleConfirmPasswordSet"
+                      class="eye-icon"
+                      onclick="togglePasswordVisibility('confirm_encrypt_password', 'toggleConfirmPasswordSet')"
+                      style="display: none; cursor: pointer"
+                    >
+                      👁️
+                    </span>
+                  </div>
+                  <small
+                    id="confirm-password-message"
+                    style="color: red"
+                  ></small>
+                </div>
+                <button type="submit" class="btn-action-encrypt" id="submitBtn">
+                  Set Encryption Password
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </section>
+        </article>
+
+        <article class="portfolio" id="data.">
+          <header>
+            <h2 class="h2 article-title">Data</h2>
+          </header>
+
+          <section id="privacySettings" class="notification-section">
+            <h3 class="section-title">Export Your Notes</h3>
+
+            <form
+            action="{{ url_for('auth.export_notes') }}"
+            method="GET"
+            id="export-form"
+          >
+            <h3>Select Notes to Export:</h3>
+            <ul class="export_ul">
+              {% for note in current_user.notes %}
+              <li class="export_li">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="note_ids"
+                    value="{{ note.id }}"
+                  />
+                  <span>
+                    {{ note.title[:20] }}{% if note.title|length > 20 %}...{% endif %}
+                  </span>
+                </label>
+              </li>
+              {% endfor %}
+              
+              {% if current_user.encrypt_password %}
+              <li>
+                <label for="password">Enter Encryption Password:</label>
+                <input
+                  type="password"
+                  name="password"
+                  class="export_password"
+                  placeholder="Enter Encryption Password"
+                  required
+                  autocomplete="new-password"
+                />
+              </li>
+              {% endif %}
+            </ul>
+          
+            <button type="submit" class="export_button">
+              <i class="bx bx-note"></i>Export Selected Notes
+            </button>
+          
+            <div class="tips">
+              {% if current_user.encrypt_password %}
+                <p><strong>Note:</strong> You have an encryption password set. Please use it for exporting your notes securely.</p>
+              {% else %}
+                <p><strong>Tip:</strong> Set your encryption password in the Privacy tab to secure your exported notes.</p>
+              {% endif %}
+            </div>
+          </form>
+          
+          </section>
+
+          <section id="privacySettings" class="notification-section">
+            <h3 class="section-title">Export Your Details</h3>
+            <ul class="export-details-list">
+                <li>
+                    <a href="{{ url_for('auth.export_user_details') }}" class="export-link">
+                        <i class="bx bxs-user-detail"></i> 
+                        Export User Details
+                    </a>
+                </li>
+            </ul>
+        </section>
+        
+
+          <section id="privacySettings" class="notification-section">
+            <h3 class="section-title">Import Notes (File Format .json )</h3>
+            <form
+              id="import-form"
+              action="{{ url_for('auth.import_notes') }}"
+              method="POST"
+              enctype="multipart/form-data"
+              onsubmit="return validateForm()"
+            >
+              <input
+                type="file"
+                name="file"
+                id="file-input"
+                accept=".json,.enc"
+                required
+              />
+              <div id="password-container" style="display: none">
+                <label for="encryption_password"
+                  >Enter Encryption Password:</label
+                >
+                <input
+                  type="password"
+                  name="encryption_password"
+                  id="encryption-password"
+                  autocomplete="off"
+                />
+              </div>
+              <button
+                type="submit"
+                class="import_button"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+              <i class="bx bx-note"></i>Import Data
+              </button>
+            </form>
+          </section>
         </article>
       </div>
     </main>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-      crossorigin="anonymous"
-    ></script>
+    <script>
+      document
+        .getElementById("file-input")
+        .addEventListener("change", function () {
+          const fileExtension = this.value.split(".").pop().toLowerCase();
+          const passwordContainer =
+            document.getElementById("password-container");
+          const passwordInput = document.getElementById("encryption-password");
 
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-    ></script>
+          if (fileExtension === "enc") {
+            passwordContainer.style.display = "block"; // Show password input for encrypted files
+            passwordInput.setAttribute("required", "required"); // Make password required
+          } else {
+            passwordContainer.style.display = "none"; // Hide password input for JSON files
+            passwordInput.value = ""; // Clear password field
+            passwordInput.removeAttribute("required"); // Remove required attribute
+          }
+        });
+
+      function validateForm() {
+        const passwordContainer = document.getElementById("password-container");
+        const passwordInput = document.getElementById("encryption-password");
+
+        if (
+          passwordContainer.style.display === "block" &&
+          !passwordInput.value
+        ) {
+          alert("Please enter the encryption password."); // Show alert if password is missing for encrypted files
+          return false; // Prevent form submission
+        }
+        return true; // Allow form submission
+      }
+    </script>
+    <script>
+      function isStrongPassword(password) {
+        const minLength = 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+        const hasSpecialChars = /[!@#$%^&*]/.test(password);
+
+        return (
+          password.length >= minLength &&
+          hasUpperCase &&
+          hasLowerCase &&
+          (hasNumbers || hasSpecialChars)
+        );
+      }
+      function showErrorMessage(messageElement, message) {
+        messageElement.textContent = message;
+        setTimeout(() => {
+          messageElement.textContent = "";
+        }, 2000);
+      }
+
+      document
+        .getElementById("changeEncryptPasswordForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const newEncryptPassword = document.getElementById(
+            "new_encrypt_password"
+          ).value;
+          const confirmEncryptPassword = document.getElementById(
+            "confirm_new_encrypt_password"
+          ).value;
+          const strengthEncryptMessage = document.getElementById(
+            "new-password-strength-message"
+          );
+          const confirmEncryptMessage = document.getElementById(
+            "new-confirm-password-message"
+          );
+          let isValid = true;
+          strengthEncryptMessage.textContent = "";
+          confirmEncryptMessage.textContent = "";
+          if (!isStrongPassword(newEncryptPassword)) {
+            showErrorMessage(
+              strengthEncryptMessage,
+              "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and either a number or a special character (or both)."
+            );
+            isValid = false;
+          }
+          if (newEncryptPassword !== confirmEncryptPassword) {
+            showErrorMessage(confirmEncryptMessage, "Passwords do not match!");
+            isValid = false;
+          }
+          if (isValid) {
+            this.submit();
+          }
+        });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+          const alerts = document.querySelectorAll(".alert");
+          alerts.forEach((alert, index) => {
+            alert.classList.remove("show");
+            alert.classList.add("fade");
+            setTimeout(() => {
+              alert.remove();
+              if (index === alerts.length - 1) {
+                const messagesContainer = document.querySelector(
+                  ".messages-container"
+                );
+                if (messagesContainer) {
+                  messagesContainer.remove();
+                }
+              }
+            }, 150);
+          });
+        }, 3000);
+      });
+    </script>
+    <script>
+      function showErrorMessage(messageElement, message) {
+        messageElement.textContent = message;
+        setTimeout(() => {
+          messageElement.textContent = "";
+        }, 2000);
+      }
+
+      document
+        .getElementById("resetEncryptPasswordForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const resetPassword = document.getElementById(
+            "reset_encrypt_password"
+          ).value;
+          const resetMessage = document.getElementById(
+            "reset-password-message"
+          );
+
+          fetch("{{ url_for('auth.validate_reset_password') }}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ reset_encrypt_password: resetPassword }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok " + response.statusText
+                );
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.valid) {
+                document.getElementById(
+                  "resetEncryptPasswordForm"
+                ).style.display = "none";
+                document.getElementById("changePasswordSection").style.display =
+                  "block";
+                resetMessage.textContent = "";
+              } else {
+                showErrorMessage(
+                  resetMessage,
+                  "Invalid reset encryption password."
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "There was a problem with the fetch operation:",
+                error
+              );
+              showErrorMessage(
+                resetMessage,
+                "An error occurred. Please try again."
+              );
+            });
+        });
+    </script>
+    <script>
+      document
+        .querySelectorAll('input[name="otp_method"]')
+        .forEach(function (radio) {
+          radio.addEventListener("click", function () {
+            document.getElementById("2faForm").submit();
+          });
+        });
+    </script>
+    <script>
+      function submitForm(checkbox) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function (box) {
+          box.checked = false;
+        });
+        checkbox.checked = true;
+        document.getElementById("visibilityForm").submit();
+      }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script
       nomodule
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
     ></script>
     <script>
-      "use strict";
-      const elementToggleFunc = function (elem) {
-        elem.classList.toggle("active");
-      };
-      const sidebar = document.querySelector("[data-sidebar]");
-      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
-
-      sidebarBtn.addEventListener("click", function () {
-        elementToggleFunc(sidebar);
-      });
-      const testimonialsItem = document.querySelectorAll(
-        "[data-testimonials-item]"
-      );
-      const modalContainer = document.querySelector("[data-modal-container]");
-      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-      const overlay = document.querySelector("[data-overlay]");
-      const modalImg = document.querySelector("[data-modal-img]");
-      const modalTitle = document.querySelector("[data-modal-title]");
-      const modalText = document.querySelector("[data-modal-text]");
-      const testimonialsModalFunc = function () {
-        modalContainer.classList.toggle("active");
-        overlay.classList.toggle("active");
-      };
-      for (let i = 0; i < testimonialsItem.length; i++) {
-        testimonialsItem[i].addEventListener("click", function () {
-          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
-          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
-          modalTitle.innerHTML = this.querySelector(
-            "[data-testimonials-title]"
-          ).innerHTML;
-          modalText.innerHTML = this.querySelector(
-            "[data-testimonials-text]"
-          ).innerHTML;
-
-          testimonialsModalFunc();
-        });
-      }
-      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-      overlay.addEventListener("click", testimonialsModalFunc);
-    </script>
-    <script>
       document.addEventListener("DOMContentLoaded", () => {
         const navLinks = document.querySelectorAll("[data-nav-link]");
         const articles = document.querySelectorAll("article");
+
+        // Initially hide all articles except the first one
+        articles.forEach((article, index) => {
+          article.style.display = index === 0 ? "block" : "none";
+        });
 
         navLinks.forEach((link) => {
           link.addEventListener("click", () => {
@@ -294,115 +1314,6 @@
             }
           });
         });
-      });
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const filterButtons = document.querySelectorAll("[data-filter-btn]");
-        const selectItems = document.querySelectorAll("[data-select-item]");
-        const projectItems = document.querySelectorAll("[data-filter-item]");
-        const filterSelectButton = document.querySelector("[data-select]");
-        const selectValue = document.querySelector("[data-select-value]");
-        const selectList = document.querySelector(".select-list");
-
-        // Function to show all projects
-        function showAllProjects() {
-          projectItems.forEach((item) => {
-            item.classList.add("active");
-          });
-        }
-
-        // Function to filter projects based on category
-        function filterProjects(category) {
-          projectItems.forEach((item) => {
-            if (
-              category === "all" ||
-              item.getAttribute("data-category") === category
-            ) {
-              item.classList.add("active");
-            } else {
-              item.classList.remove("active");
-            }
-          });
-        }
-
-        // Event listener for filter buttons
-        filterButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            const category = this.textContent.toLowerCase();
-
-            // Remove active class from all filter buttons and add it to the clicked button
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            this.classList.add("active");
-
-            // Filter projects based on the selected category
-            if (category === "all") {
-              showAllProjects();
-            } else {
-              filterProjects(category);
-            }
-
-            // Update the select button's text for small screens
-            selectValue.textContent = this.textContent;
-            selectList.classList.remove("active");
-          });
-        });
-
-        // Event listener for select items
-        selectItems.forEach((item) => {
-          item.addEventListener("click", function () {
-            const category = this.textContent.toLowerCase();
-
-            // Remove active class from all filter buttons and add it to the selected button
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            const selectedButton = [...filterButtons].find(
-              (btn) => btn.textContent.toLowerCase() === category
-            );
-            if (selectedButton) selectedButton.classList.add("active");
-
-            // Filter projects based on the selected category
-            if (category === "all") {
-              showAllProjects();
-            } else {
-              filterProjects(category);
-            }
-
-            // Update the select button's text
-            selectValue.textContent = this.textContent;
-
-            // Close the select dropdown
-            selectList.classList.remove("active");
-          });
-        });
-
-        // Toggle select list visibility when the filter select button is clicked
-        filterSelectButton.addEventListener("click", function () {
-          selectList.classList.toggle("active");
-        });
-
-        // Show all projects by default on page load
-        showAllProjects();
-      });
-    </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const form = document.querySelector("[data-form]");
-        const inputs = form.querySelectorAll("[data-form-input]");
-        const submitButton = form.querySelector("[data-form-btn]");
-        function checkFormValidity() {
-          let allFilled = true;
-          inputs.forEach((input) => {
-            if (input.value.trim() === "") {
-              allFilled = false;
-            }
-          });
-          submitButton.disabled = !allFilled;
-        }
-        inputs.forEach((input) => {
-          input.addEventListener("input", checkFormValidity);
-        });
-        checkFormValidity();
       });
     </script>
   </body>

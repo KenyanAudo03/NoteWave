@@ -361,7 +361,7 @@ button:hover {
   width: auto;
   padding: 10px 20px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 12px;
   margin-bottom: 10px;
 }
 
@@ -378,6 +378,10 @@ button:hover {
   background-color: orange;
   color: #fff;
 }
+.alert-error {
+  background-color: red;
+  color: white;
+}
 
 .alert {
   transition: opacity 0.15s linear;
@@ -389,7 +393,6 @@ button:hover {
   margin-right: 8px;
   color: #fff;
 }
-
 .bxs-badge-check {
   font-size: 20px;
 }
@@ -435,7 +438,7 @@ button:hover {
 
 .resend-link {
   cursor: pointer;
-  background-color: #007bff; 
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -444,20 +447,10 @@ button:hover {
 }
 
 .resend-link:hover:not(.inactive) {
-  background-color: #0056b3; 
+  background-color: #0056b3;
 }
 
 .resend-link:disabled {
-  background-color: #ccc; 
+  background-color: #ccc;
   cursor: not-allowed;
-}
-@media (max-width: 500px) {
-  .alert {
-    display: inline-block;
-    width: auto;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
 }

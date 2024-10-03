@@ -62,12 +62,23 @@ document.addEventListener("DOMContentLoaded", function () {
       loader.style.display = "flex";
 
       setTimeout(() => {
-        form.submit(); // Proceed with form submission
-      }, 5000); // Simulate delay (e.g., for server response)
+        form.submit(); 
+      }, 5000); 
 
       setTimeout(() => {
-        loader.style.display = "none"; // Hide loader after submission
+        loader.style.display = "none"; 
       }, 5000);
     }
   });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(function () {
+    const alerts = document.querySelectorAll(".alert");
+    alerts.forEach((alert) => {
+      alert.classList.remove("show");
+      alert.classList.add("fade");
+      setTimeout(() => alert.remove(), 150);
+    });
+  }, 3000);
 });

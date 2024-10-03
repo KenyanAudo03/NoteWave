@@ -429,3 +429,60 @@ button:hover.off.signup {
 .form-element {
   margin-bottom: 1rem;
 }
+.email-verification-alert {
+  display: inline-block;
+  width: auto;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 20px;
+  margin-bottom: 10px;
+  background-color: red;
+}
+
+.messages-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 20px;
+  text-align: center;
+}
+
+.alert {
+  display: inline-block;
+  width: auto;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.alert-success {
+  background-color: green;
+  color: white;
+}
+
+.alert-danger {
+  background-color: red;
+  color: white;
+}
+.alert-warning {
+  background-color: orange;
+  color: #fff;
+}
+.alert-error{
+  background-color: red;
+  color: white;
+}
+
+.alert {
+  transition: opacity 0.15s linear;
+}
+.alert.fade {
+  opacity: 1;
+}
+.alert .fas {
+  margin-right: 8px;
+  color: #fff;
+}

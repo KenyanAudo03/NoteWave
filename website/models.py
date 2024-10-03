@@ -6,6 +6,7 @@ from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 import os
 import secrets
+from sqlalchemy import Integer, DateTime, Boolean
 
 
 class EmailVerificationToken(db.Model):
@@ -20,7 +21,6 @@ class EmailVerificationToken(db.Model):
         return datetime.utcnow() > self.expiration_date
 
 
-# User Model
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True)
@@ -41,10 +41,17 @@ class User(db.Model, UserMixin):
     is_2fa_enabled = db.Column(db.Boolean, default=False)
     otp_secret = db.Column(db.String(32), nullable=True)
     temp_otp = db.Column(db.String(32), nullable=True)
-    otp_method = db.Column(db.String(10), default='app')
+    otp_method = db.Column(db.String(10), nullable=True, default=None)
     is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
     email_verified = db.Column(db.Boolean, default=False)
+    failed_attempts = db.Column(Integer, default=0)
+    account_locked = db.Column(Boolean, default=False)
+    lockout_time = db.Column(DateTime)
+    profile_visibility = db.Column(db.String(20), default='public')
+
+    encrypt_password = db.Column(db.String(128), nullable=True) 
+    reset_encrypt_password = db.Column(db.String(128), nullable=True) 
 
     note_tags = db.relationship(
         "NoteTag", back_populates="user", cascade="all, delete-orphan"
@@ -72,12 +79,13 @@ class User(db.Model, UserMixin):
     email_verification_tokens = db.relationship(
         "EmailVerificationToken", back_populates="user", cascade="all, delete-orphan"
     )
+    sessions = db.relationship(
+        "UserSession", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def generate_verification_token(self):
         token = secrets.token_urlsafe(32)
-        expiration_date = datetime.utcnow() + timedelta(
-            hours=1
-        )
+        expiration_date = datetime.utcnow() + timedelta(hours=1)
         verification_token = EmailVerificationToken(
             token=token, user_id=self.id, expiration_date=expiration_date
         )
@@ -93,102 +101,146 @@ class User(db.Model, UserMixin):
         return None
 
 
-    def __init__(
-        self,
-        email,
-        password,
-        first_name,
-        second_name,
-        full_name,
-        user_name,
-        time_zone,
-        generated_color=None,
-        is_admin=False,
-    ):
-        self.email = email
-        self.password = password
-        self.first_name = first_name
-        self.second_name = second_name
-        self.full_name = full_name
-        self.profile_picture = None
-        self.cover_picture = None
-        self.user_name = user_name
-        self.phone_number = None
-        self.country_code = None
-        self.bio = None
-        self.time_zone = time_zone
-        self.date_birth = None
-        self.gender = None
-        self.generated_color = generated_color
-        self.is_active = True
-        self.is_admin = is_admin
+def __init__(
+    self,
+    email,
+    password,
+    first_name,
+    second_name,
+    full_name,
+    user_name,
+    time_zone,
+    encrypt_password,
+    reset_encrypt_password,
+    profile_visibility,
+    generated_color=None,
+    is_admin=False,
+    failed_attempts=0,
+    account_locked=False,
+    lockout_time=None,
+    otp_method=None,
+):
+    self.email = email
+    self.password = password
+    self.first_name = first_name
+    self.second_name = second_name
+    self.full_name = full_name
+    self.profile_picture = None
+    self.cover_picture = None
+    self.user_name = user_name
+    self.phone_number = None
+    self.country_code = None
+    self.bio = None
+    self.time_zone = time_zone
+    self.date_birth = None
+    self.gender = None
+    self.generated_color = generated_color
+    self.is_active = True
+    self.is_admin = is_admin
+    self.failed_attempts = failed_attempts
+    self.account_locked = account_locked
+    self.lockout_time = lockout_time
+    self.profile_visibility = profile_visibility
+    self.encrypt_password = encrypt_password
+    self.reset_encrypt_password = reset_encrypt_password
+    self.otp_method = otp_method
 
-        self.email_preferences = EmailPreferences()
-        self.push_preferences = PushPreferences(new_message=True)
+    self.email_preferences = EmailPreferences()
+    self.push_preferences = PushPreferences(new_message=True)
 
-    def serialize(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            "first_name": self.first_name,
-            "second_name": self.second_name,
-            "full_name": self.full_name,
-            "user_name": self.user_name,
-            "phone_number": self.phone_number,
-            "country_code": self.country_code,
-            "bio": self.bio,
-            "time_zone": self.time_zone,
-            "date_birth": self.date_birth,
-            "gender": self.gender,
-            "generated_color": self.generated_color,
-            "is_active": self.is_active,
-            "is_admin": self.is_admin,
-            "email_preferences": {
-                "newsletter": self.email_preferences.newsletter,
-                "activity_alerts": self.email_preferences.activity_alerts,
-            },
-            "push_preferences": {
-                "new_message": self.push_preferences.new_message,
-            },
-        }
+
+def serialize(self):
+    return {
+        "id": self.id,
+        "email": self.email,
+        "first_name": self.first_name,
+        "second_name": self.second_name,
+        "full_name": self.full_name,
+        "user_name": self.user_name,
+        "phone_number": self.phone_number,
+        "country_code": self.country_code,
+        "bio": self.bio,
+        "time_zone": self.time_zone,
+        "date_birth": self.date_birth,
+        "gender": self.gender,
+        "generated_color": self.generated_color,
+        "is_active": self.is_active,
+        "is_admin": self.is_admin,
+        "failed_attempts": self.failed_attempts, 
+        "account_locked": self.account_locked,  
+        "lockout_time": self.lockout_time, 
+        "profile_visibility" : self.profile_visibility, 
+        "encrypt_password" : self.encrypt_password, 
+        "reset_encrypt_password": self.reset_encrypt_password, 
+        "otp_method": self.otp_method,
+        "email_preferences": {
+            "newsletter": self.email_preferences.newsletter,
+            "activity_alerts": self.email_preferences.activity_alerts,
+        },
+        "push_preferences": {
+            "new_message": self.push_preferences.new_message,
+        },
+    }
+
+
+class UserSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    session_id = db.Column(db.String(128), nullable=False)
+    device_info = db.Column(db.String(256))
+    login_time = db.Column(db.DateTime, default=datetime.utcnow)
+    last_active_time = db.Column(db.DateTime, default=datetime.utcnow) 
+
+    user = db.relationship("User", back_populates="sessions")
+
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    edited_at = db.Column(db.DateTime, onupdate=datetime.utcnow)  
-    is_deleted = db.Column(db.Boolean, default=False)  
-    reply_to_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)  
-    reactions = db.Column(db.JSON, default=dict)  
+    edited_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False)
+    reply_to_id = db.Column(db.Integer, db.ForeignKey("message.id"), nullable=True)
+    reactions = db.Column(db.JSON, default=dict)
 
-    sender = db.relationship('User', foreign_keys=[sender_id])
-    receiver = db.relationship('User', foreign_keys=[receiver_id])
-    reply_to = db.relationship('Message', remote_side=[id], backref='replies', foreign_keys=[reply_to_id])
+    sender = db.relationship("User", foreign_keys=[sender_id])
+    receiver = db.relationship("User", foreign_keys=[receiver_id])
+    reply_to = db.relationship(
+        "Message", remote_side=[id], backref="replies", foreign_keys=[reply_to_id]
+    )
+
 
 class Friendship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Who sent the request
-    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Who received the request
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False
+    )  # Who sent the request
+    friend_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False
+    )  # Who received the request
     is_accepted = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = db.relationship('User', foreign_keys=[user_id])
-    friend = db.relationship('User', foreign_keys=[friend_id])
+    user = db.relationship("User", foreign_keys=[user_id])
+    friend = db.relationship("User", foreign_keys=[friend_id])
+
 
 class Following(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User who is following
-    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User being followed
+    follower_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False
+    )  # User who is following
+    followed_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False
+    )  # User being followed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    follower = db.relationship('User', foreign_keys=[follower_id])
-    followed = db.relationship('User', foreign_keys=[followed_id])
-
-
+    follower = db.relationship("User", foreign_keys=[follower_id])
+    followed = db.relationship("User", foreign_keys=[followed_id])
 
 
 class PushPreferences(db.Model):

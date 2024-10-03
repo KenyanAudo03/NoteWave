@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Sessions</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .active-sessions {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .table th, .table td {
+            text-align: center;
+        }
+        .terminate-button {
+            background-color: #dc3545; /* Bootstrap danger color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .terminate-button:hover {
+            background-color: #c82333; /* Darker shade on hover */
+        }
+        @media (max-width: 768px) {
+            .active-sessions {
+                padding: 15px;
+            }
+            .table th, .table td {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<section class="active-sessions">
+    <div class="title text-center">
+        <h3>Your Active Sessions</h3>
+        <p>You can log out of any active session below.</p>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Session ID</th>
+                <th scope="col">Device Info</th>
+                <th scope="col">Login Time</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td scope="row">{{ session.session_id }}</td>
+                <td>{{ session.device_info }}</td>
+                <td>{{ session.login_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                    <form action="{{ url_for('auth.terminate_session', session_id=session.session_id) }}" method="POST">
+                        <button type="submit" class="terminate-button">Log Out</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+<form
+action="{{ url_for('auth.set_encrypt_password') }}"
+method="POST"
+id="setEncryptPasswordForm"
+>
+<div>
+  <label for="new_encrypt_password"
+    >Reset Encryption Password Key</label
+  >
+  <input
+    type="text"
+    name="new_encrypt_password"
+    id="new_encrypt_password"
+    required
+  />
+</div>
+<div>
+  <label for="set_encrypt_password"
+    >Set Encryption Password</label
+  >
+  <div class="password-container">
+    <input
+      type="password"
+      name="set_encrypt_password"
+      id="set_encrypt_password"
+      required
+      oninput="toggleEyeIcon(this, 'togglePasswordSet')"
+    />
+    
+    <span
+      id="togglePasswordSet"
+      class="eye-icon"
+      onclick="togglePasswordVisibility('set_encrypt_password', 'togglePasswordSet')"
+      style="display: none; cursor: pointer"
+    >
+      👁️
+    </span>
+  </div>
+  <small
+    id="password-strength-message"
+    style="color: red"
+  ></small>
+</div>
+<div>
+  <label for="confirm_encrypt_password"
+    >Confirm Encryption Password</label
+  >
+  <div class="password-container">
+    <input
+      type="password"
+      name="confirm_encrypt_password"
+      id="confirm_encrypt_password"
+      required
+      oninput="toggleEyeIcon(this, 'toggleConfirmPasswordSet')"
+    />
+    <span
+      id="toggleConfirmPasswordSet"
+      class="eye-icon"
+      onclick="togglePasswordVisibility('confirm_encrypt_password', 'toggleConfirmPasswordSet')"
+      style="display: none; cursor: pointer"
+    >
+      👁️
+    </span>
+  </div>
+  <small
+    id="confirm-password-message"
+    style="color: red"
+  ></small>
+</div>
+<button type="submit" class="btn-action-encrypt" id="submitBtn">
+  Set Encryption Password
+</button>
+</form>

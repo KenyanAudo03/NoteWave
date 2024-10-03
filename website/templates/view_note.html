@@ -267,14 +267,14 @@
           </header>
           <p>Content:</p>
           <div id="editor">{{ note.content | safe}}</div>
-          <small
+          <!-- <small
             style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
           >
             {% if note.updated_at and note.updated_at > note.created_at %}
             Updated on: {{ note.updated_at.strftime('%Y/%m/%d %H:%M') }} {% else
             %} Created on: {{ note.created_at.strftime('%Y/%m/%d %H:%M') }} {%
             endif %}
-          </small>
+          </small> -->
         </article>
       </div>
 

@@ -21,7 +21,24 @@ import smtplib
 import pytz
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from .models import User, NoteTag, Notification, Note, LoginActivity, PushPreferences, Friendship, Message
+from .models import (
+    User,
+    UserSession,
+    NoteTag,
+    Notification,
+    Note,
+    LoginActivity,
+    PushPreferences,
+    Friendship,
+    Message,
+    EmailPreferences,
+    Following,
+    Rating,
+    ToDo,
+    Subtask,
+    EmailVerificationToken,
+    PasswordResetToken,
+)
 import random
 from pytz import timezone
 from datetime import datetime
@@ -35,9 +52,62 @@ import pyotp
 from website.decorators import admin_required
 from user_agents import parse
 from flask import session
+import uuid
+from functools import wraps
+from flask import session, redirect, url_for, flash
+import re
+from cryptography.fernet import Fernet
+import base64
+import hashlib
 
 
 auth = Blueprint("auth", __name__)
+
+
+SESSION_TIMEOUT = 30
+
+
+def session_timeout_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated:
+            active_session = UserSession.query.filter_by(
+                user_id=current_user.id
+            ).first()
+            if active_session:
+                if (datetime.utcnow() - active_session.last_active_time) > timedelta(
+                    minutes=SESSION_TIMEOUT
+                ):
+                    logout_user()
+                    flash(
+                        "You have been logged out due to inactivity.",
+                        category="warning",
+                    )
+                    return redirect(url_for("auth.login"))
+                else:
+                    active_session.last_active_time = datetime.utcnow()
+                    db.session.commit()
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def extract_browser_name(user_agent):
+    browser_patterns = [
+        (r"Chrome\/\d+.*Mobile", "Chrome Mobile"),
+        (r"Chrome\/\d+", "Chrome"),
+        (r"Firefox\/\d+", "Firefox"),
+        (r"Edg\/\d+", "Edge"),
+        (r"OPR\/\d+", "Opera"),
+        (r"Safari\/\d+", "Safari"),
+        (r"MSIE\s\d+", "Internet Explorer"),
+    ]
+
+    for pattern, browser in browser_patterns:
+        if re.search(pattern, user_agent):
+            return browser
+
+    return "Unknown"
 
 
 @auth.route("/login", methods=["GET", "POST"])
@@ -47,33 +117,175 @@ def login():
         password = request.form.get("password-login").strip()
         user = User.query.filter_by(email=email).first()
 
-        if user and check_password_hash(user.password, password):
-            if not user.is_active:
-                flash("Your account has been deactivated.", category="warning")
-                return redirect(url_for("auth.login"))
-
-            login_user(user, remember=True)
-            log_login_activity(user)
-
-            if user.is_2fa_enabled:
-                if user.otp_method == "email":
-                    otp, secret = generate_otp()
-                    user.temp_otp = otp
-                    user.otp_secret = secret
+        if user:
+            if user.account_locked:
+                if datetime.utcnow() < user.lockout_time:
+                    user_tz = (
+                        pytz.timezone(user.time_zone) if user.time_zone else pytz.utc
+                    )
+                    lockout_time_local = user.lockout_time.astimezone(user_tz)
+                    remaining_time = (
+                        lockout_time_local - datetime.now(user_tz)
+                    ).seconds // 60
+                    flash(
+                        f"Your account is temporarily locked. Please try again in {remaining_time} minutes.",
+                        category="error",
+                    )
+                    return redirect(url_for("auth.login"))
+                else:
+                    user.account_locked = False
+                    user.failed_attempts = 0
+                    user.lockout_time = None
                     db.session.commit()
-                    send_otp_email(user.email, otp)
-                    flash("A new OTP has been sent to your email.", category="info")
-                    return redirect(url_for("auth.verify_email_otp"))
 
-                elif user.otp_method == "app":
-                    return redirect(url_for("auth.verify_2fa"))
+            # Check password and handle successful login
+            if check_password_hash(user.password, password):
+                if not user.is_active:
+                    flash("Your account has been deactivated.", category="warning")
+                    return redirect(url_for("auth.login"))
 
-            flash("Login successful", category="success")
-            return redirect(url_for("views.user_home"))
+                # Login the user
+                login_user(user, remember=True)
 
-        flash("Login failed. Check your email and password.", category="error")
+                # Get user's timezone and current time
+                user_tz = pytz.timezone(user.time_zone) if user.time_zone else pytz.utc
+                current_time_in_user_tz = datetime.now(user_tz)
+
+                # Create a new session for the user
+                session_id = str(uuid.uuid4())
+                device_info = request.user_agent.string
+                new_session = UserSession(
+                    user_id=user.id,
+                    session_id=session_id,
+                    device_info=device_info,
+                    login_time=current_time_in_user_tz,
+                )
+                db.session.add(new_session)
+
+                # Log login activity
+                ip_address = request.remote_addr
+                user_agent = request.user_agent.string
+                browser_name = extract_browser_name(user_agent)
+
+                new_login_activity = LoginActivity(
+                    user_id=user.id,
+                    timestamp=current_time_in_user_tz,
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    time_zone=user.time_zone or "UTC",
+                    browser_name=browser_name,
+                )
+                db.session.add(new_login_activity)
+
+                db.session.commit()  # Commit both session and login activity changes
+
+                # **Send login activity email if user has opted in**
+                if user.email_preferences and user.email_preferences.activity_alerts:
+                    send_activity_alert(user, new_login_activity)
+
+                # Handle two-factor authentication
+                if user.is_2fa_enabled:
+                    if user.otp_method == "email":
+                        otp, secret = generate_otp()
+                        user.temp_otp = otp
+                        user.otp_secret = secret
+                        db.session.commit()
+                        send_otp_email(user.email, otp)
+                        flash("A new OTP has been sent to your email.", category="info")
+                        return redirect(url_for("auth.verify_email_otp"))
+                    elif user.otp_method == "app":
+                        return redirect(url_for("auth.verify_2fa"))
+
+                flash("Login successful", category="success")
+                return redirect(url_for("views.user_home"))
+
+            user.failed_attempts += 1
+            if user.failed_attempts >= 3:
+                user.account_locked = True
+                user.lockout_time = datetime.utcnow() + timedelta(minutes=30)
+                db.session.commit()
+                flash(
+                    "Account locked for 30 minutes due to multiple failed attempts.",
+                    category="error",
+                )
+            else:
+                db.session.commit()
+                flash("Login failed. Check your email and password.", category="error")
+
+        else:
+            flash("Login failed. Check your email and password.", category="error")
 
     return render_template("login.html")
+
+
+@auth.route("/update_profile_visibility", methods=["POST"])
+@login_required
+def update_profile_visibility():
+    visibility = request.form.get("profile_visibility")
+    if visibility in ["public", "connections", "private"]:
+        current_user.profile_visibility = visibility
+        db.session.commit()
+        flash("Profile visibility updated successfully!", "success")
+    else:
+        flash("Invalid profile visibility option selected.", "error")
+    return redirect(url_for("views.settings"))
+
+
+@auth.route("/validate_reset_password", methods=["POST"])
+@login_required
+def validate_reset_password():
+    data = request.get_json()
+    reset_encrypt_password = data.get("reset_encrypt_password")
+    if check_password_hash(current_user.encrypt_password, reset_encrypt_password):
+        return jsonify({"valid": True})
+    return jsonify({"valid": False})
+
+
+@auth.route("/change_encrypt_password", methods=["POST"])
+@login_required
+def change_encrypt_password():
+    new_encrypt_password = request.form.get("new_encrypt_password")
+    confirm_encrypt_password = request.form.get("confirm_encrypt_password")
+
+    if new_encrypt_password == confirm_encrypt_password:
+        current_user.encrypt_password = generate_password_hash(new_encrypt_password)
+        db.session.commit()
+        flash("Encryption password changed successfully!", "success")
+    else:
+        flash("Encryption passwords do not match!", "error")
+
+    return redirect(url_for("views.settings"))
+
+
+@auth.route("/disable_encrypt_password", methods=["POST"])
+@login_required
+def disable_encrypt_password():
+    current_user.encrypt_password = None
+    current_user.reset_encrypt_password = None
+    db.session.commit()
+    flash("Encryption password disabled successfully!", "success")
+
+    return redirect(url_for("views.settings"))
+
+
+@auth.route("/set_encrypt_password", methods=["POST"])
+@login_required
+def set_encrypt_password():
+    reset_encrypt_password = request.form.get("new_encrypt_password")
+    new_encrypt_password = request.form.get("set_encrypt_password")
+    confirm_encrypt_password = request.form.get("confirm_encrypt_password")
+
+    if new_encrypt_password == confirm_encrypt_password:
+        current_user.encrypt_password = generate_password_hash(new_encrypt_password)
+        current_user.reset_encrypt_password = generate_password_hash(
+            reset_encrypt_password
+        )
+        db.session.commit()
+        flash("Encryption password set successfully!", "success")
+    else:
+        flash("Encryption passwords do not match!", "error")
+
+    return redirect(url_for("views.settings"))
 
 
 @auth.route("/resend_otp_login", methods=["POST"])
@@ -154,32 +366,6 @@ def send_activity_alert(user, new_activity):
         print("Error: " + str(e))
 
 
-def log_login_activity(user):
-    try:
-        user_timezone = user.time_zone if user.time_zone else "UTC"
-        user_agent_string = request.headers.get("User-Agent")
-        user_agent = parse(user_agent_string)
-        browser_name = (
-            user_agent.browser.family if user_agent.browser.family else "Unknown"
-        )
-        new_activity = LoginActivity(
-            user_id=user.id,
-            timestamp=datetime.utcnow(),
-            ip_address=request.remote_addr,
-            user_agent=user_agent_string,
-            time_zone=user_timezone,
-            browser_name=browser_name,
-        )
-        db.session.add(new_activity)
-        db.session.commit()
-
-        if user.email_preferences.activity_alerts:
-            send_activity_alert(user, new_activity)
-
-    except Exception as e:
-        print(f"Error logging login activity: {e}")
-
-
 @auth.before_request
 def check_account_active():
     if current_user.is_authenticated and not current_user.is_active:
@@ -225,6 +411,8 @@ def make_admin(user_id):
 
 import urllib.parse
 from urllib.parse import urlparse, parse_qs, quote
+
+
 @auth.route("/enable_2fa", methods=["POST"])
 @login_required
 def enable_2fa():
@@ -234,15 +422,19 @@ def enable_2fa():
         current_user.otp_secret = totp.secret
         current_user.otp_method = "app"
         db.session.commit()
-        
+
         account_name = f"{ current_user.email}"
         issuer_name = f"NoteWave: {account_name}"
-        otp_uri = totp.provisioning_uri(quote(account_name), issuer_name=quote(issuer_name))
+        otp_uri = totp.provisioning_uri(
+            quote(account_name), issuer_name=quote(issuer_name)
+        )
         parsed_uri = urlparse(otp_uri)
         query_params = parse_qs(parsed_uri.query)
-        secret = query_params.get('secret', [''])[0]
-        session['otp_secret'] = secret
-        return redirect(url_for("auth.show_2fa_qr_code", otp_uri=otp_uri, secret=secret))
+        secret = query_params.get("secret", [""])[0]
+        session["otp_secret"] = secret
+        return redirect(
+            url_for("auth.show_2fa_qr_code", otp_uri=otp_uri, secret=secret)
+        )
     elif otp_method == "email":
         otp, secret = generate_otp()
         current_user.otp_secret = secret
@@ -253,11 +445,12 @@ def enable_2fa():
         flash("OTP has been sent to your email.", category="info")
         return redirect(url_for("auth.verify_otp"))
 
+
 @auth.route("/show_2fa_qr_code", methods=["GET"])
 @login_required
 def show_2fa_qr_code():
     otp_uri = request.args.get("otp_uri")
-    secret = session.get('otp_secret')  
+    secret = session.get("otp_secret")
     return render_template("setup2fa.html", otp_uri=otp_uri, secret=secret)
 
 
@@ -647,9 +840,42 @@ def check_email():
 @auth.route("/logout", methods=["POST"])
 @login_required
 def logout():
+    active_session = UserSession.query.filter_by(user_id=current_user.id).first()
+    if active_session:
+        db.session.delete(active_session)
+        db.session.commit()
     logout_user()
     flash("Logged out successfully", category="success")
     return redirect(url_for("auth.login"))
+
+
+@auth.route("/logout_other_sessions", methods=["POST"])
+@login_required
+def logout_other_sessions():
+    # No password check
+    sessions = UserSession.query.filter_by(user_id=current_user.id).all()
+    return render_template("active_sessions.html", sessions=sessions)
+
+
+@auth.route("/terminate_session/<session_id>", methods=["POST"])
+@login_required
+def terminate_session(session_id):
+    session_to_terminate = UserSession.query.filter_by(
+        user_id=current_user.id, session_id=session_id
+    ).first()
+    sessions = UserSession.query.filter_by(user_id=current_user.id).all()
+
+    if session_to_terminate:
+        db.session.delete(session_to_terminate)
+        db.session.commit()
+
+        flash("Session logged out successfully.", category="success")
+        return redirect(url_for("auth.login"))
+
+    else:
+        flash("Session not found.", category="error")
+
+    return render_template("active_sessions.html", sessions=sessions)
 
 
 @auth.route("/logout_idle", methods=["POST"])
@@ -665,13 +891,32 @@ def logout_idle():
 def delete_account():
     user = User.query.get(current_user.id)
     if user:
-
+        # Handle associated records
         NoteTag.query.filter_by(user_id=user.id).delete()
-
         Note.query.filter_by(user_id=user.id).delete()
+        PasswordResetToken.query.filter_by(user_id=user.id).delete()
+        EmailPreferences.query.filter_by(user_id=user.id).delete()
+        PushPreferences.query.filter_by(user_id=user.id).delete()
+        Friendship.query.filter(
+            (Friendship.user_id == user.id) | (Friendship.friend_id == user.id)
+        ).delete()
+        Following.query.filter(
+            (Following.follower_id == user.id) | (Following.followed_id == user.id)
+        ).delete()
+        LoginActivity.query.filter_by(user_id=user.id).delete()
+        Notification.query.filter_by(user_id=user.id).delete()
+        EmailVerificationToken.query.filter_by(user_id=user.id).delete()
+        messages = Message.query.filter(
+            (Message.sender_id == user.id) | (Message.receiver_id == user.id)
+        ).all()
 
+        for message in messages:
+            message.is_deleted = True
+
+        db.session.commit()
         db.session.delete(user)
         db.session.commit()
+
         logout_user()
         flash("Your account has been deleted successfully.", category="success")
         return redirect(url_for("auth.login"))
@@ -691,6 +936,16 @@ def deactivate_account():
     send_deactivation_email(user_email)
 
     return redirect(url_for("auth.login"))
+
+
+@auth.route("/check_password_delete_account", methods=["POST"])
+@login_required
+def check_password_delete_account():
+    password = request.form.get("password")
+    if check_password_hash(current_user.password, password):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "message": "Password Incorrect"}), 400
 
 
 def send_deactivation_email(user_email):
@@ -984,7 +1239,8 @@ def resend_verification():
     else:
         flash("This email is either not registered or already verified.", "error")
 
-    return redirect(url_for("views.user_home"))
+    # Redirecting to the settings page instead of user_home
+    return redirect(url_for("views.settings"))
 
 
 @auth.route("/terms", methods=["GET", "POST"])
@@ -1192,7 +1448,15 @@ def forgot_password():
     if request.method == "POST":
         email = request.form["email"]
         user = User.query.filter_by(email=email).first()
+
         if user:
+            if user.account_locked:
+                remaining_time = (user.lockout_time - datetime.utcnow()).seconds // 60
+                flash(
+                    f"Your account is temporarily locked. Please try again in {remaining_time} minutes.",
+                    category="error",
+                )
+                return redirect(url_for("auth.forgot_password"))
             token = generate_token()
             expiration = datetime.utcnow() + timedelta(hours=5)
             password_reset_token = PasswordResetToken(
@@ -1202,6 +1466,7 @@ def forgot_password():
             db.session.commit()
             send_password_reset_email(user, token)
         return redirect(url_for("auth.password_reset_email_sent"))
+
     return render_template("forgot_password.html")
 
 
@@ -1356,14 +1621,54 @@ def update_password():
     new_password = request.form.get("newPassword")
     confirm_password = request.form.get("confirmPassword")
 
+    if current_user.account_locked:
+        if datetime.utcnow() < current_user.lockout_time:
+            remaining_time = (
+                current_user.lockout_time - datetime.utcnow()
+            ).seconds // 60
+            return jsonify(
+                {
+                    "success": False,
+                    "message": f"Your account is temporarily locked. Please try again in {remaining_time} minutes.",
+                    "errorField": "generalError",
+                    "redirect": False,
+                }
+            )
+        else:
+            current_user.failed_attempts = 0
+            current_user.account_locked = False
+            current_user.lockout_time = None
+            db.session.commit()
+
     if not check_password_hash(current_user.password, current_password):
+        current_user.failed_attempts += 1
+
+        if current_user.failed_attempts >= 3:
+            current_user.account_locked = True
+            current_user.lockout_time = datetime.utcnow() + timedelta(minutes=30)
+            db.session.commit()
+            return jsonify(
+                {
+                    "success": False,
+                    "message": "Your account has been temporarily locked for 30 minutes due to multiple failed attempts.",
+                    "errorField": "generalError",
+                    "redirect": True,
+                }
+            )
+
+        db.session.commit()
         return jsonify(
             {
                 "success": False,
-                "message": "Current password is incorrect.",
+                "message": "Current password is incorrect. Attempts left: {}".format(
+                    3 - current_user.failed_attempts
+                ),
                 "errorField": "currentPasswordError",
+                "redirect": False,
             }
         )
+
+    current_user.failed_attempts = 0
 
     if not (8 <= len(new_password) <= 50):
         return jsonify(
@@ -1371,6 +1676,7 @@ def update_password():
                 "success": False,
                 "message": "New password must be between 8 and 50 characters long.",
                 "errorField": "newPasswordError",
+                "redirect": False,
             }
         )
 
@@ -1380,6 +1686,7 @@ def update_password():
                 "success": False,
                 "message": "New passwords do not match.",
                 "errorField": "confirmPasswordError",
+                "redirect": False,
             }
         )
 
@@ -1390,12 +1697,12 @@ def update_password():
     db.session.commit()
 
     user_time_zone = current_user.time_zone
-
     if user_time_zone:
         user_tz = timezone(user_time_zone)
         created_at = datetime.now(user_tz)
     else:
         created_at = datetime.utcnow()
+
     if current_user.push_preferences and current_user.push_preferences.new_message:
         notification = Notification(
             user_id=current_user.id, message="Password Updated", created_at=created_at
@@ -1676,32 +1983,70 @@ def calculate_age():
         return jsonify({"error": str(e)}), 500
 
 
-@auth.route("/export_notes", methods=["GET"])
+@auth.route("/export_notes", methods=["GET", "POST"])
 @login_required
 def export_notes():
-
     user = User.query.get(current_user.id)
+
     if not user:
         flash("User not found.", "error")
         return redirect(url_for("views.profile"))
 
-    notes = Note.query.filter_by(user_id=user.id).all()
-    notes_data = [note.serialize() for note in notes]
-    export_data = {"notes": notes_data}
-    json_data = json.dumps(export_data, indent=4)
-    buffer = io.BytesIO()
-    buffer.write(json_data.encode("utf-8"))
-    buffer.seek(0)
-    response = make_response(
-        send_file(
-            buffer,
-            as_attachment=True,
-            download_name="user_notes.json",
-            mimetype="application/json",
-        )
-    )
-    return response
+    selected_note_ids = request.args.getlist("note_ids")
 
+    if not selected_note_ids:
+        flash("No notes selected for export.", "error")
+        return redirect(url_for("views.settings"))
+
+    notes = Note.query.filter(Note.id.in_(selected_note_ids), Note.user_id == user.id).all()
+    notes_data = [note.serialize() for note in notes]
+
+    export_data = {
+        "notes": notes_data,
+        "user_id": user.id,
+        "user_hash": user.encrypt_password,
+    }
+    json_data = json.dumps(export_data, indent=4)
+
+    original_password = request.args.get("password", None)
+
+    try:
+        if user.encrypt_password and original_password:
+            if check_password_hash(user.encrypt_password, original_password):
+                key = base64.urlsafe_b64encode(hashlib.sha256(original_password.encode()).digest())
+                cipher = Fernet(key)
+                encrypted_data = cipher.encrypt(json_data.encode("utf-8"))
+
+                buffer = io.BytesIO()
+                buffer.write(encrypted_data)
+                buffer.seek(0)
+                return send_file(
+                    buffer,
+                    as_attachment=True,
+                    download_name="selected_notes.enc",
+                    mimetype="application/octet-stream",
+                )
+            else:
+                flash("Invalid encryption password. Please try again.", "error")
+                return redirect(url_for("views.settings"))
+        else:
+            buffer = io.BytesIO()
+            buffer.write(json_data.encode("utf-8"))
+            buffer.seek(0)
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name="selected_notes.json",
+                mimetype="application/json",
+            )
+
+    except Exception as e:
+        flash(f"An error occurred while exporting notes: {str(e)}", "error")
+        return redirect(url_for("views.settings"))
+
+
+
+import logging
 
 @auth.route("/export_user_details", methods=["GET"])
 @login_required
@@ -1709,35 +2054,48 @@ def export_user_details():
     user = User.query.get(current_user.id)
     if not user:
         flash("User not found.", "error")
-        return redirect(url_for("views.profile"))
-    user_data = user.serialize()
-    export_data = {"user": user_data}
-    json_data = json.dumps(export_data, indent=4)
-    buffer = io.BytesIO()
-    buffer.write(json_data.encode("utf-8"))
-    buffer.seek(0)
-    response = make_response(
-        send_file(
-            buffer,
-            as_attachment=True,
-            download_name="user_details.json",
-            mimetype="application/json",
+        return redirect(url_for("views.settings"))
+
+    try:
+        user_data = user.serialize()
+        export_data = {"user": user_data}
+        json_data = json.dumps(export_data, indent=4)
+
+        buffer = io.BytesIO()
+        buffer.write(json_data.encode("utf-8"))
+        buffer.seek(0)
+
+        response = make_response(
+            send_file(
+                buffer,
+                as_attachment=True,
+                download_name="user_details.json",
+                mimetype="application/json",
+            )
         )
-    )
-    return response
+        return response
+    except Exception as e:
+        logging.error(f"Error exporting user details: {str(e)}")
+        flash("An error occurred while exporting user details.", "error")
+        return redirect(url_for("views.settings"))
 
 
 @auth.route("/import_notes", methods=["POST"])
 @login_required
 def import_notes():
     file = request.files.get("file")
+    encryption_password = request.form.get(
+        "encryption_password"
+    )  # Get password from the form
 
     if not file:
         flash("No file uploaded.", "error")
         return redirect(url_for("views.settings"))
 
-    if not file.filename.endswith(".json"):
-        flash("Invalid file format. Please upload a JSON file.", "error")
+    # Determine the file extension
+    file_extension = file.filename.split(".")[-1].lower()
+    if file_extension not in ["json", "enc"]:
+        flash("Invalid file format. Please upload a JSON or encrypted file.", "error")
         return redirect(url_for("views.settings"))
 
     try:
@@ -1745,71 +2103,42 @@ def import_notes():
         temp_file_path = os.path.join("/tmp", filename)
         file.save(temp_file_path)
 
-        with open(temp_file_path, "r") as f:
-            notes_data = json.load(f)
-
-        notes = notes_data.get("notes", [])
-
-        if not isinstance(notes, list):
-            flash(
-                "Invalid JSON format. The file should contain a list of notes.", "error"
+        if file_extension == "enc":
+            # Handle encrypted file
+            with open(temp_file_path, "rb") as f:
+                encrypted_data = f.read()
+            key = base64.urlsafe_b64encode(
+                hashlib.sha256(encryption_password.encode()).digest()
             )
-            return redirect(url_for("views.settings"))
-        default_tag = NoteTag.query.filter_by(
-            name="Default", user_id=current_user.id
-        ).first()
-        if not default_tag:
-            default_tag = NoteTag(
-                name="Default", color="#e67e22", user_id=current_user.id
-            )
-            db.session.add(default_tag)
-            db.session.commit()
+            cipher = Fernet(key)
 
-        default_tag_id = default_tag.id
+            try:
+                decrypted_data = cipher.decrypt(encrypted_data)
+                export_data = json.loads(decrypted_data.decode("utf-8"))
+                notes_data = export_data.get("notes", [])
+                owner_id = export_data.get("user_id")
+                owner_hash = export_data.get("user_hash")
+                original_user = User.query.get(owner_id)
+                if not original_user or not check_password_hash(
+                    original_user.encrypt_password, encryption_password
+                ):
+                    flash("Incorrect encryption password for this note.", "error")
+                    return redirect(url_for("views.settings"))
+                import_notes_data(notes_data)
+                flash("Notes imported successfully from encrypted file.", "success")
 
-        for note_data in notes:
-            tag_id = note_data["tag_id"]
-
-            existing_tag = NoteTag.query.filter_by(
-                id=tag_id, user_id=current_user.id
-            ).first()
-            if not existing_tag:
-                tag_id = default_tag_id
-
-            note = Note.query.filter_by(id=note_data["id"]).first()
-            created_at = (
-                datetime.fromisoformat(note_data["created_at"])
-                if note_data.get("created_at")
-                else None
-            )
-            updated_at = (
-                datetime.fromisoformat(note_data["updated_at"])
-                if note_data.get("updated_at")
-                else None
-            )
-
-            if not note:
-                note = Note(
-                    id=note_data["id"],
-                    title=note_data["title"],
-                    content=note_data["content"],
-                    tag_id=tag_id,
-                    user_id=current_user.id,
-                    created_at=created_at,
-                    updated_at=updated_at,
-                    is_favorite=note_data.get("is_favorite", False),
+            except Exception as e:
+                flash(
+                    "Failed to decrypt the notes. Check your password or file.", "error"
                 )
-                db.session.add(note)
-            else:
-                note.title = note_data["title"]
-                note.content = note_data["content"]
-                note.tag_id = tag_id
-                note.updated_at = updated_at
-                note.is_favorite = note_data.get("is_favorite", False)
-                note.user_id = current_user.id
+                return redirect(url_for("views.settings"))
 
-        db.session.commit()
-        flash("Notes imported successfully in Default Bookmark.", "success")
+        else:
+            with open(temp_file_path, "r") as f:
+                notes_data = json.load(f).get("notes", [])
+
+            import_notes_data(notes_data)
+            flash("Notes imported successfully from JSON file.", "success")
 
     except json.JSONDecodeError:
         flash("Error decoding JSON file.", "error")
@@ -1822,9 +2151,67 @@ def import_notes():
     return redirect(url_for("views.settings"))
 
 
+def import_notes_data(notes):
+    default_tag = NoteTag.query.filter_by(
+        name="Default", user_id=current_user.id
+    ).first()
+    if not default_tag:
+        default_tag = NoteTag(name="Default", color="#e67e22", user_id=current_user.id)
+        db.session.add(default_tag)
+        db.session.commit()
+
+    default_tag_id = default_tag.id
+
+    for note_data in notes:
+        tag_id = note_data.get("tag_id")
+
+        existing_tag = NoteTag.query.filter_by(
+            id=tag_id, user_id=current_user.id
+        ).first()
+        if not existing_tag:
+            tag_id = default_tag_id
+
+        note = Note.query.filter_by(id=note_data["id"]).first()
+        created_at = (
+            datetime.fromisoformat(note_data["created_at"])
+            if note_data.get("created_at")
+            else None
+        )
+        updated_at = (
+            datetime.fromisoformat(note_data["updated_at"])
+            if note_data.get("updated_at")
+            else None
+        )
+
+        if not note:
+            note = Note(
+                id=note_data["id"],
+                title=note_data["title"],
+                content=note_data["content"],
+                tag_id=tag_id,
+                user_id=current_user.id,
+                created_at=created_at,
+                updated_at=updated_at,
+                is_favorite=note_data.get("is_favorite", False),
+            )
+            db.session.add(note)
+        else:
+            note.title = note_data["title"]
+            note.content = note_data["content"]
+            note.tag_id = tag_id
+            note.updated_at = updated_at
+            note.is_favorite = note_data.get("is_favorite", False)
+            note.user_id = current_user.id
+
+    db.session.commit()
+
+
 @auth.route("/update_email_preferences", methods=["POST"])
 @login_required
 def update_email_preferences():
+    if not current_user.email_preferences:
+        current_user.email_preferences = EmailPreferences(user_id=current_user.id)
+
     newsletter = request.form.get("newsletter") == "on"
     activity_alerts = request.form.get("activity_alerts") == "on"
 
@@ -1854,65 +2241,103 @@ def update_push_notifications():
     flash("Push notifications preferences updated.", category="success")
     return redirect(url_for("views.settings"))
 
-@auth.route('/select_chat', methods=['GET'])
+
+@auth.route("/select_chat", methods=["GET"])
 @login_required
 def select_chat():
-    users = User.query.filter(User.id != current_user.id).all()  
-    return render_template('list_message_user.html', users=users)
+    users = User.query.filter(User.id != current_user.id).all()
+    return render_template("list_message_user.html", users=users)
 
-@auth.route('/chat/<int:receiver_id>', methods=['GET', 'POST'])
+
+@auth.route("/chat/<int:receiver_id>", methods=["GET", "POST"])
 @login_required
 def chat(receiver_id):
     receiver = User.query.get_or_404(receiver_id)
-    
+
     # Fetch friendship status between current user and receiver
     friendship = Friendship.query.filter(
-        ((Friendship.user_id == current_user.id) & (Friendship.friend_id == receiver_id)) |
-        ((Friendship.user_id == receiver_id) & (Friendship.friend_id == current_user.id))
+        (
+            (Friendship.user_id == current_user.id)
+            & (Friendship.friend_id == receiver_id)
+        )
+        | (
+            (Friendship.user_id == receiver_id)
+            & (Friendship.friend_id == current_user.id)
+        )
     ).first()
-    
+
     # Get the sender's and receiver's timezone, fallback to UTC if not available
-    sender_tz = pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
+    sender_tz = (
+        pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
+    )
     receiver_tz = pytz.timezone(receiver.time_zone) if receiver.time_zone else pytz.UTC
 
-    if request.method == 'POST':
-        content = request.form.get('content')
-        
+    if request.method == "POST":
+        content = request.form.get("content")
+
         # Restrict multiple messages if no response from receiver yet
         if not friendship or not friendship.is_accepted:
-            last_message = Message.query.filter_by(sender_id=current_user.id, receiver_id=receiver_id)\
-                                        .order_by(Message.timestamp.desc()).first()
+            last_message = (
+                Message.query.filter_by(
+                    sender_id=current_user.id, receiver_id=receiver_id
+                )
+                .order_by(Message.timestamp.desc())
+                .first()
+            )
             # Check if the sender has already sent a message and the receiver hasn't replied yet
-            if last_message and not Message.query.filter_by(sender_id=receiver_id, receiver_id=current_user.id).first():
+            if (
+                last_message
+                and not Message.query.filter_by(
+                    sender_id=receiver_id, receiver_id=current_user.id
+                ).first()
+            ):
                 flash("You cannot send another message until the receiver replies.")
-                return redirect(url_for('auth.chat', receiver_id=receiver_id))
-    
+                return redirect(url_for("auth.chat", receiver_id=receiver_id))
+
         # Get the current time in the sender's timezone
         created_at = datetime.now(sender_tz)
-        
-        new_message = Message(sender_id=current_user.id, receiver_id=receiver_id, content=content, timestamp=created_at)
+
+        new_message = Message(
+            sender_id=current_user.id,
+            receiver_id=receiver_id,
+            content=content,
+            timestamp=created_at,
+        )
         db.session.add(new_message)
         db.session.commit()
 
         flash("Message sent.")
-        return redirect(url_for('auth.chat', receiver_id=receiver_id))
+        return redirect(url_for("auth.chat", receiver_id=receiver_id))
 
-    messages = Message.query.filter(
-        ((Message.sender_id == current_user.id) & (Message.receiver_id == receiver_id)) |
-        ((Message.sender_id == receiver_id) & (Message.receiver_id == current_user.id))
-    ).order_by(Message.timestamp.asc()).all()
+    messages = (
+        Message.query.filter(
+            (
+                (Message.sender_id == current_user.id)
+                & (Message.receiver_id == receiver_id)
+            )
+            | (
+                (Message.sender_id == receiver_id)
+                & (Message.receiver_id == current_user.id)
+            )
+        )
+        .order_by(Message.timestamp.asc())
+        .all()
+    )
 
     for message in messages:
         if message.sender_id == current_user.id:
-            message.local_timestamp = message.timestamp.astimezone(sender_tz)  # Sender's timezone
+            message.local_timestamp = message.timestamp.astimezone(
+                sender_tz
+            )  # Sender's timezone
         else:
-            message.local_timestamp = message.timestamp.astimezone(receiver_tz)  # Receiver's timezone
+            message.local_timestamp = message.timestamp.astimezone(
+                receiver_tz
+            )  # Receiver's timezone
 
-    return render_template('chat.html', receiver=receiver, messages=messages)
+    return render_template("chat.html", receiver=receiver, messages=messages)
 
 
-
-@auth.route('/edit_message/<int:message_id>', methods=['POST'])
+@auth.route("/edit_message/<int:message_id>", methods=["POST"])
 @login_required
 def edit_message(message_id):
     message = Message.query.get_or_404(message_id)
@@ -1920,9 +2345,9 @@ def edit_message(message_id):
     if message.sender_id != current_user.id:
         abort(403)  #
 
-    new_content = request.form.get('content')
-    message.content = new_content  
+    new_content = request.form.get("content")
+    message.content = new_content
     db.session.commit()
 
     flash("Message edited.")
-    return redirect(url_for('chat', receiver_id=message.receiver_id))
+    return redirect(url_for("chat", receiver_id=message.receiver_id))
