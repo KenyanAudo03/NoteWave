@@ -183,7 +183,7 @@ def login():
                 if user.email_preferences and user.email_preferences.activity_alerts:
                     send_activity_alert(user, new_login_activity)
 
-                # Handle two-factor authentication
+
                 if user.is_2fa_enabled:
                     if user.otp_method == "email":
                         otp, secret = generate_otp()
@@ -322,7 +322,7 @@ def verify_email_otp():
                 "2FA verification successful. You are now logged in.",
                 category="success",
             )
-            return redirect(url_for("views.user_home"))
+            return redirect(url_for("views.settings"))
         else:
             flash("Invalid OTP code. Please try again.", category="danger")
 
@@ -809,7 +809,7 @@ def disable_2fa():
     current_user.otp_secret = None
     db.session.commit()
     flash("2FA has been disabled.", category="success")
-    return redirect(url_for("views.user_home"))
+    return redirect(url_for("views.settings"))
 
 
 @auth.route("/verify_2fa", methods=["GET", "POST"])
@@ -1565,55 +1565,6 @@ def update_username():
     return redirect(url_for("views.settings"))
 
 
-@auth.route("/update_name", methods=["POST"])
-@login_required
-def update_name():
-    first_name = request.form.get("firstName")
-    second_name = request.form.get("secondName")
-
-    if not first_name or not second_name:
-        flash("Both first name and second name are required.", "error")
-        return redirect(url_for("views.settings"))
-
-    if not (
-        first_name.replace(" ", "").replace("-", "").isalpha()
-        and second_name.replace(" ", "").replace("-", "").isalpha()
-    ):
-        flash("Names can only contain letters, spaces, and hyphens.", "error")
-        return redirect(url_for("views.settings"))
-
-    if not (1 <= len(first_name) <= 50 and 1 <= len(second_name) <= 50):
-        flash("Names must be between 1 and 50 characters long.", "error")
-        return redirect(url_for("views.settings"))
-
-    try:
-        current_user.first_name = first_name
-        current_user.second_name = second_name
-        current_user.full_name = f"{first_name} {second_name}"
-        db.session.commit()
-        user_time_zone = current_user.time_zone
-
-        if user_time_zone:
-            user_tz = timezone(user_time_zone)
-            created_at = datetime.now(user_tz)
-        else:
-            created_at = datetime.utcnow()
-        if current_user.push_preferences and current_user.push_preferences.new_message:
-            notification = Notification(
-                user_id=current_user.id, message="Name Updated", created_at=created_at
-            )
-            db.session.add(notification)
-            db.session.commit()
-
-        flash("Name updated successfully!", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash("An error occurred while updating your name. Please try again.", "error")
-        print(f"Error: {e}")
-
-    return redirect(url_for("views.settings"))
-
-
 @auth.route("/update_password", methods=["POST"])
 @login_required
 def update_password():
@@ -1751,150 +1702,17 @@ def update_profile_pic():
             current_user.cover_picture = cover_pic_filename
 
     db.session.commit()
-    flash("Profile and/or cover picture updated successfully!", "success")
+    flash("Profile picture updated successfully!", "success")
     return redirect(url_for("views.settings"))
-
 
 def allowed_file(filename):
     allowed_extensions = {"png", "jpg", "jpeg", "gif"}
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
 
 
-# PN
-@auth.route("/update_phone_number", methods=["POST"])
-@login_required
-def update_phone_number():
-    user_id = request.form.get("user_id")
-    full_phone_number = request.form.get("phone_number")
-    country_code = request.form.get("country_code")
-    if full_phone_number.startswith(country_code):
-        phone_number = full_phone_number[len(country_code) :].strip()
-    else:
-        phone_number = full_phone_number
-
-    user = User.query.get(user_id)
-    if user:
-        user.phone_number = phone_number
-        user.country_code = country_code
-        db.session.commit()
-        user_time_zone = current_user.time_zone
-
-    if user_time_zone:
-        user_tz = timezone(user_time_zone)
-        created_at = datetime.now(user_tz)
-    else:
-        created_at = datetime.utcnow()
-
-    if current_user.push_preferences and current_user.push_preferences.new_message:
-        notification = Notification(
-            user_id=current_user.id,
-            message="Phone Number Updated",
-            created_at=created_at,
-        )
-        db.session.add(notification)
-        db.session.commit()
-        return "Phone number updated successfully", 200
-    return "Failed to update phone number", 400
 
 
 from datetime import datetime
-
-
-# DOB
-@auth.route("/update_date_of_birth", methods=["POST"])
-@login_required
-def update_date_of_birth():
-    dob = request.form.get("date_of_birth")
-    try:
-        dob_date = datetime.strptime(dob, "%Y-%m-%d").date()
-        today = datetime.today().date()
-        if dob_date > today:
-            return "Date of birth cannot be in the future.", 400
-    except ValueError:
-        return "Invalid date format.", 400
-
-    user = User.query.get(current_user.id)
-    if user:
-        user.date_birth = dob
-        db.session.commit()
-    user_time_zone = current_user.time_zone
-
-    if user_time_zone:
-        user_tz = timezone(user_time_zone)
-        created_at = datetime.now(user_tz)
-    else:
-        created_at = datetime.utcnow()
-
-    if current_user.push_preferences and current_user.push_preferences.new_message:
-        notification = Notification(
-            user_id=current_user.id, message="DOB Updated", created_at=created_at
-        )
-        db.session.add(notification)
-        db.session.commit()
-        return "Date of birth updated successfully", 200
-
-    return "Failed to update date of birth", 400
-
-
-@auth.route("/update_time_zone", methods=["POST"])
-@login_required
-def update_time_zone():
-    time_zone = request.form.get("time_zone")
-
-    if not time_zone:
-        return jsonify({"error": "Time zone is required"}), 400
-
-    user = User.query.get(current_user.id)
-    if user:
-        user.time_zone = time_zone
-        db.session.commit()
-
-    user_time_zone = current_user.time_zone
-
-    if user_time_zone:
-        user_tz = timezone(user_time_zone)
-        created_at = datetime.now(user_tz)
-    else:
-        created_at = datetime.utcnow()
-    if current_user.push_preferences and current_user.push_preferences.new_message:
-        notification = Notification(
-            user_id=current_user.id, message="Timezone Updated", created_at=created_at
-        )
-        db.session.add(notification)
-        db.session.commit()
-    return jsonify({"message": "Time zone updated successfully"}), 200
-
-
-@auth.route("/update_bio", methods=["POST"])
-@login_required
-def update_bio():
-    bio = request.form.get("bio")
-
-    if not bio:
-        return jsonify({"error": "Bio is required"}), 400
-
-    user = User.query.get(current_user.id)
-    if user:
-        user.bio = bio
-        db.session.commit()
-    user_time_zone = current_user.time_zone
-
-    if user_time_zone:
-        user_tz = timezone(user_time_zone)
-        created_at = datetime.now(user_tz)
-    else:
-        created_at = datetime.utcnow()
-
-    if current_user.push_preferences and current_user.push_preferences.new_message:
-        notification = Notification(
-            user_id=current_user.id, message="Bio Updated", created_at=created_at
-        )
-        db.session.add(notification)
-        db.session.commit()
-        return jsonify({"message": "Bio updated successfully"}), 200
-
-    return jsonify({"error": "User not found"}), 404
-
 
 @auth.route("/update_generated_color", methods=["POST"])
 @login_required
@@ -1927,33 +1745,7 @@ def update_generated_color():
     return jsonify({"error": "Failed to update color"}), 400
 
 
-@auth.route("/update_gender", methods=["POST"])
-@login_required
-def update_gender():
-    gender = request.form.get("gender")
-    if not gender:
-        return jsonify({"error": "Gender is required"}), 400
 
-    user = User.query.get(current_user.id)
-    if user:
-        user.gender = gender
-        db.session.commit()
-        user_time_zone = current_user.time_zone
-
-        if user_time_zone:
-            user_tz = timezone(user_time_zone)
-            created_at = datetime.now(user_tz)
-        else:
-            created_at = datetime.utcnow()
-
-        if current_user.push_preferences and current_user.push_preferences.new_message:
-            notification = Notification(
-                user_id=current_user.id, message="Gender Updated", created_at=created_at
-            )
-            db.session.add(notification)
-            db.session.commit()
-        return jsonify({"message": "Gender updated successfully"}), 200
-    return jsonify({"error": "Failed to update gender"}), 400
 
 
 @auth.route("/calculate_age", methods=["GET"])
@@ -1981,6 +1773,30 @@ def calculate_age():
         return jsonify({"age": age})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def generate_encrypted_filename(user_first_name):
+    """
+    Generates a unique filename for encrypted notes using the user's first name
+    and a timestamp or UUID to ensure uniqueness.
+    """
+    safe_first_name = secure_filename(user_first_name)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    unique_id = str(uuid.uuid4())
+
+    filename = f"{safe_first_name}_{timestamp}_{unique_id}.enc"
+    return filename
+
+def generate_json_filename(user_first_name):
+    """
+    Generates a unique filename for encrypted notes using the user's first name
+    and a timestamp or UUID to ensure uniqueness.
+    """
+    safe_first_name = secure_filename(user_first_name)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    unique_id = str(uuid.uuid4())
+
+    filename = f"{safe_first_name}_{timestamp}_{unique_id}.json"
+    return filename
 
 
 @auth.route("/export_notes", methods=["GET", "POST"])
@@ -2023,7 +1839,7 @@ def export_notes():
                 return send_file(
                     buffer,
                     as_attachment=True,
-                    download_name="selected_notes.enc",
+                    download_name=generate_encrypted_filename(current_user.first_name),
                     mimetype="application/octet-stream",
                 )
             else:
@@ -2036,7 +1852,7 @@ def export_notes():
             return send_file(
                 buffer,
                 as_attachment=True,
-                download_name="selected_notes.json",
+                download_name=generate_json_filename(current_user.first_name),
                 mimetype="application/json",
             )
 
@@ -2045,9 +1861,7 @@ def export_notes():
         return redirect(url_for("views.settings"))
 
 
-
 import logging
-
 @auth.route("/export_user_details", methods=["GET"])
 @login_required
 def export_user_details():
@@ -2057,42 +1871,38 @@ def export_user_details():
         return redirect(url_for("views.settings"))
 
     try:
-        user_data = user.serialize()
+        user_data = user.serialize() 
         export_data = {"user": user_data}
         json_data = json.dumps(export_data, indent=4)
-
         buffer = io.BytesIO()
         buffer.write(json_data.encode("utf-8"))
         buffer.seek(0)
-
         response = make_response(
             send_file(
                 buffer,
                 as_attachment=True,
-                download_name="user_details.json",
+                download_name=f"{current_user.user_name}_NotewaveDetails.json",
                 mimetype="application/json",
             )
         )
         return response
+
     except Exception as e:
         logging.error(f"Error exporting user details: {str(e)}")
-        flash("An error occurred while exporting user details.", "error")
+        flash(f"An error occurred while exporting user details: {str(e)}", "error")
         return redirect(url_for("views.settings"))
+
 
 
 @auth.route("/import_notes", methods=["POST"])
 @login_required
 def import_notes():
     file = request.files.get("file")
-    encryption_password = request.form.get(
-        "encryption_password"
-    )  # Get password from the form
+    encryption_password = request.form.get("encryption_password")
 
     if not file:
         flash("No file uploaded.", "error")
         return redirect(url_for("views.settings"))
-
-    # Determine the file extension
     file_extension = file.filename.split(".")[-1].lower()
     if file_extension not in ["json", "enc"]:
         flash("Invalid file format. Please upload a JSON or encrypted file.", "error")
@@ -2102,11 +1912,10 @@ def import_notes():
         filename = secure_filename(file.filename)
         temp_file_path = os.path.join("/tmp", filename)
         file.save(temp_file_path)
-
         if file_extension == "enc":
-            # Handle encrypted file
             with open(temp_file_path, "rb") as f:
                 encrypted_data = f.read()
+
             key = base64.urlsafe_b64encode(
                 hashlib.sha256(encryption_password.encode()).digest()
             )
@@ -2115,28 +1924,35 @@ def import_notes():
             try:
                 decrypted_data = cipher.decrypt(encrypted_data)
                 export_data = json.loads(decrypted_data.decode("utf-8"))
+                if not validate_import_data(export_data):
+                    flash("Invalid file structure. Please provide a valid notes file.", "error")
+                    return redirect(url_for("views.settings"))
+
                 notes_data = export_data.get("notes", [])
                 owner_id = export_data.get("user_id")
-                owner_hash = export_data.get("user_hash")
                 original_user = User.query.get(owner_id)
+
                 if not original_user or not check_password_hash(
                     original_user.encrypt_password, encryption_password
                 ):
                     flash("Incorrect encryption password for this note.", "error")
                     return redirect(url_for("views.settings"))
+
                 import_notes_data(notes_data)
                 flash("Notes imported successfully from encrypted file.", "success")
 
             except Exception as e:
-                flash(
-                    "Failed to decrypt the notes. Check your password or file.", "error"
-                )
+                flash("Failed to decrypt the notes. Check your password or file.", "error")
                 return redirect(url_for("views.settings"))
 
         else:
             with open(temp_file_path, "r") as f:
-                notes_data = json.load(f).get("notes", [])
+                export_data = json.load(f)
+            if not validate_import_data(export_data):
+                flash("Invalid JSON file structure. Please provide a valid notes file.", "error")
+                return redirect(url_for("views.settings"))
 
+            notes_data = export_data.get("notes", [])
             import_notes_data(notes_data)
             flash("Notes imported successfully from JSON file.", "success")
 
@@ -2151,6 +1967,28 @@ def import_notes():
     return redirect(url_for("views.settings"))
 
 
+def validate_import_data(data):
+    """
+    Validates the structure of the imported data to ensure it contains
+    notes and other required fields in the correct format.
+    """
+    if not isinstance(data, dict):
+        return False
+    notes = data.get("notes", None)
+    if notes is None or not isinstance(notes, list):
+        return False
+    for note in notes:
+        if not isinstance(note, dict):
+            return False
+        required_fields = ["title", "content"]
+        if not all(field in note for field in required_fields):
+            return False
+    return True
+
+
+from datetime import datetime
+import pytz
+
 def import_notes_data(notes):
     default_tag = NoteTag.query.filter_by(
         name="Default", user_id=current_user.id
@@ -2161,49 +1999,30 @@ def import_notes_data(notes):
         db.session.commit()
 
     default_tag_id = default_tag.id
+    user_timezone = pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
+    current_time = datetime.now(user_timezone) 
 
     for note_data in notes:
         tag_id = note_data.get("tag_id")
-
-        existing_tag = NoteTag.query.filter_by(
-            id=tag_id, user_id=current_user.id
-        ).first()
+        existing_tag = NoteTag.query.filter_by(id=tag_id, user_id=current_user.id).first()
         if not existing_tag:
             tag_id = default_tag_id
+        created_at = current_time  
+        updated_at = None  
 
-        note = Note.query.filter_by(id=note_data["id"]).first()
-        created_at = (
-            datetime.fromisoformat(note_data["created_at"])
-            if note_data.get("created_at")
-            else None
+        note = Note(
+            title=note_data["title"],
+            content=note_data["content"],
+            tag_id=tag_id,
+            user_id=current_user.id, 
+            created_at=created_at,  
+            updated_at=updated_at,  
+            is_favorite=note_data.get("is_favorite", False),
         )
-        updated_at = (
-            datetime.fromisoformat(note_data["updated_at"])
-            if note_data.get("updated_at")
-            else None
-        )
-
-        if not note:
-            note = Note(
-                id=note_data["id"],
-                title=note_data["title"],
-                content=note_data["content"],
-                tag_id=tag_id,
-                user_id=current_user.id,
-                created_at=created_at,
-                updated_at=updated_at,
-                is_favorite=note_data.get("is_favorite", False),
-            )
-            db.session.add(note)
-        else:
-            note.title = note_data["title"]
-            note.content = note_data["content"]
-            note.tag_id = tag_id
-            note.updated_at = updated_at
-            note.is_favorite = note_data.get("is_favorite", False)
-            note.user_id = current_user.id
+        db.session.add(note) 
 
     db.session.commit()
+
 
 
 @auth.route("/update_email_preferences", methods=["POST"])
@@ -2253,8 +2072,6 @@ def select_chat():
 @login_required
 def chat(receiver_id):
     receiver = User.query.get_or_404(receiver_id)
-
-    # Fetch friendship status between current user and receiver
     friendship = Friendship.query.filter(
         (
             (Friendship.user_id == current_user.id)
@@ -2265,8 +2082,6 @@ def chat(receiver_id):
             & (Friendship.friend_id == current_user.id)
         )
     ).first()
-
-    # Get the sender's and receiver's timezone, fallback to UTC if not available
     sender_tz = (
         pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
     )
@@ -2274,8 +2089,6 @@ def chat(receiver_id):
 
     if request.method == "POST":
         content = request.form.get("content")
-
-        # Restrict multiple messages if no response from receiver yet
         if not friendship or not friendship.is_accepted:
             last_message = (
                 Message.query.filter_by(
@@ -2284,7 +2097,6 @@ def chat(receiver_id):
                 .order_by(Message.timestamp.desc())
                 .first()
             )
-            # Check if the sender has already sent a message and the receiver hasn't replied yet
             if (
                 last_message
                 and not Message.query.filter_by(
@@ -2293,8 +2105,6 @@ def chat(receiver_id):
             ):
                 flash("You cannot send another message until the receiver replies.")
                 return redirect(url_for("auth.chat", receiver_id=receiver_id))
-
-        # Get the current time in the sender's timezone
         created_at = datetime.now(sender_tz)
 
         new_message = Message(
@@ -2351,3 +2161,73 @@ def edit_message(message_id):
 
     flash("Message edited.")
     return redirect(url_for("chat", receiver_id=message.receiver_id))
+
+
+
+@auth.route("/update_personal_info", methods=["POST"])
+@login_required
+def update_personal_info():
+    first_name = request.form.get("firstName")
+    second_name = request.form.get("secondName")
+    dob = request.form.get("date_of_birth")
+    gender = request.form.get("gender")
+    generated_color = request.form.get("generated_color")
+    print(f"Received data: first_name={first_name}, second_name={second_name}, dob={dob}, gender={gender}, generated_color={generated_color}" )
+
+    if first_name and first_name != current_user.first_name:
+        current_user.first_name = first_name
+    if second_name and second_name != current_user.second_name:
+        current_user.second_name = second_name
+    if generated_color and generated_color != current_user.generated_color:
+        current_user.generated_color = generated_color
+    if dob and dob != current_user.date_birth:
+        current_user.date_birth = dob
+    if gender and gender != current_user.gender:
+        current_user.gender = gender
+
+    db.session.commit()
+    flash("Personal information updated successfully!", "success")
+    return redirect(url_for("views.settings"))
+
+
+
+@auth.route("/update_account_info", methods=["POST"])
+@login_required
+def update_account_info():
+    email = request.form.get("newEmail")
+    new_username = request.form.get("newUsername")
+    bio = request.form.get("bio")
+    
+    # Validate and update logic here
+    if email and email != current_user.email:
+        current_user.email = email
+    if new_username and new_username != current_user.user_name:
+        current_user.user_name = new_username
+    if bio and bio != current_user.bio:
+        current_user.bio = bio
+
+    db.session.commit()
+    flash("Account information updated successfully!", "success")
+    return redirect(url_for("views.settings"))
+
+@auth.route("/update_contact_info", methods=["POST"])
+@login_required
+def update_contact_info():
+    phone_number = request.form.get("phone_number")
+    country_code = request.form.get("country_code")
+    time_zone = request.form.get("time_zone")
+    if phone_number:
+        phone_number = phone_number.replace("(", "").replace(")", "").replace(" ", "").strip()
+        if phone_number != current_user.phone_number:
+            current_user.phone_number = phone_number
+    if country_code and country_code != current_user.country_code:
+        current_user.country_code = country_code  
+
+    if time_zone and time_zone != current_user.time_zone:
+        current_user.time_zone = time_zone
+    db.session.commit()
+    flash("Contact information updated successfully!", "success")
+    return redirect(url_for("views.settings"))
+
+
+

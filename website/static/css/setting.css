@@ -522,8 +522,28 @@ main {
 .fields {
   display: flex;
   width: 100%;
-  align-items: flex-start;
+  align-items: flex-start; 
 }
+
+.avatar-box {
+  flex: 1; 
+  margin-right: 20px; 
+}
+
+.form-place {
+  flex: 10; 
+
+}
+
+.profile-image {
+  width: 100%; 
+  height: auto;
+}
+
+.submit-button, .submit {
+  margin-top: 10px; 
+}
+
 
 .about-text p {
   margin-bottom: 15px;
@@ -2061,8 +2081,13 @@ textarea.form-input::-webkit-resizer {
 .form {
   width: 100%;
 }
-.form textarea {
+#InformationForm textarea {
   resize: none;
+  width: 100%;
+  background-color: hsla(240, 1%, 17%, 0.75);
+  color: #fff;
+  border: 1px solid whitesmoke;
+  padding: 10px;
 }
 .form input,
 .form select,
@@ -2076,6 +2101,7 @@ textarea.form-input::-webkit-resizer {
   padding: 10px;
   color: #fff;
 }
+
 .testimonials input {
   width: 100%;
   height: 40px;
@@ -2109,6 +2135,21 @@ textarea.form-input::-webkit-resizer {
   justify-content: space-between;
   gap: 20px;
 }
+.phone_numbers{
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+#countryCode,
+#timeZoneSearch{
+  background-color: hsla(240, 1%, 17%, 0.75);
+  color: #fff;
+  outline: none;
+  height: 40px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid whitesmoke;
+}
 
 .log-out {
   display: flex;
@@ -2140,7 +2181,7 @@ textarea.form-input::-webkit-resizer {
   justify-content: center;
 }
 .form .submit {
-  width: 40%;
+  width: auto;
   text-align: center;
   margin-top: 10px;
   background-color: #000;
@@ -2161,8 +2202,11 @@ textarea.form-input::-webkit-resizer {
   color: #fff;
   padding: 10px 20px;
 }
-#passwordForm {
-  margin-left: calc(5% + 60px);
+#passwordForm,
+#InformationForm,
+#contactForm
+ {
+  margin-left: calc(5% + 100px);
 }
 
 .about-text,
@@ -2235,7 +2279,7 @@ textarea.form-input::-webkit-resizer {
 
 .cropbuttons button:hover {
   border: 1px solid var(--background-);
-  color: #000;
+  color: #fff;
   background: none;
 }
 
@@ -2923,4 +2967,151 @@ input[type="checkbox"]:checked::before {
 
 .import_button:active {
   transform: translateY(0);
+}
+
+.drag-area {
+  border: 2px dashed #cccccc; /* Dashed border to indicate the drop area */
+  border-radius: 10px;
+  padding: 50px 20px;
+  text-align: center;
+  background-color: #f9f9f9; /* Light background for contrast */
+  transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for hover */
+  position: relative; /* For positioning elements inside */
+  cursor: pointer; /* Show pointer to indicate interactivity */
+}
+
+.drag-area.active {
+  border-color: #00aaff; /* Highlight the border when file is dragged over */
+  background-color: #e6f7ff; /* Change background color on hover */
+}
+
+.drag-area .icon {
+  font-size: 50px; /* Larger icon for better visibility */
+  color: #999999;
+  margin-bottom: 10px;
+  transition: color 0.3s ease-in-out; /* Transition effect for color change */
+}
+
+.drag-area.active .icon {
+  color: #00aaff; /* Change icon color when active */
+}
+
+.drag-area header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #666666;
+  margin-bottom: 10px;
+}
+
+.drag-area span {
+  display: block;
+  font-size: 14px;
+  color: #999999;
+  margin-bottom: 15px;
+}
+
+.button-area{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drag-area button{
+  padding: 10px 25px;
+  font-size: 20px;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  background: #fff;
+  color: #0fb8ac;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#import-form{
+  margin-top: 10px;
+}
+.drag-area button:hover {
+  background-color: #fff; 
+}
+
+.drag-area input[type="file"] {
+  display: none; 
+}
+@media (max-width: 768px) {
+  .drag-area {
+    padding: 30px 15px;
+  }
+
+  .drag-area header {
+    font-size: 16px;
+  }
+
+  .drag-area button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .drag-area .icon {
+    font-size: 40px;
+  }
+}
+.custom-select-wrapper {
+  position: relative;
+  width: 200px;
+  font-family: Arial, sans-serif;
+}
+
+.custom-select {
+  position: relative;
+  user-select: none;
+}
+
+.select-box {
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-color {
+  font-weight: bold;
+}
+
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  z-index: 10;
+}
+
+.select-options.show {
+  display: block;
+  max-height: 200px;
+}
+
+.option {
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.option:hover {
+  opacity: 0.7;
 }

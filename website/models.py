@@ -41,7 +41,7 @@ class User(db.Model, UserMixin):
     is_2fa_enabled = db.Column(db.Boolean, default=False)
     otp_secret = db.Column(db.String(32), nullable=True)
     temp_otp = db.Column(db.String(32), nullable=True)
-    otp_method = db.Column(db.String(10), nullable=True, default=None)
+    otp_method = db.Column(db.String(10), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
     email_verified = db.Column(db.Boolean, default=False)
@@ -101,86 +101,88 @@ class User(db.Model, UserMixin):
         return None
 
 
-def __init__(
-    self,
-    email,
-    password,
-    first_name,
-    second_name,
-    full_name,
-    user_name,
-    time_zone,
-    encrypt_password,
-    reset_encrypt_password,
-    profile_visibility,
-    generated_color=None,
-    is_admin=False,
-    failed_attempts=0,
-    account_locked=False,
-    lockout_time=None,
-    otp_method=None,
-):
-    self.email = email
-    self.password = password
-    self.first_name = first_name
-    self.second_name = second_name
-    self.full_name = full_name
-    self.profile_picture = None
-    self.cover_picture = None
-    self.user_name = user_name
-    self.phone_number = None
-    self.country_code = None
-    self.bio = None
-    self.time_zone = time_zone
-    self.date_birth = None
-    self.gender = None
-    self.generated_color = generated_color
-    self.is_active = True
-    self.is_admin = is_admin
-    self.failed_attempts = failed_attempts
-    self.account_locked = account_locked
-    self.lockout_time = lockout_time
-    self.profile_visibility = profile_visibility
-    self.encrypt_password = encrypt_password
-    self.reset_encrypt_password = reset_encrypt_password
-    self.otp_method = otp_method
+    def __init__(
+        self,
+        email,
+        password,
+        first_name,
+        second_name,
+        full_name,
+        user_name,
+        time_zone,
+        encrypt_password,
+        reset_encrypt_password,
+        profile_visibility,
+        generated_color=None,
+        is_admin=False,
+        failed_attempts=0,
+        account_locked=False,
+        lockout_time=None,
+        otp_method=None,
+    ):
+        self.email = email
+        self.password = password
+        self.first_name = first_name
+        self.second_name = second_name
+        self.full_name = full_name
+        self.profile_picture = None
+        self.cover_picture = None
+        self.user_name = user_name
+        self.phone_number = None
+        self.country_code = None
+        self.bio = None
+        self.time_zone = time_zone
+        self.date_birth = None
+        self.gender = None
+        self.generated_color = generated_color
+        self.is_active = True
+        self.is_admin = is_admin
+        self.failed_attempts = failed_attempts
+        self.account_locked = account_locked
+        self.lockout_time = lockout_time
+        self.profile_visibility = profile_visibility
+        self.encrypt_password = encrypt_password
+        self.reset_encrypt_password = reset_encrypt_password
+        self.otp_method = None
 
-    self.email_preferences = EmailPreferences()
-    self.push_preferences = PushPreferences(new_message=True)
+        self.email_preferences = EmailPreferences()
+        self.push_preferences = PushPreferences(new_message=True)
 
 
-def serialize(self):
-    return {
-        "id": self.id,
-        "email": self.email,
-        "first_name": self.first_name,
-        "second_name": self.second_name,
-        "full_name": self.full_name,
-        "user_name": self.user_name,
-        "phone_number": self.phone_number,
-        "country_code": self.country_code,
-        "bio": self.bio,
-        "time_zone": self.time_zone,
-        "date_birth": self.date_birth,
-        "gender": self.gender,
-        "generated_color": self.generated_color,
-        "is_active": self.is_active,
-        "is_admin": self.is_admin,
-        "failed_attempts": self.failed_attempts, 
-        "account_locked": self.account_locked,  
-        "lockout_time": self.lockout_time, 
-        "profile_visibility" : self.profile_visibility, 
-        "encrypt_password" : self.encrypt_password, 
-        "reset_encrypt_password": self.reset_encrypt_password, 
-        "otp_method": self.otp_method,
-        "email_preferences": {
-            "newsletter": self.email_preferences.newsletter,
-            "activity_alerts": self.email_preferences.activity_alerts,
-        },
-        "push_preferences": {
-            "new_message": self.push_preferences.new_message,
-        },
-    }
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "first_name": self.first_name,
+            "second_name": self.second_name,
+            "full_name": self.full_name,
+            "user_name": self.user_name,
+            "phone_number": self.phone_number,
+            "country_code": self.country_code,
+            "bio": self.bio,
+            "time_zone": self.time_zone,
+            "date_birth": self.date_birth,
+            "gender": self.gender,
+            "generated_color": self.generated_color,
+            "is_active": self.is_active,
+            "is_admin": self.is_admin,
+            "failed_attempts": self.failed_attempts,
+            "account_locked": self.account_locked,
+            "lockout_time": self.lockout_time,
+            "profile_visibility": self.profile_visibility,
+            "encrypt_password": self.encrypt_password,
+            "reset_encrypt_password": self.reset_encrypt_password,
+            "otp_method": self.otp_method,
+            "email_preferences": {
+                "newsletter": self.email_preferences.newsletter if self.email_preferences else None,
+                "activity_alerts": self.email_preferences.activity_alerts if self.email_preferences else None,
+            },
+            "push_preferences": {
+                "new_message": self.push_preferences.new_message if self.push_preferences else None,
+            },
+        }
+
+
 
 
 class UserSession(db.Model):

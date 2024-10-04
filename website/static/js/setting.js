@@ -1,4 +1,152 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const generatedColorSelect = document.getElementById("generatedColor");
+  const colorPreview = document.getElementById("colorPreview");
+
+  function updateColorPreview() {
+    const selectedColor = generatedColorSelect.value;
+    colorPreview.style.backgroundColor = selectedColor;
+  }
+  updateColorPreview();
+  generatedColorSelect.addEventListener("change", updateColorPreview);
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const firstNameInput = document.getElementById("firstName");
+  const secondNameInput = document.getElementById("secondName");
+  const generatedColor = document.getElementById("generatedColor");
+  const dobInput = document.getElementById("dobInput");
+  const genderSelect = document.getElementById("genderSelect");
+  const submitBtn = document.getElementById("submitBtn");
+  const personalInfoForm = document.getElementById("personalInfoForm");
+
+  const firstNameError = document.getElementById("firstNameError");
+  const secondNameError = document.getElementById("secondNameError");
+
+  const nameRegex = /^[a-zA-Z\s'-]+$/;
+
+  // Store original values
+  const originalFirstName = firstNameInput.value;
+  const originalSecondName = secondNameInput.value;
+  const originalGeneratedColor = generatedColor.value;
+  const originalDob = dobInput.value;
+  const originalGender = genderSelect.value;
+
+  function validateNames() {
+    const firstNameMaxLength = 50;
+    const secondNameMaxLength = 50;
+
+    if (firstNameInput.value.length > firstNameMaxLength) {
+      firstNameInput.value = firstNameInput.value.substring(
+        0,
+        firstNameMaxLength
+      );
+      return "First name cannot exceed 50 characters.";
+    }
+
+    if (secondNameInput.value.length > secondNameMaxLength) {
+      secondNameInput.value = secondNameInput.value.substring(
+        0,
+        secondNameMaxLength
+      );
+      return "Second name cannot exceed 50 characters.";
+    }
+
+    return null;
+  }
+
+  function validateNameFormat(nameInput, fieldName) {
+    if (!nameRegex.test(nameInput.value)) {
+      return `${fieldName} can only contain letters, spaces, apostrophes, and hyphens.`;
+    }
+    return null;
+  }
+
+  function showSubmitButton() {
+    submitBtn.style.display = "inline-block";
+  }
+
+  function hideSubmitButton() {
+    submitBtn.style.display = "none";
+  }
+
+  function showError(element, message) {
+    element.textContent = message;
+    element.style.display = "block";
+
+    setTimeout(() => {
+      element.style.display = "none";
+    }, 2000);
+  }
+
+  function checkForChanges() {
+    if (
+      firstNameInput.value === originalFirstName &&
+      secondNameInput.value === originalSecondName &&
+      dobInput.value === originalDob &&
+      genderSelect.value === originalGender &&
+      generatedColor.value === originalGeneratedColor
+    ) {
+      hideSubmitButton();
+    } else {
+      showSubmitButton();
+    }
+  }
+
+  // Add event listeners to all inputs
+  firstNameInput.addEventListener("input", function () {
+    firstNameError.style.display = "none";
+    checkForChanges();
+  });
+
+  secondNameInput.addEventListener("input", function () {
+    secondNameError.style.display = "none";
+    checkForChanges();
+  });
+
+  dobInput.addEventListener("input", function () {
+    checkForChanges();
+  });
+
+  genderSelect.addEventListener("change", function () {
+    checkForChanges();
+  });
+
+  generatedColor.addEventListener("input", function () {
+    // Use 'input' to detect all changes
+    checkForChanges();
+  });
+
+  personalInfoForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    firstNameError.style.display = "none";
+    secondNameError.style.display = "none";
+
+    const lengthError = validateNames();
+    const firstNameFormatError = validateNameFormat(
+      firstNameInput,
+      "First Name"
+    );
+    const secondNameFormatError = validateNameFormat(
+      secondNameInput,
+      "Second Name"
+    );
+
+    if (!firstNameInput.value) {
+      showError(firstNameError, "First Name is required.");
+    } else if (lengthError) {
+      showError(firstNameError, lengthError);
+    } else if (firstNameFormatError) {
+      showError(firstNameError, firstNameFormatError);
+    } else if (!secondNameInput.value) {
+      showError(secondNameError, "Second Name is required.");
+    } else if (secondNameFormatError) {
+      showError(secondNameError, secondNameFormatError);
+    } else {
+      // Programmatically submit the form
+      personalInfoForm.submit();
+    }
+  });
+});
+document.addEventListener("DOMContentLoaded", function () {
   const profilePicInput = document.getElementById("profilePic");
   const croppingContainer = document.getElementById("croppingContainer");
   const imageToCrop = document.getElementById("imageToCrop");
@@ -49,48 +197,48 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   cropButton.addEventListener("click", function () {
-    const canvas = cropper.getCroppedCanvas();
-    canvas.toBlob(function (blob) {
-      const formData = new FormData();
-      const userId = document.getElementById("userId").value;
-      const filename = `profile_pic_${userId}_${Date.now()}.png`;
-      formData.append("profile_pic", blob, filename);
+const canvas = cropper.getCroppedCanvas();
+canvas.toBlob(function (blob) {
+  const formData = new FormData();
+  const userId = document.getElementById("userId").value;
+  const csrfToken = document.querySelector('input[name="csrf_token"]').value;  // Get CSRF token
 
-      progressContainer.style.display = "flex";
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", document.getElementById("profilePicForm").action);
+  const filename = `profile_pic_${userId}_${Date.now()}.png`;
+  formData.append("profile_pic", blob, filename);
+  formData.append("csrf_token", csrfToken);  // Append CSRF token here
 
-      xhr.upload.onprogress = function (event) {
-        if (event.lengthComputable) {
-          const percentComplete = Math.round(
-            (event.loaded / event.total) * 100
-          );
+  progressContainer.style.display = "flex";
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", document.getElementById("profilePicForm").action);
+
+  xhr.upload.onprogress = function (event) {
+      if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
           progressText.textContent = `${percentComplete}%`;
-          progressBar.style.transform = `rotate(${
-            percentComplete * 3.6 - 90
-          }deg)`;
-        }
-      };
+          progressBar.style.transform = `rotate(${percentComplete * 3.6 - 90}deg)`;
+      }
+  };
 
-      xhr.onload = function () {
-        if (xhr.status === 200) {
+  xhr.onload = function () {
+      if (xhr.status === 200) {
           progressText.textContent = "Done!";
           setTimeout(() => {
-            progressContainer.style.display = "none";
-            location.reload();
+              progressContainer.style.display = "none";
+              location.reload();
           }, 1000);
-        } else {
+      } else {
           alert("Failed to update profile picture.");
-        }
-      };
+      }
+  };
 
-      xhr.onerror = function () {
-        alert("Failed to update profile picture.");
-      };
+  xhr.onerror = function () {
+      alert("Failed to update profile picture.");
+  };
 
-      xhr.send(formData);
-    });
-  });
+  xhr.send(formData);
+});
+});
+
 
   cancelButton.addEventListener("click", function () {
     croppingContainer.style.display = "none";
@@ -196,13 +344,19 @@ document
     }
 
     if (!hasError) {
+      // Get the CSRF token from the hidden input field
+      const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
       fetch("/auth/update_password", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
         body: new URLSearchParams({
           currentPassword: currentPassword,
           newPassword: newPassword,
           confirmPassword: confirmPassword,
+          csrf_token: csrfToken // Add CSRF token to the body
         }).toString(),
       })
         .then((response) => response.json())
@@ -263,6 +417,9 @@ function showNotification(message) {
     notification.style.display = "none";
   }, 3000);
 }
+
+
+
 document.addEventListener("DOMContentLoaded", function () {
   var currentPasswordInput = document.getElementById("currentPassword");
   var newPasswordInput = document.getElementById("newPassword");
@@ -300,20 +457,24 @@ document.addEventListener("DOMContentLoaded", function () {
       confirmPasswordToggle.style.display = "none";
     }
   });
-  document.querySelectorAll(".toggle-password").forEach(function (toggle) {
-    toggle.addEventListener("click", function () {
-      var targetInput = document.querySelector(
-        toggle.getAttribute("data-target")
-      );
-      var type =
-        targetInput.getAttribute("type") === "password" ? "text" : "password";
-      targetInput.setAttribute("type", type);
+  document
+    .querySelectorAll(".toggle-password")
+    .forEach(function (toggle) {
+      toggle.addEventListener("click", function () {
+        var targetInput = document.querySelector(
+          toggle.getAttribute("data-target")
+        );
+        var type =
+          targetInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        targetInput.setAttribute("type", type);
 
-      // Toggle between eye and eye-slash icon
-      toggle.classList.toggle("fa-eye");
-      toggle.classList.toggle("fa-eye-slash");
+        // Toggle between eye and eye-slash icon
+        toggle.classList.toggle("fa-eye");
+        toggle.classList.toggle("fa-eye-slash");
+      });
     });
-  });
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -525,14 +686,18 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const newPassword = document.getElementById("set_encrypt_password").value;
+    const newPassword = document.getElementById(
+      "set_encrypt_password"
+    ).value;
     const confirmPassword = document.getElementById(
       "confirm_encrypt_password"
     ).value;
     const strengthMessage = document.getElementById(
       "password-strength-message"
     );
-    const confirmMessage = document.getElementById("confirm-password-message");
+    const confirmMessage = document.getElementById(
+      "confirm-password-message"
+    );
     let isValid = true;
     strengthMessage.textContent = "";
     confirmMessage.textContent = "";
@@ -579,3 +744,37 @@ function toggleEyeIcon(passwordField, eyeIconId) {
     eyeIcon.style.display = "none";
   }
 }
+
+
+function formatPhoneNumber(input) {
+  let phoneNumber = input.value.replace(/\D/g, '');
+  if (phoneNumber.startsWith('0')) {
+      phoneNumber = phoneNumber.substring(1);
+  }
+  if (phoneNumber.length > 3) {
+      const areaCode = phoneNumber.substring(0, 3);
+      const numberPart = phoneNumber.substring(3);
+      const formattedNumber = `(${areaCode}) ${numberPart}`;
+      input.value = formattedNumber;
+  } else {
+      input.value = phoneNumber; 
+  }
+}
+function formatPhoneNumber(input) {
+  let phoneNumber = input.value.replace(/\D/g, '');
+  
+  if (phoneNumber.startsWith('0')) {
+      phoneNumber = phoneNumber.substring(1);
+  }
+  
+  // Create a formatted phone number
+  if (phoneNumber.length > 3) {
+      const areaCode = phoneNumber.substring(0, 3);
+      const numberPart = phoneNumber.substring(3);
+      const formattedNumber = `(${areaCode}) ${numberPart}`;
+      input.value = formattedNumber;
+  } else {
+      input.value = phoneNumber; 
+  }
+}
+

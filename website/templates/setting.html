@@ -16,7 +16,18 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_red.css"
+    />
 
     <link
       rel="icon"
@@ -75,7 +86,7 @@
           <header>
             <h2 class="h2 article-title">Account</h2>
           </header>
-          <section class="about-text">
+          <section class="about-text" style="width: 100%">
             <h3>Personal Information <br /></h3>
             <small>Use a permanent address where you can receive mail.</small>
             <br />
@@ -88,6 +99,11 @@
                 class="picture-form"
                 style="display: none"
               >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <input
                   type="file"
                   id="profilePic"
@@ -109,6 +125,7 @@
                   Upload Pictures
                 </button>
               </form>
+
               <figure class="avatar-box">
                 {% if current_user.profile_picture %}
                 <img
@@ -166,104 +183,242 @@
                     </div>
                   </div>
                 </div>
+
                 <div class="form">
-                  <form action="">
+                  <form
+                    action="{{ url_for('auth.update_personal_info') }}"
+                    method="POST"
+                    id="personalInfoForm"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf_token"
+                      value="{{ csrf_token() }}"
+                    />
                     <div class="names">
                       <div class="name-field">
-                        <label for="firstName">First Name</label>
+                        <label for="firstName">First Name </label>
                         <input
                           type="text"
                           id="firstName"
                           name="firstName"
                           value="{{ current_user.first_name }}"
-                          style="--background-: {{ current_user.generated_color }}"
+                          autocomplete="off"
+                          required
+                          maxlength="50"
                         />
+                        <div
+                          class="error-message"
+                          id="firstNameError"
+                          style="display: none; color: red"
+                        ></div>
                       </div>
                       <div class="name-field">
-                        <label for="secondName">Second Name</label>
+                        <label for="secondName">Second Name </label>
                         <input
                           type="text"
                           id="secondName"
                           name="secondName"
+                          autocomplete="off"
                           value="{{ current_user.second_name }}"
-                          style="--background-: {{ current_user.generated_color }}"
+                          required
+                          maxlength="50"
                         />
+                        <div
+                          class="error-message"
+                          id="secondNameError"
+                          style="display: none; color: red"
+                        ></div>
                       </div>
                     </div>
-                    <label for="bioInput">Bio</label>
-                    <textarea
-                      id="bioInput"
-                      name="bio"
-                      rows="4"
-                      cols="50"
-                      placeholder="Enter your bio"
-                      required
-                      readonly
-                      style="--background-: {{ current_user.generated_color }}"
-                    >
-{{current_user.bio}}</textarea
-                    >
-                    <label for="newEmail">Email</label>
-                    <input
-                      type="text"
-                      id="newEmail"
-                      name="newUsername"
-                      value="{{ current_user.email }}"
-                      style="--background-: {{ current_user.generated_color }}"
-                    />
-                    <label for="newUsername">New Username</label>
-                    <input
-                      type="text"
-                      id="newUsername"
-                      name="newUsername"
-                      value="@{{ current_user.user_name[1:] }}"
-                      style="--background-: {{ current_user.generated_color }}"
-                    />
-                    <label for="timeZoneSearch">Timezone</label>
-                    <input
-                      value="{{current_user.time_zone}}"
-                      type="text"
-                      id="timeZoneSearch"
-                      placeholder="Search for a time zone"
-                      style="--background-: {{ current_user.generated_color }}"
-                    />
+
+                    <label for="generatedColor">Display Color</label>
+                    <div style="display: flex; align-items: center">
+                      <select name="generated_color" id="generatedColor">
+                        <option value="{{ current_user.generated_color }}">
+                          {{ current_user.generated_color }}
+                        </option>
+                        <option value="#FF0000">Red</option>
+                        <option value="#00FF00">Green</option>
+                        <option value="#0000ff">Blue</option>
+                        <option value="#ffff00">Yellow</option>
+                        <option value="#00ffff">Cyan</option>
+                        <option value="#3498db">Sky Blue</option>
+                        <option value="#2ecc71">Light Green</option>
+                        <option value="#e67e22">Orange</option>
+                        <option value="#95a5a6">Grey</option>
+                        <option value="#9b59b6">Purple</option>
+                      </select>
+                      <div
+                        id="colorPreview"
+                        style="
+                          width: 30px;
+                          height: 30px;
+                          margin-left: 10px;
+                          border: 1px solid #ccc;
+                        "
+                      ></div>
+                    </div>
+
                     <label for="dobInput">Date of Birth</label>
                     <input
                       type="text"
                       id="dobInput"
                       name="date_of_birth"
-                      placeholder="Select Date"
-                      required
-                      value="{{current_user.date_birth}}"
-                      style="--background-: {{ current_user.generated_color }}"
+                      value="{{ current_user.date_birth }}"
+                      placeholder="Select Date of Birth"
                     />
-                    <label for="genderSelect">Gender:</label>
-                    <select
-                      id="genderSelect"
-                      name="gender"
-                      required
-                      style="--background-: {{ current_user.generated_color }}"
-                    >
-                      <option value="">{{current_user.gender }}</option>
+
+                    <label for="genderSelect">Gender</label>
+                    <select id="genderSelect" name="gender">
+                      <option value="">{{ current_user.gender }}</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                     </select>
-                    <label for="phoneNumber">Phone Number</label>
-                    <input
-                      type="text"
-                      id="phoneNumber"
-                      name="phone_number"
-                      placeholder="(555) 555-5555"
-                      readonly
-                      value="{{current_user.phone_number}}"
-                      style="--background-: {{ current_user.generated_color }}"
-                    />
 
-                    <button type="submit" class="submit">Save</button>
+                    <button
+                      type="submit"
+                      class="submit"
+                      id="submitBtn"
+                      style="display: none"
+                    >
+                      Update Personal Information
+                    </button>
                   </form>
                 </div>
               </div>
             </div>
+          </section>
+
+          <section class="testimonials">
+            <h3>Account Information</h3>
+            <form
+              action="{{ url_for('auth.update_account_info') }}"
+              method="POST"
+              id="InformationForm"
+            >
+              <label for="newEmail">Email</label>
+              <input
+                type="email"
+                id="newEmail"
+                name="newEmail"
+                value="{{ current_user.email }}"
+                required
+              />
+
+              <label for="newUsername">New Username</label>
+              <input
+                type="text"
+                id="newUsername"
+                name="newUsername"
+                value="@{{ current_user.user_name[1:] }}"
+                required
+              />
+
+              <label for="bioInput">Bio</label>
+              <textarea id="bioInput" name="bio" rows="4" required>
+{{ current_user.bio }}</textarea
+              >
+              <button type="submit" class="submit">
+                Update Account Information
+              </button>
+            </form>
+          </section>
+
+          <section class="testimonials">
+            <h3>Contact Information</h3>
+            <form
+              action="{{ url_for('auth.update_contact_info') }}"
+              method="POST"
+              id="contactForm"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="phone_numbers">
+                <div class="name-field">
+                  <label for="countryCode">Country Code</label>
+                  <select id="countryCode" name="country_code">
+                    <option value="">{{ current_user.country_code }}</option>
+                    <option value="+1">USA (+1)</option>
+                    <option value="+254">Kenya (+254)</option>
+                    <option value="+44">UK (+44)</option>
+                    <option value="+61">Australia (+61)</option>
+                    <option value="+49">Germany (+49)</option>
+                    <option value="+33">France (+33)</option>
+                    <option value="+39">Italy (+39)</option>
+                    <option value="+81">Japan (+81)</option>
+                    <option value="+86">China (+86)</option>
+                    <option value="+91">India (+91)</option>
+                    <option value="+55">Brazil (+55)</option>
+                    <option value="+7">Russia (+7)</option>
+                    <option value="+82">South Korea (+82)</option>
+                    <option value="+34">Spain (+34)</option>
+                    <option value="+32">Belgium (+32)</option>
+                    <option value="+41">Switzerland (+41)</option>
+                    <option value="+46">Sweden (+46)</option>
+                    <option value="+45">Denmark (+45)</option>
+                    <option value="+31">Netherlands (+31)</option>
+                    <option value="+353">Ireland (+353)</option>
+                    <option value="+351">Portugal (+351)</option>
+                    <option value="+60">Malaysia (+60)</option>
+                    <option value="+65">Singapore (+65)</option>
+                    <option value="+66">Thailand (+66)</option>
+                    <option value="+63">Philippines (+63)</option>
+                    <option value="+64">New Zealand (+64)</option>
+                    <option value="+20">Egypt (+20)</option>
+                    <option value="+233">Ghana (+233)</option>
+                  </select>
+                </div>
+                <div class="name-field">
+                  <label for="phoneNumber">Phone Number</label>
+                  <input
+                    type="text"
+                    id="phoneNumber"
+                    name="phone_number"
+                    placeholder="703853259"
+                    value="{{ current_user.phone_number }}"
+                    required
+                    oninput="formatPhoneNumber(this)"
+                  />
+                  <small
+                    id="error-message"
+                    style="color: red; display: none"
+                  ></small>
+                </div>
+              </div>
+              <label for="timeZoneSearch">Timezone</label>
+              <select id="timeZoneSearch" name="time_zone" >
+                <option value="">{{ current_user.time_zone }}</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Africa/Nairobi">Nairobi</option>
+                <option value="America/New_York">New York</option>
+                <option value="America/Los_Angeles">Los Angeles</option>
+                <option value="Europe/Berlin">Berlin</option>
+                <option value="Europe/Rome">Rome</option>
+                <option value="Asia/Shanghai">Shanghai</option>
+                <option value="Asia/Kolkata">Kolkata</option>
+                <option value="Australia/Sydney">Sydney</option>
+                <option value="America/Sao_Paulo">São Paulo</option>
+                <option value="Africa/Cairo">Cairo</option>
+                <option value="Africa/Johannesburg">Johannesburg</option>
+                <option value="Asia/Dubai">Dubai</option>
+                <option value="America/Mexico_City">Mexico City</option>
+                <option value="Europe/Moscow">Moscow</option>
+                <option value="Asia/Singapore">Singapore</option>
+                <option value="Europe/Zurich">Zurich</option>
+                <option value="Asia/Hong_Kong">Hong Kong</option>
+                <option value="Europe/Madrid">Madrid</option>
+              </select>
+
+              <button type="submit" class="submit" id="updateButton" style="display: none;">
+                Update Contact Information
+              </button>
+            </form>
           </section>
 
           <section class="testimonials">
@@ -289,6 +444,11 @@
               action="{{ url_for('auth.update_password') }}"
               method="POST"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <label for="currentPassword">Current Password:</label>
               <div class="input-container">
                 <input
@@ -380,6 +540,11 @@
                   method="POST"
                   id="checkSessions"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <label for="logOut">Your Password</label><br />
                   <input
                     type="password"
@@ -420,6 +585,11 @@
                   action="{{ url_for('auth.deactivate_account') }}"
                   method="POST"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <label for="logOut">Your Password</label><br />
                   <input type="password" id="logOut" name="password" required />
                   <div
@@ -456,6 +626,11 @@
                   method="post"
                   id="deleteForm"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <label for="logOut">Your Password</label><br />
                   <input type="password" id="delOut" required />
                   <div
@@ -558,6 +733,11 @@
               method="POST"
               action="{{ url_for('auth.update_email_preferences') }}"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <div class="form-group">
                 <label for="activity_alerts">
                   <input
@@ -591,6 +771,11 @@
               method="POST"
               action="{{ url_for('auth.update_push_notifications') }}"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <div class="form-group">
                 <label for="new_message">
                   <input
@@ -664,6 +849,11 @@
                 action="{{ url_for('auth.resend_verification') }}"
                 method="POST"
               >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <div class="form-group-card">
                   <label for="email">Email address:</label>
                   <input
@@ -720,24 +910,48 @@
                   class="activeForm"
                   id="2faForm"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <div class="radio-group">
                     <label class="radio-label">
                       <input
                         type="checkbox"
                         name="otp_method"
                         value="app"
-                        checked
+                        {%
+                        if
+                        current_user.otp_method
+                        is
+                        none
+                        %}disabled{%
+                        endif
+                        %}
                       />
                       Use Authenticator App
                     </label>
                     <label class="radio-label">
-                      <input type="checkbox" name="otp_method" value="email" />
+                      <input
+                        type="checkbox"
+                        name="otp_method"
+                        value="email"
+                        {%
+                        if
+                        current_user.otp_method
+                        is
+                        none
+                        %}disabled{%
+                        endif
+                        %}
+                      />
                       Send OTP to Email
                     </label>
                   </div>
                 </form>
-
                 {% endif %}
+
                 <div id="twoFAStatusMessage" class="status-message"></div>
               </div>
             </div>
@@ -749,6 +963,11 @@
                 class="activeForm"
                 id="visibilityForm"
               >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <label class="radio-label">
                   <input type="checkbox" name="profile_visibility"
                   value="public" {% if current_user.profile_visibility ==
@@ -783,10 +1002,16 @@
                   Your encryption password is set. You can Change/Disable it
                   here:
                 </p>
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <div>
                   <label for="reset_encrypt_password"
                     >Reset Encryption Password:</label
                   >
+
                   <div class="password-container">
                     <input
                       type="password"
@@ -807,6 +1032,11 @@
                   </div>
                 </div>
                 <small id="reset-password-message" style="color: red"></small>
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <button type="submit" class="btn-action-encrypt">
                   Verify Password
                 </button>
@@ -819,6 +1049,11 @@
                   method="POST"
                   id="changeEncryptPasswordForm"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <div>
                     <label for="new_encrypt_password"
                       >New Encryption Password:</label
@@ -885,6 +1120,11 @@
                   method="POST"
                   id="disableEncryptPasswordForm"
                 >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <h3>Disable</h3>
                   <button type="submit" class="btn-action-encrypt">
                     Disable Encryption Password
@@ -902,6 +1142,11 @@
                 method="POST"
                 id="setEncryptPasswordForm"
               >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <div>
                   <label for="new_encrypt_password"
                     >Reset Encryption Password Key</label
@@ -930,7 +1175,6 @@
                     <span
                       id="togglePasswordSet"
                       class="eye-icon"
-                    
                       onclick="togglePasswordVisibility('set_encrypt_password', 'togglePasswordSet')"
                       style="display: none; cursor: pointer"
                     >
@@ -987,85 +1231,126 @@
             <h3 class="section-title">Export Your Notes</h3>
 
             <form
-            action="{{ url_for('auth.export_notes') }}"
-            method="GET"
-            id="export-form"
-          >
-            <h3>Select Notes to Export:</h3>
-            <ul class="export_ul">
-              {% for note in current_user.notes %}
-              <li class="export_li">
-                <label>
+              action="{{ url_for('auth.export_notes') }}"
+              method="GET"
+              id="export-form"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <h3>Select Notes to Export:</h3>
+              <ul class="export_ul">
+                {% for note in current_user.notes %}
+                <li class="export_li">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="note_ids"
+                      value="{{ note.id }}"
+                    />
+                    <span>
+                      {{ note.title[:20] }}{% if note.title|length > 20 %}...{%
+                      endif %}
+                    </span>
+                  </label>
+                </li>
+                {% endfor %} {% if current_user.encrypt_password %}
+                <li>
+                  <label for="password">Enter Encryption Password:</label>
                   <input
-                    type="checkbox"
-                    name="note_ids"
-                    value="{{ note.id }}"
+                    type="password"
+                    name="password"
+                    class="export_password"
+                    placeholder="Enter Encryption Password"
+                    required
+                    autocomplete="new-password"
                   />
-                  <span>
-                    {{ note.title[:20] }}{% if note.title|length > 20 %}...{% endif %}
-                  </span>
-                </label>
-              </li>
-              {% endfor %}
-              
-              {% if current_user.encrypt_password %}
-              <li>
-                <label for="password">Enter Encryption Password:</label>
-                <input
-                  type="password"
-                  name="password"
-                  class="export_password"
-                  placeholder="Enter Encryption Password"
-                  required
-                  autocomplete="new-password"
-                />
-              </li>
-              {% endif %}
-            </ul>
-          
-            <button type="submit" class="export_button">
-              <i class="bx bx-note"></i>Export Selected Notes
-            </button>
-          
-            <div class="tips">
-              {% if current_user.encrypt_password %}
-                <p><strong>Note:</strong> You have an encryption password set. Please use it for exporting your notes securely.</p>
-              {% else %}
-                <p><strong>Tip:</strong> Set your encryption password in the Privacy tab to secure your exported notes.</p>
-              {% endif %}
-            </div>
-          </form>
-          
+                </li>
+                {% endif %}
+              </ul>
+
+              <button type="submit" class="export_button">
+                <i class="bx bx-note"></i>Export Selected Notes
+              </button>
+
+              <div class="tips">
+                {% if current_user.encrypt_password %}
+                <p>
+                  <strong>Note:</strong> You have set an encryption password.
+                  Please use it to export your notes securely. <br /><br />
+                  <strong>Tip:</strong> The exported notes can only be used
+                  within this application.
+                </p>
+                {% else %}
+                <p>
+                  <strong>Tip:</strong> Set an encryption password in the
+                  Privacy tab to secure your exported notes. <br /><br />
+                  <strong>Tip:</strong> The exported notes can only be used
+                  within this application.
+                </p>
+
+                {% endif %}
+              </div>
+            </form>
           </section>
 
           <section id="privacySettings" class="notification-section">
             <h3 class="section-title">Export Your Details</h3>
             <ul class="export-details-list">
-                <li>
-                    <a href="{{ url_for('auth.export_user_details') }}" class="export-link">
-                        <i class="bx bxs-user-detail"></i> 
-                        Export User Details
-                    </a>
-                </li>
+              <li>
+                <a
+                  href="{{ url_for('auth.export_user_details') }}"
+                  class="export-link"
+                >
+                  <i class="bx bxs-user-detail"></i>
+                  Export User Details
+                </a>
+              </li>
             </ul>
-        </section>
-        
+          </section>
 
           <section id="privacySettings" class="notification-section">
-            <h3 class="section-title">Import Notes (File Format .json )</h3>
+            <h3 class="section-title">
+              Import Notes (File Format .json/.enc )
+            </h3>
+
+            <div class="drag-area">
+              <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+              <header>Drag & Drop to Upload File</header>
+              <span>OR</span>
+              <div class="button-area">
+                <button type="button">Browse File</button>
+              </div>
+              <input
+                type="file"
+                name="file"
+                id="file-input"
+                accept=".json,.enc"
+                hidden
+                required
+              />
+            </div>
             <form
               id="import-form"
               action="{{ url_for('auth.import_notes') }}"
               method="POST"
               enctype="multipart/form-data"
               onsubmit="return validateForm()"
+              style="display: none"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <input
                 type="file"
                 name="file"
-                id="file-input"
+                id="file-hidden"
                 accept=".json,.enc"
-                required
+                hidden
               />
               <div id="password-container" style="display: none">
                 <label for="encryption_password"
@@ -1076,6 +1361,7 @@
                   name="encryption_password"
                   id="encryption-password"
                   autocomplete="off"
+                  class="export_password"
                 />
               </div>
               <button
@@ -1083,47 +1369,163 @@
                 class="import_button"
                 style="--background-: {{ current_user.generated_color }}"
               >
-              <i class="bx bx-note"></i>Import Data
+                <i class="bx bx-note"></i>Import Data
               </button>
             </form>
           </section>
         </article>
       </div>
     </main>
+    <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-      document
-        .getElementById("file-input")
-        .addEventListener("change", function () {
-          const fileExtension = this.value.split(".").pop().toLowerCase();
-          const passwordContainer =
-            document.getElementById("password-container");
-          const passwordInput = document.getElementById("encryption-password");
-
-          if (fileExtension === "enc") {
-            passwordContainer.style.display = "block"; // Show password input for encrypted files
-            passwordInput.setAttribute("required", "required"); // Make password required
-          } else {
-            passwordContainer.style.display = "none"; // Hide password input for JSON files
-            passwordInput.value = ""; // Clear password field
-            passwordInput.removeAttribute("required"); // Remove required attribute
-          }
+      document.addEventListener("DOMContentLoaded", function () {
+        flatpickr("#dobInput", {
+          altInput: true,
+          altFormat: "F j, Y",
+          dateFormat: "Y-m-d",
+          maxDate: "today",
+          theme: "material_red",
         });
+      });
+    </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const contactForm = document.getElementById("contactForm");
+      const phoneNumberInput = document.getElementById("phoneNumber");
+      const countryCodeSelect = document.getElementById("countryCode");
+      const timeZoneSelect = document.getElementById("timeZoneSearch");
+      const updateButton = document.getElementById("updateButton");
+  
+      // Store original values
+      const originalPhoneNumber = phoneNumberInput.value;
+      const originalCountryCode = countryCodeSelect.value;
+      const originalTimeZone = timeZoneSelect.value;
+  
+      // Function to check if any value has changed
+      function checkForChanges() {
+        const currentPhoneNumber = phoneNumberInput.value;
+        const currentCountryCode = countryCodeSelect.value;
+        const currentTimeZone = timeZoneSelect.value;
+  
+        if (
+          currentPhoneNumber !== originalPhoneNumber ||
+          currentCountryCode !== originalCountryCode ||
+          currentTimeZone !== originalTimeZone
+        ) {
+          updateButton.style.display = "block"; // Show the button if values have changed
+        } else {
+          updateButton.style.display = "none"; // Hide the button if values are the same
+        }
+      }
+  
+      // Event listeners for input changes
+      phoneNumberInput.addEventListener("input", checkForChanges);
+      countryCodeSelect.addEventListener("change", checkForChanges);
+      timeZoneSelect.addEventListener("change", checkForChanges);
+  
+      contactForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+  
+        const phoneInput = phoneNumberInput.value.replace(/\D/g, "");
+        const errorMessageDiv = document.getElementById("error-message");
+        errorMessageDiv.style.display = "none";
+        let isValid = true;
+        const minLength = 7;
+        const maxLength = 15;
+  
+        if (phoneInput.length < minLength || phoneInput.length > maxLength) {
+          errorMessageDiv.textContent = `Phone number must be between ${minLength} and ${maxLength} digits long (excluding country code).`;
+          errorMessageDiv.style.display = "block";
+          isValid = false;
+        }
+  
+        if (isValid) {
+          this.submit();
+        } else {
+          setTimeout(() => {
+            errorMessageDiv.style.display = "none";
+          }, 2000);
+        }
+      });
+    });
+  </script>
+  
+    <script>
+      const dropArea = document.querySelector(".drag-area"),
+        dragText = dropArea.querySelector("header"),
+        button = dropArea.querySelector("button"),
+        input = dropArea.querySelector("input[type='file']"),
+        hiddenForm = document.getElementById("import-form"),
+        fileHiddenInput = document.getElementById("file-hidden"),
+        passwordContainer = document.getElementById("password-container"),
+        passwordInput = document.getElementById("encryption-password");
 
+      let file;
+
+      button.onclick = () => {
+        input.click();
+      };
+      input.addEventListener("change", function () {
+        file = this.files[0];
+        dropArea.classList.add("active");
+        updateFileInput(file);
+      });
+      dropArea.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        dropArea.classList.add("active");
+        dragText.textContent = "Release to Upload File";
+      });
+      dropArea.addEventListener("dragleave", () => {
+        dropArea.classList.remove("active");
+        dragText.textContent = "Drag & Drop to Upload File";
+      });
+      dropArea.addEventListener("drop", (event) => {
+        event.preventDefault();
+        file = event.dataTransfer.files[0];
+        updateFileInput(file);
+      });
+      function updateFileInput(file) {
+        let fileType = file.name.split(".").pop().toLowerCase();
+        let validExtensions = ["json", "enc"];
+
+        if (validExtensions.includes(fileType)) {
+          dragText.textContent = `File Selected: ${file.name}`;
+          hiddenForm.style.display = "block";
+          fileHiddenInput.files = input.files;
+          if (!input.files.length) {
+            let dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileHiddenInput.files = dataTransfer.files;
+          }
+          if (fileType === "enc") {
+            passwordContainer.style.display = "block";
+            passwordInput.setAttribute("required", "required");
+          } else {
+            passwordContainer.style.display = "none";
+            passwordInput.value = "";
+            passwordInput.removeAttribute("required");
+          }
+        } else {
+          alert("Invalid file type! Please upload a .json or .enc file.");
+          dropArea.classList.remove("active");
+          dragText.textContent = "Drag & Drop to Upload File";
+        }
+      }
       function validateForm() {
-        const passwordContainer = document.getElementById("password-container");
-        const passwordInput = document.getElementById("encryption-password");
-
         if (
           passwordContainer.style.display === "block" &&
           !passwordInput.value
         ) {
-          alert("Please enter the encryption password."); // Show alert if password is missing for encrypted files
-          return false; // Prevent form submission
+          alert("Please enter the encryption password.");
+          return false;
         }
-        return true; // Allow form submission
+        return true;
       }
     </script>
+
     <script>
       function isStrongPassword(password) {
         const minLength = 8;
@@ -1223,11 +1625,15 @@
           const resetMessage = document.getElementById(
             "reset-password-message"
           );
+          const csrfToken = document.querySelector(
+            'input[name="csrf_token"]'
+          ).value;
 
           fetch("{{ url_for('auth.validate_reset_password') }}", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({ reset_encrypt_password: resetPassword }),
           })
@@ -1266,6 +1672,7 @@
             });
         });
     </script>
+
     <script>
       document
         .querySelectorAll('input[name="otp_method"]')
@@ -1286,8 +1693,6 @@
       }
     </script>
 
-    <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script
       nomodule
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
@@ -1296,8 +1701,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         const navLinks = document.querySelectorAll("[data-nav-link]");
         const articles = document.querySelectorAll("article");
-
-        // Initially hide all articles except the first one
         articles.forEach((article, index) => {
           article.style.display = index === 0 ? "block" : "none";
         });
