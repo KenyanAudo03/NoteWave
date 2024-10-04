@@ -491,6 +491,7 @@
                   type="password"
                   id="newPassword"
                   name="newPassword"
+                  autocomplete="off"
                   style="--background-: {{ current_user.generated_color }}"
                   required
                 />
@@ -512,6 +513,7 @@
                   id="confirmPassword"
                   name="confirmPassword"
                   style="--background-: {{ current_user.generated_color }}"
+                  autocomplete="off"
                   required
                 />
                 <i
@@ -533,13 +535,14 @@
 
               <button
                 type="submit"
-                style="--background-: {{ current_user.generated_color }}"
+                style="--background-: {{ current_user.generated_color }}; display: none;"
                 class="submit"
               >
                 Update Password
               </button>
             </form>
           </section>
+
 
           <section class="about-text">
             <div class="log-out">
@@ -576,7 +579,7 @@
 
                   <button
                     type="submit"
-                    style="--background: {{ current_user.generated_color }}"
+                    style="--background: {{ current_user.generated_color }};"
                     class="submit"
                   >
                     Log out sessions
@@ -671,7 +674,7 @@
             <p>Deleting Data...</p>
           </div>
 
-          <!-- <section id="activateUsers">
+          <section id="activateUsers">
             <h1>Manage Users</h1>
 
             <table>
@@ -734,7 +737,7 @@
                 {% endfor %}
               </tbody>
             </table>
-          </section> -->
+          </section>
         </article>
 
         <article class="portfolio" id="notification.">

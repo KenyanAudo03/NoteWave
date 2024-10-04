@@ -2160,6 +2160,17 @@ textarea.form-input::-webkit-resizer {
 .log-out .title p {
   max-width: 400px !important;
 }
+@media (max-width: 500px){
+  .log-out {
+    display: inline;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .form-log_out label{
+    margin-top: -5px;
+  }
+  
+}
 .name-field {
   flex: 1;
   display: flex;

@@ -282,14 +282,29 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-let failedAttempts = 0;
-const maxFailedAttempts = 3;
+document.addEventListener("DOMContentLoaded", function () {
+  const passwordForm = document.getElementById("passwordForm");
+  const currentPasswordInput = document.getElementById("currentPassword");
+  const submitButton = passwordForm.querySelector(".submit");
 
-document
-  .getElementById("passwordForm")
-  .addEventListener("submit", function (event) {
+  // Initially hide the submit button
+  submitButton.style.display = "none";
+
+  // Add event listener to show the submit button when typing starts in the current password field
+  currentPasswordInput.addEventListener("input", function () {
+    if (currentPasswordInput.value.length > 0) {
+      submitButton.style.display = "block";
+    } else {
+      submitButton.style.display = "none";
+    }
+  });
+
+  // Rest of the form validation and submission logic...
+  let failedAttempts = 0;
+  const maxFailedAttempts = 3;
+
+  passwordForm.addEventListener("submit", function (event) {
     event.preventDefault();
-    var currentPasswordInput = document.getElementById("currentPassword");
     var newPasswordInput = document.getElementById("newPassword");
     var confirmPasswordInput = document.getElementById("confirmPassword");
 
@@ -344,7 +359,6 @@ document
     }
 
     if (!hasError) {
-      // Get the CSRF token from the hidden input field
       const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
       fetch("/auth/update_password", {
@@ -356,7 +370,7 @@ document
           currentPassword: currentPassword,
           newPassword: newPassword,
           confirmPassword: confirmPassword,
-          csrf_token: csrfToken // Add CSRF token to the body
+          csrf_token: csrfToken
         }).toString(),
       })
         .then((response) => response.json())
@@ -389,34 +403,35 @@ document
     }
   });
 
-function showError(message, errorFieldId) {
-  var errorField = document.getElementById(errorFieldId);
-  if (errorField) {
-    errorField.textContent = message;
+  function showError(message, errorFieldId) {
+    var errorField = document.getElementById(errorFieldId);
+    if (errorField) {
+      errorField.textContent = message;
 
-    setTimeout(() => {
-      errorField.textContent = "";
-    }, 3000);
-  } else {
-    console.error("Error field not found: " + errorFieldId);
+      setTimeout(() => {
+        errorField.textContent = "";
+      }, 3000);
+    } else {
+      console.error("Error field not found: " + errorFieldId);
+    }
   }
-}
 
-function clearErrorMessages() {
-  document.getElementById("currentPasswordError").textContent = "";
-  document.getElementById("newPasswordError").textContent = "";
-  document.getElementById("confirmPasswordError").textContent = "";
-  document.getElementById("generalError").textContent = "";
-}
+  function clearErrorMessages() {
+    document.getElementById("currentPasswordError").textContent = "";
+    document.getElementById("newPasswordError").textContent = "";
+    document.getElementById("confirmPasswordError").textContent = "";
+    document.getElementById("generalError").textContent = "";
+  }
 
-function showNotification(message) {
-  var notification = document.getElementById("notification");
-  notification.textContent = message;
-  notification.style.display = "block";
-  setTimeout(() => {
-    notification.style.display = "none";
-  }, 3000);
-}
+  function showNotification(message) {
+    var notification = document.getElementById("notification");
+    notification.textContent = message;
+    notification.style.display = "block";
+    setTimeout(() => {
+      notification.style.display = "none";
+    }, 3000);
+  }
+});
 
 
 
@@ -481,6 +496,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const deactivateForm = document.getElementById("checkSessions");
   const passwordInput = document.getElementById("sessionLog");
   const passwordError = document.getElementById("sessionLogError");
+  const submitButton = deactivateForm.querySelector(".submit");
+
   if (!deactivateForm) {
     console.error("Deactivate form not found");
     return;
@@ -491,6 +508,9 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  // Show the submit button immediately
+  submitButton.style.display = "block";
+
   deactivateForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
@@ -498,6 +518,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Password input value:", password);
     passwordError.style.display = "none";
     passwordError.textContent = "";
+
     if (!password) {
       passwordError.textContent = "Password cannot be empty.";
       passwordError.style.display = "block";
@@ -505,6 +526,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     console.log("Attempting to send password:", password);
+    
+    // Get the CSRF token from the hidden input field
+    const csrfToken = deactivateForm.querySelector('input[name="csrf_token"]').value;
+
     fetch("/auth/check_password_delete_account", {
       method: "POST",
       headers: {
@@ -512,6 +537,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: new URLSearchParams({
         password: password,
+        csrf_token: csrfToken // Include CSRF token in the body
       }).toString(),
     })
       .then((response) => {
@@ -536,11 +562,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const deactivateForm = document.getElementById("deactivateForm");
   const passwordInput = document.getElementById("logOut");
   const passwordError = document.getElementById("passwordError");
+
   if (!deactivateForm) {
     console.error("Deactivate form not found");
     return;
@@ -558,6 +586,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Password input value:", password);
     passwordError.style.display = "none";
     passwordError.textContent = "";
+    
     if (!password) {
       passwordError.textContent = "Password cannot be empty.";
       passwordError.style.display = "block";
@@ -565,6 +594,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     console.log("Attempting to send password:", password);
+    const csrfToken = deactivateForm.querySelector('input[name="csrf_token"]').value;
+
     fetch("/auth/check_password_delete_account", {
       method: "POST",
       headers: {
@@ -572,6 +603,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: new URLSearchParams({
         password: password,
+        csrf_token: csrfToken 
       }).toString(),
     })
       .then((response) => {
@@ -584,7 +616,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         if (data.success) {
-          deactivateForm.submit();
+          deactivateForm.submit(); 
         }
       })
       .catch((error) => {
@@ -596,6 +628,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const deactivateForm = document.getElementById("deleteForm");
@@ -607,6 +640,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.error("Deactivate form not found");
     return;
   }
+  
   if (!passwordInput) {
     console.error("Password input not found");
     return;
@@ -619,6 +653,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Password input value:", password);
     passwordError.style.display = "none";
     passwordError.textContent = "";
+    
     if (!password) {
       passwordError.textContent = "Password cannot be empty.";
       passwordError.style.display = "block";
@@ -626,6 +661,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     console.log("Attempting to send password:", password);
+    
+    // Get the CSRF token from the hidden input field
+    const csrfToken = deactivateForm.querySelector('input[name="csrf_token"]').value;
+
     fetch("/auth/check_password_delete_account", {
       method: "POST",
       headers: {
@@ -633,6 +672,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: new URLSearchParams({
         password: password,
+        csrf_token: csrfToken 
       }).toString(),
     })
       .then((response) => {
@@ -645,10 +685,10 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         if (data.success) {
-          loadingOverlay.style.display = "flex";
+          loadingOverlay.style.display = "flex"; 
           setTimeout(() => {
             deactivateForm.submit();
-          }, 5000);
+          }, 5000); 
         }
       })
       .catch((error) => {
@@ -660,6 +700,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
 
 function isStrongPassword(password) {
   const minLength = 8;
