@@ -714,7 +714,11 @@
                     <form
                       action="{{ url_for('auth.activate_account', user_id=user.id) }}"
                       method="post"
-                    >
+                    ><input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                       <button type="submit">Activate</button>
                     </form>
                     {% else %}
@@ -744,7 +748,6 @@
           <header>
             <h2 class="h2 article-title">Notification</h2>
           </header>
-          <!-- Email Notifications Section -->
           <section id="emailNotifications" class="notification-section">
             <h3 class="section-title">Email Notifications</h3>
             <form

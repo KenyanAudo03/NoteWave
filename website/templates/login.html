@@ -93,6 +93,11 @@
               method="POST"
               action="{{ url_for('auth.login') }}"
             >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <div class="form-element form-stack">
                 <label for="email" class="email"
                   ><i class="bx bx-envelope icon"></i> Email</label

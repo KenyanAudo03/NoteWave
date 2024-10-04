@@ -10,17 +10,18 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    document
+  document
     .getElementById("form-login")
     .addEventListener("submit", function (event) {
       event.preventDefault();
-  
+
       const emailInput = document.getElementById("email");
       const passwordInput = document.getElementById("password-login");
       const email = emailInput.value;
       const password = passwordInput.value;
+      const csrfToken = document.querySelector('input[name="csrf_token"]').value; 
       clearErrorMessages();
-  
+
       function shakeInput(input, fullBorder = false) {
         input.classList.add("shake");
         input.classList.add("input-error");
@@ -31,12 +32,11 @@ document.addEventListener("DOMContentLoaded", function () {
           input.classList.remove("shake", "full-border-error", "input-error");
         }, 1000);
       }
-  
+
       function showErrorMessage(input, message) {
         const errorElement = document.createElement("div");
         errorElement.classList.add("error-message");
 
-        
         const closeIcon = document.createElement("span");
         closeIcon.classList.add("close-icon");
         closeIcon.innerHTML = "&times;";
@@ -48,23 +48,23 @@ document.addEventListener("DOMContentLoaded", function () {
         input.parentNode.appendChild(errorElement);
         setTimeout(() => {
           errorElement.remove();
-        }, 3000); 
+        }, 3000);
       }
-  
+
       function clearErrorMessages() {
         const errorMessages = document.querySelectorAll(".error-message");
         errorMessages.forEach((msg) => msg.remove());
       }
-  
+
       // Remove previous error classes
       emailInput.classList.remove("input-error", "full-border-error");
       passwordInput.classList.remove("input-error");
-  
+
       // Check if email exists
       fetch("/auth/check_email", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `email=${encodeURIComponent(email)}`,
+        body: `email=${encodeURIComponent(email)}&csrf_token=${encodeURIComponent(csrfToken)}`, // Include CSRF token
       })
         .then((response) => response.json())
         .then((data) => {
@@ -76,9 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch("/auth/check_password", {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: `email=${encodeURIComponent(
-                email
-              )}&password-login=${encodeURIComponent(password)}`,
+              body: `email=${encodeURIComponent(email)}&password-login=${encodeURIComponent(password)}&csrf_token=${encodeURIComponent(csrfToken)}`, // Include CSRF token
             })
               .then((response) => response.json())
               .then((data) => {
@@ -86,13 +84,13 @@ document.addEventListener("DOMContentLoaded", function () {
                   shakeInput(passwordInput);
                   showErrorMessage(passwordInput, "Password is wrong.");
                 } else {
-                  document.getElementById("form-login").submit();
+                  document.getElementById("form-login").submit(); // Submit the form if everything is correct
                 }
               });
           }
         });
     });
-});  
+});
 document.addEventListener("DOMContentLoaded", function () {
   setTimeout(function () {
     const alerts = document.querySelectorAll(".alert");
