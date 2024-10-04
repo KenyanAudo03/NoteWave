@@ -766,8 +766,7 @@ function formatPhoneNumber(input) {
   if (phoneNumber.startsWith('0')) {
       phoneNumber = phoneNumber.substring(1);
   }
-  
-  // Create a formatted phone number
+
   if (phoneNumber.length > 3) {
       const areaCode = phoneNumber.substring(0, 3);
       const numberPart = phoneNumber.substring(3);

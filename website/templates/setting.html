@@ -271,7 +271,11 @@
 
                     <label for="genderSelect">Gender</label>
                     <select id="genderSelect" name="gender">
-                      <option value="">{{ current_user.gender }}</option>
+                      <option value="">
+                        {{ current_user.gender if current_user.gender else
+                        'Select Gender' }}
+                      </option>
+
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                     </select>
@@ -341,7 +345,10 @@
                 <div class="name-field">
                   <label for="countryCode">Country Code</label>
                   <select id="countryCode" name="country_code">
-                    <option value="">{{ current_user.country_code }}</option>
+                    <option value="">
+                      {{ current_user.country_code if current_user.country_code
+                      else 'Select Country Code' }}
+                    </option>
                     <option value="+1">USA (+1)</option>
                     <option value="+254">Kenya (+254)</option>
                     <option value="+44">UK (+44)</option>
@@ -379,10 +386,11 @@
                     id="phoneNumber"
                     name="phone_number"
                     placeholder="703853259"
-                    value="{{ current_user.phone_number }}"
+                    value="{{ current_user.phone_number if current_user.phone_number else '' }}"
                     required
                     oninput="formatPhoneNumber(this)"
                   />
+
                   <small
                     id="error-message"
                     style="color: red; display: none"
@@ -390,8 +398,11 @@
                 </div>
               </div>
               <label for="timeZoneSearch">Timezone</label>
-              <select id="timeZoneSearch" name="time_zone" >
-                <option value="">{{ current_user.time_zone }}</option>
+              <select id="timeZoneSearch" name="time_zone">
+                <option value="">
+                  {{ current_user.time_zone if current_user.time_zone else
+                  'Select Timezone' }}
+                </option>
                 <option value="Europe/London">London</option>
                 <option value="Europe/Paris">Paris</option>
                 <option value="Asia/Tokyo">Tokyo</option>
@@ -415,7 +426,12 @@
                 <option value="Europe/Madrid">Madrid</option>
               </select>
 
-              <button type="submit" class="submit" id="updateButton" style="display: none;">
+              <button
+                type="submit"
+                class="submit"
+                id="updateButton"
+                style="display: none"
+              >
                 Update Contact Information
               </button>
             </form>
@@ -1391,68 +1407,68 @@
         });
       });
     </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const contactForm = document.getElementById("contactForm");
-      const phoneNumberInput = document.getElementById("phoneNumber");
-      const countryCodeSelect = document.getElementById("countryCode");
-      const timeZoneSelect = document.getElementById("timeZoneSearch");
-      const updateButton = document.getElementById("updateButton");
-  
-      // Store original values
-      const originalPhoneNumber = phoneNumberInput.value;
-      const originalCountryCode = countryCodeSelect.value;
-      const originalTimeZone = timeZoneSelect.value;
-  
-      // Function to check if any value has changed
-      function checkForChanges() {
-        const currentPhoneNumber = phoneNumberInput.value;
-        const currentCountryCode = countryCodeSelect.value;
-        const currentTimeZone = timeZoneSelect.value;
-  
-        if (
-          currentPhoneNumber !== originalPhoneNumber ||
-          currentCountryCode !== originalCountryCode ||
-          currentTimeZone !== originalTimeZone
-        ) {
-          updateButton.style.display = "block"; // Show the button if values have changed
-        } else {
-          updateButton.style.display = "none"; // Hide the button if values are the same
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const contactForm = document.getElementById("contactForm");
+        const phoneNumberInput = document.getElementById("phoneNumber");
+        const countryCodeSelect = document.getElementById("countryCode");
+        const timeZoneSelect = document.getElementById("timeZoneSearch");
+        const updateButton = document.getElementById("updateButton");
+
+        // Store original values
+        const originalPhoneNumber = phoneNumberInput.value;
+        const originalCountryCode = countryCodeSelect.value;
+        const originalTimeZone = timeZoneSelect.value;
+
+        // Function to check if any value has changed
+        function checkForChanges() {
+          const currentPhoneNumber = phoneNumberInput.value;
+          const currentCountryCode = countryCodeSelect.value;
+          const currentTimeZone = timeZoneSelect.value;
+
+          if (
+            currentPhoneNumber !== originalPhoneNumber ||
+            currentCountryCode !== originalCountryCode ||
+            currentTimeZone !== originalTimeZone
+          ) {
+            updateButton.style.display = "block"; // Show the button if values have changed
+          } else {
+            updateButton.style.display = "none"; // Hide the button if values are the same
+          }
         }
-      }
-  
-      // Event listeners for input changes
-      phoneNumberInput.addEventListener("input", checkForChanges);
-      countryCodeSelect.addEventListener("change", checkForChanges);
-      timeZoneSelect.addEventListener("change", checkForChanges);
-  
-      contactForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-  
-        const phoneInput = phoneNumberInput.value.replace(/\D/g, "");
-        const errorMessageDiv = document.getElementById("error-message");
-        errorMessageDiv.style.display = "none";
-        let isValid = true;
-        const minLength = 7;
-        const maxLength = 15;
-  
-        if (phoneInput.length < minLength || phoneInput.length > maxLength) {
-          errorMessageDiv.textContent = `Phone number must be between ${minLength} and ${maxLength} digits long (excluding country code).`;
-          errorMessageDiv.style.display = "block";
-          isValid = false;
-        }
-  
-        if (isValid) {
-          this.submit();
-        } else {
-          setTimeout(() => {
-            errorMessageDiv.style.display = "none";
-          }, 2000);
-        }
+
+        // Event listeners for input changes
+        phoneNumberInput.addEventListener("input", checkForChanges);
+        countryCodeSelect.addEventListener("change", checkForChanges);
+        timeZoneSelect.addEventListener("change", checkForChanges);
+
+        contactForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const phoneInput = phoneNumberInput.value.replace(/\D/g, "");
+          const errorMessageDiv = document.getElementById("error-message");
+          errorMessageDiv.style.display = "none";
+          let isValid = true;
+          const minLength = 7;
+          const maxLength = 15;
+
+          if (phoneInput.length < minLength || phoneInput.length > maxLength) {
+            errorMessageDiv.textContent = `Phone number must be between ${minLength} and ${maxLength} digits long (excluding country code).`;
+            errorMessageDiv.style.display = "block";
+            isValid = false;
+          }
+
+          if (isValid) {
+            this.submit();
+          } else {
+            setTimeout(() => {
+              errorMessageDiv.style.display = "none";
+            }, 2000);
+          }
+        });
       });
-    });
-  </script>
-  
+    </script>
+
     <script>
       const dropArea = document.querySelector(".drag-area"),
         dragText = dropArea.querySelector("header"),
