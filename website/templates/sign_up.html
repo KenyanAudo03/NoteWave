@@ -8,7 +8,10 @@
       name="description"
       content="Sign up for NoteWave to start creating and managing your notes efficiently."
     />
-    <meta name="keywords" content="NoteWave, SignUp, Notes, Productivity, Create Account" />
+    <meta
+      name="keywords"
+      content="NoteWave, SignUp, Notes, Productivity, Create Account"
+    />
     <meta name="author" content="NoteWave Team" />
     <!-- Meta Tags for Social Media -->
     <meta property="og:title" content="SignUp | NoteWave" />
@@ -53,292 +56,292 @@
       href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
     />
     <link
-    rel="icon"
-    href="{{ url_for('static', filename='img/notewave.ico') }}"
-    type="image/x-icon"
-  />
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
     <style>
-       .swal2-popup {
-            font-size: 1rem;
-            margin-top: 5px; 
-        }
-
-        .swal2-title {
-            color: #e74c3c;
-            font-size: 1.5rem;
-            font-family: 'Courier New', Courier, monospace;
-        }
-    </style>
-</head>
-
-<body>
-  <div id="back">
-    <canvas id="canvas" class="canvas-back"></canvas>
-    <div class="backRight"></div>
-  </div>
-
-  <div class="left">
-    <div class="content">
-      <h2>Sign Up</h2>
-      <form id="form-signup" method="post" onsubmit="return false;">
-        <div class="form-element form-stack">
-          <label for="firstName" class="form-label"
-            ><i class="bx bx-user icon"></i> FirstName</label
-          >
-          <input
-            id="firstName"
-            name="firstName"
-            class="input-field"
-            aria-required="true"
-            aria-label="FirstName"
-            type="text"
-            autocomplete="new-name"
-          />
-        </div>
-        <div class="form-element form-stack">
-          <label for="secondName" class="form-label"
-            ><i class="bx bx-user icon"></i> SecondName</label
-          >
-          <input
-            id="secondName"
-            name="secondName"
-            class="input-field"
-            aria-required="true"
-            aria-label="SecondName"
-            type="text"
-            autocomplete="new-secondname"
-          />
-        </div>
-
-        <div class="form-element form-stack">
-          <label for="email" class="form-label">
-            <i class="bx bx-envelope icon"></i> Email</label
-          >
-          <input
-            id="email"
-            name="email"
-            class="input-field"
-            aria-required="true"
-            aria-label="Email"
-            autocomplete="new-email"
-          />
-        </div>
-        <div class="form-element form-stack">
-          <label for="password" class="form-label">
-            <i class="bx bx-lock-alt icon"></i> Password</label
-          >
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="input-field"
-            aria-required="true"
-            aria-label="Password"
-            autocomplete="new-password"
-          />
-        </div>
-        <div id="passwordStrength" class="password-strength"></div>
-        <div class="form-element form-stack">
-          <label for="confirm-password" class="form-label"
-            ><i class="bx bx-lock-alt icon"></i> Confirm Password</label
-          >
-          <input
-            type="password"
-            id="confirm-password"
-            name="confirm-password"
-            class="input-field"
-            aria-required="true"
-            aria-label="Confirm Password"
-            autocomplete="new-password"
-          />
-        </div>
-
-        <div class="form-element form-checkbox">
-          <input
-            id="confirm-terms"
-            type="checkbox"
-            name="confirm"
-            value="yes"
-            class="checkbox"
-          />
-          <label for="confirm-terms"
-            >I agree to the
-            <a href="/auth/terms">
-              Terms and Conditions of your service</a
-            ></label
-          >
-        </div>
-
-
-        <div class="container1">
-         
-          <div class="show-pass">
-            <input type="checkbox" id="show-pass-checkbox"  class="checkbox"/>
-            <label for="show-pass-checkbox">Show Password</label>
-          </div>
-
-          <div class="forgot-password">
-            <a href="/auth/forgot-password">Forgot Password?</a>
-          </div>
-        </div>
-        <div class="login">
-          <p>
-            Already have an account?
-            <a href="/auth/login">Click here</a>
-          </p>
-        </div>
-        <div class="form-element form-submit">
-          <button id="signUp" class="signup" type="submit" name="signup">
-            <span>Sign Up</span>
-            <i class="bx bx-right-arrow-alt"></i>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.11.3/paper-full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
-  <script>
-    paper.install(window);
-    paper.setup(document.getElementById("canvas"));
-
-    // Paper JS Variables
-    var canvasWidth, canvasHeight, canvasMiddleX, canvasMiddleY;
-
-    var shapeGroup = new Group();
-
-    var positionArray = [];
-
-    function getCanvasBounds() {
-      // Get current canvas size
-      canvasWidth = view.size.width;
-      canvasHeight = view.size.height;
-      canvasMiddleX = canvasWidth / 2;
-      canvasMiddleY = canvasHeight / 2;
-      // Set path position
-      var position1 = {
-        x: canvasMiddleX / 2 + 100,
-        y: 100,
-      };
-
-      var position2 = {
-        x: 200,
-        y: canvasMiddleY,
-      };
-
-      var position3 = {
-        x: canvasMiddleX - 50 + canvasMiddleX / 2,
-        y: 150,
-      };
-
-      var position4 = {
-        x: 0,
-        y: canvasMiddleY + 100,
-      };
-
-      var position5 = {
-        x: canvasWidth - 130,
-        y: canvasHeight - 75,
-      };
-
-      var position6 = {
-        x: canvasMiddleX + 80,
-        y: canvasHeight - 50,
-      };
-
-      var position7 = {
-        x: canvasWidth + 60,
-        y: canvasMiddleY - 50,
-      };
-
-      var position8 = {
-        x: canvasMiddleX + 100,
-        y: canvasMiddleY + 100,
-      };
-
-      positionArray = [
-        position3,
-        position2,
-        position5,
-        position4,
-        position1,
-        position6,
-        position7,
-        position8,
-      ];
-    }
-
-    /* ====================== *
-     * Create Shapes          *
-     * ====================== */
-    function initializeShapes() {
-      // Get Canvas Bounds
-      getCanvasBounds();
-
-      var shapePathData = [
-        "M231,352l445-156L600,0L452,54L331,3L0,48L231,352",
-        "M0,0l64,219L29,343l535,30L478,37l-133,4L0,0z",
-        "M0,65l16,138l96,107l270-2L470,0L337,4L0,65z",
-        "M333,0L0,94l64,219L29,437l570-151l-196-42L333,0",
-        "M331.9,3.6l-331,45l231,304l445-156l-76-196l-148,54L331.9,3.6z",
-        "M389,352l92-113l195-43l0,0l0,0L445,48l-80,1L122.7,0L0,275.2L162,297L389,352",
-        "M 50 100 L 300 150 L 550 50 L 750 300 L 500 250 L 300 450 L 50 100",
-        "M 700 350 L 500 350 L 700 500 L 400 400 L 200 450 L 250 350 L 100 300 L 150 50 L 350 100 L 250 150 L 450 150 L 400 50 L 550 150 L 350 250 L 650 150 L 650 50 L 700 150 L 600 250 L 750 250 L 650 300 L 700 350 ",
-      ];
-
-      for (var i = 0; i <= shapePathData.length; i++) {
-        // Create shape
-        var headerShape = new Path({
-          strokeColor: "rgba(255, 255, 255, 0.5)",
-          strokeWidth: 2,
-          parent: shapeGroup,
-        });
-        // Set path data
-        headerShape.pathData = shapePathData[i];
-        headerShape.scale(2);
-        // Set path position
-        headerShape.position = positionArray[i];
+      .swal2-popup {
+        font-size: 1rem;
+        margin-top: 5px;
       }
-    }
 
-    initializeShapes();
+      .swal2-title {
+        color: #e74c3c;
+        font-size: 1.5rem;
+        font-family: "Courier New", Courier, monospace;
+      }
+    </style>
+  </head>
 
-    /* ====================== *
-     * Animation              *
-     * ====================== */
-    view.onFrame = function paperOnFrame(event) {
-      if (event.count % 4 === 0) {
-        // Slows down frame rate
-        for (var i = 0; i < shapeGroup.children.length; i++) {
-          if (i % 2 === 0) {
-            shapeGroup.children[i].rotate(-0.1);
-          } else {
-            shapeGroup.children[i].rotate(0.1);
+  <body>
+    <div id="back">
+      <canvas id="canvas" class="canvas-back"></canvas>
+      <div class="backRight"></div>
+    </div>
+
+    <div class="left">
+      <div class="content">
+        <h2>Sign Up</h2>
+        <form id="form-signup" method="post" onsubmit="return false;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <div class="form-element form-stack">
+            <label for="firstName" class="form-label"
+              ><i class="bx bx-user icon"></i> FirstName</label
+            >
+
+            <input
+              id="firstName"
+              name="firstName"
+              class="input-field"
+              aria-required="true"
+              aria-label="FirstName"
+              type="text"
+              autocomplete="new-name"
+            />
+          </div>
+          <div class="form-element form-stack">
+            <label for="secondName" class="form-label"
+              ><i class="bx bx-user icon"></i> SecondName</label
+            >
+            <input
+              id="secondName"
+              name="secondName"
+              class="input-field"
+              aria-required="true"
+              aria-label="SecondName"
+              type="text"
+              autocomplete="new-secondname"
+            />
+          </div>
+
+          <div class="form-element form-stack">
+            <label for="email" class="form-label">
+              <i class="bx bx-envelope icon"></i> Email</label
+            >
+            <input
+              id="email"
+              name="email"
+              class="input-field"
+              aria-required="true"
+              aria-label="Email"
+              autocomplete="new-email"
+            />
+          </div>
+          <div class="form-element form-stack">
+            <label for="password" class="form-label">
+              <i class="bx bx-lock-alt icon"></i> Password</label
+            >
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="input-field"
+              aria-required="true"
+              aria-label="Password"
+              autocomplete="new-password"
+            />
+          </div>
+          <div id="passwordStrength" class="password-strength"></div>
+          <div class="form-element form-stack">
+            <label for="confirm-password" class="form-label"
+              ><i class="bx bx-lock-alt icon"></i> Confirm Password</label
+            >
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirm-password"
+              class="input-field"
+              aria-required="true"
+              aria-label="Confirm Password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="form-element form-checkbox">
+            <input
+              id="confirm-terms"
+              type="checkbox"
+              name="confirm"
+              value="yes"
+              class="checkbox"
+            />
+            <label for="confirm-terms"
+              >I agree to the
+              <a href="/auth/terms">
+                Terms and Conditions of your service</a
+              ></label
+            >
+          </div>
+
+          <div class="container1">
+            <div class="show-pass">
+              <input type="checkbox" id="show-pass-checkbox" class="checkbox" />
+              <label for="show-pass-checkbox">Show Password</label>
+            </div>
+
+            <div class="forgot-password">
+              <a href="/auth/forgot-password">Forgot Password?</a>
+            </div>
+          </div>
+          <div class="login">
+            <p>
+              Already have an account?
+              <a href="/auth/login">Click here</a>
+            </p>
+          </div>
+          <div class="form-element form-submit">
+            <button id="signUp" class="signup" type="submit" name="signup">
+              <span>Sign Up</span>
+              <i class="bx bx-right-arrow-alt"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.11.3/paper-full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script>
+      paper.install(window);
+      paper.setup(document.getElementById("canvas"));
+
+      // Paper JS Variables
+      var canvasWidth, canvasHeight, canvasMiddleX, canvasMiddleY;
+
+      var shapeGroup = new Group();
+
+      var positionArray = [];
+
+      function getCanvasBounds() {
+        // Get current canvas size
+        canvasWidth = view.size.width;
+        canvasHeight = view.size.height;
+        canvasMiddleX = canvasWidth / 2;
+        canvasMiddleY = canvasHeight / 2;
+        // Set path position
+        var position1 = {
+          x: canvasMiddleX / 2 + 100,
+          y: 100,
+        };
+
+        var position2 = {
+          x: 200,
+          y: canvasMiddleY,
+        };
+
+        var position3 = {
+          x: canvasMiddleX - 50 + canvasMiddleX / 2,
+          y: 150,
+        };
+
+        var position4 = {
+          x: 0,
+          y: canvasMiddleY + 100,
+        };
+
+        var position5 = {
+          x: canvasWidth - 130,
+          y: canvasHeight - 75,
+        };
+
+        var position6 = {
+          x: canvasMiddleX + 80,
+          y: canvasHeight - 50,
+        };
+
+        var position7 = {
+          x: canvasWidth + 60,
+          y: canvasMiddleY - 50,
+        };
+
+        var position8 = {
+          x: canvasMiddleX + 100,
+          y: canvasMiddleY + 100,
+        };
+
+        positionArray = [
+          position3,
+          position2,
+          position5,
+          position4,
+          position1,
+          position6,
+          position7,
+          position8,
+        ];
+      }
+
+      /* ====================== *
+       * Create Shapes          *
+       * ====================== */
+      function initializeShapes() {
+        // Get Canvas Bounds
+        getCanvasBounds();
+
+        var shapePathData = [
+          "M231,352l445-156L600,0L452,54L331,3L0,48L231,352",
+          "M0,0l64,219L29,343l535,30L478,37l-133,4L0,0z",
+          "M0,65l16,138l96,107l270-2L470,0L337,4L0,65z",
+          "M333,0L0,94l64,219L29,437l570-151l-196-42L333,0",
+          "M331.9,3.6l-331,45l231,304l445-156l-76-196l-148,54L331.9,3.6z",
+          "M389,352l92-113l195-43l0,0l0,0L445,48l-80,1L122.7,0L0,275.2L162,297L389,352",
+          "M 50 100 L 300 150 L 550 50 L 750 300 L 500 250 L 300 450 L 50 100",
+          "M 700 350 L 500 350 L 700 500 L 400 400 L 200 450 L 250 350 L 100 300 L 150 50 L 350 100 L 250 150 L 450 150 L 400 50 L 550 150 L 350 250 L 650 150 L 650 50 L 700 150 L 600 250 L 750 250 L 650 300 L 700 350 ",
+        ];
+
+        for (var i = 0; i <= shapePathData.length; i++) {
+          // Create shape
+          var headerShape = new Path({
+            strokeColor: "rgba(255, 255, 255, 0.5)",
+            strokeWidth: 2,
+            parent: shapeGroup,
+          });
+          // Set path data
+          headerShape.pathData = shapePathData[i];
+          headerShape.scale(2);
+          // Set path position
+          headerShape.position = positionArray[i];
+        }
+      }
+
+      initializeShapes();
+
+      /* ====================== *
+       * Animation              *
+       * ====================== */
+      view.onFrame = function paperOnFrame(event) {
+        if (event.count % 4 === 0) {
+          // Slows down frame rate
+          for (var i = 0; i < shapeGroup.children.length; i++) {
+            if (i % 2 === 0) {
+              shapeGroup.children[i].rotate(-0.1);
+            } else {
+              shapeGroup.children[i].rotate(0.1);
+            }
           }
         }
-      }
-    };
+      };
 
-    view.onResize = function paperOnResize() {
-      getCanvasBounds();
+      view.onResize = function paperOnResize() {
+        getCanvasBounds();
 
-      for (var i = 0; i < shapeGroup.children.length; i++) {
-        shapeGroup.children[i].position = positionArray[i];
-      }
+        for (var i = 0; i < shapeGroup.children.length; i++) {
+          shapeGroup.children[i].position = positionArray[i];
+        }
 
-      if (canvasWidth < 700) {
-        shapeGroup.children[3].opacity = 0;
-        shapeGroup.children[2].opacity = 0;
-        shapeGroup.children[5].opacity = 0;
-      } else {
-        shapeGroup.children[3].opacity = 1;
-        shapeGroup.children[2].opacity = 1;
-        shapeGroup.children[5].opacity = 1;
-      }
-    };
-  </script>
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-      <script src="{{ url_for('static', filename='js/sign_up.js') }}"></script>
-</body>
+        if (canvasWidth < 700) {
+          shapeGroup.children[3].opacity = 0;
+          shapeGroup.children[2].opacity = 0;
+          shapeGroup.children[5].opacity = 0;
+        } else {
+          shapeGroup.children[3].opacity = 1;
+          shapeGroup.children[2].opacity = 1;
+          shapeGroup.children[5].opacity = 1;
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="{{ url_for('static', filename='js/sign_up.js') }}"></script>
+  </body>
 </html>

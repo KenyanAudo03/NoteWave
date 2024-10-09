@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 import re
-from .models import User, NoteTag, Note, Notification, ToDo, Subtask, Friendship
+from .models import User, NoteTag, Note, Notification, ToDo, Subtask, Friendship, Admin
 import pytz
 from html import escape
 from pytz import timezone
@@ -1141,8 +1141,33 @@ def delete_tag(tag_id):
 @login_required
 def settings():
     users = User.query.all()
-    return render_template("setting.html", users=users)
 
+    statistics = None
+    monthly_statistics = None
+    login_activities = None
+    note_counts = [] 
+
+    if current_user.role == 'superadmin':
+        admin_instance = Admin()
+        statistics = admin_instance.view_statistics()
+        monthly_statistics = admin_instance.view_monthly_statistics()
+        login_activities = admin_instance.view_login_activities()
+        for user in users:
+            note_counts.append({
+                "user_id": user.id,
+                "username": user.user_name,
+                "imported_notes_count": user.imported_notes_count,
+                "exported_notes_count": user.exported_notes_count,
+            })
+
+    return render_template(
+        "setting.html", 
+        users=users,
+        statistics=statistics, 
+        view_monthly_statistics=monthly_statistics,
+        login_activities=login_activities,
+        note_counts=note_counts  
+    )
 
 @views.route("/send_email", methods=["POST"])
 def send_email():

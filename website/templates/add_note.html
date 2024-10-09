@@ -264,6 +264,11 @@
                 placeholder="Note Title"
                 required
               />
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <div id="quillEditor"></div>
               <input name="content" id="content" type="hidden" />
               <input type="hidden" name="tag_id" value="{{ tag.id }}" />

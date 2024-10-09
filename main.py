@@ -9,7 +9,6 @@ from website.models import User, Friendship, Message  # Ensure these are importe
 # Initialize Flask app
 app = create_app()
 
-# Initialize SocketIO with the app
 socketio = SocketIO(app)
 
 @socketio.on('typing')
@@ -30,10 +29,7 @@ def handle_typing(data):
 @login_required
 def handle_stop_typing(data):
     receiver_id = data['receiver_id']
-    # Construct room based on sender and receiver IDs
     room = f"chat_{min(current_user.id, receiver_id)}_{max(current_user.id, receiver_id)}"
-    
-    # Broadcast stop typing status to the room with sender_id for consistency
     emit('stop_typing', {
         'sender_id': current_user.id
     }, room=room)

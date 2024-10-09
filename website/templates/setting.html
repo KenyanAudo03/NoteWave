@@ -58,9 +58,6 @@
         <nav class="navbar">
           <ul class="navbar-list">
             <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Dashboard.</button>
-            </li>
-            <li class="navbar-item">
               <button class="navbar-link active" data-nav-link>Account.</button>
             </li>
 
@@ -79,13 +76,24 @@
             <li class="navbar-item">
               <button class="navbar-link" data-nav-link>Data.</button>
             </li>
+            {% if current_user.is_admin %}
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Admin.</button>
+            </li>
+            {% endif %}
           </ul>
         </nav>
 
         <article class="about active" id="account.">
           <header>
-            <h2 class="h2 article-title">Account</h2>
+            <h2 class="h2 article-title">
+              Account
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
           </header>
+
           <section class="about-text" style="width: 100%">
             <h3>Personal Information <br /></h3>
             <small>Use a permanent address where you can receive mail.</small>
@@ -299,31 +307,93 @@
             <form
               action="{{ url_for('auth.update_account_info') }}"
               method="POST"
-              id="InformationForm"
+              class="accountForm"
+              id="accountForm"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+
               <label for="newEmail">Email</label>
               <input
                 type="email"
                 id="newEmail"
                 name="newEmail"
                 value="{{ current_user.email }}"
-                required
+                autocomplete="off"
               />
+              <div
+                id="emailError"
+                class="error-message"
+                style="display: none"
+              ></div>
+              <button type="button" id="sendOtpBtn" style="display: none">
+                Send Verification OTP
+              </button>
+
+              <label for="otpInput" style="display: none" id="otpLabel"
+                >Enter OTP</label
+              >
+              <input
+                type="text"
+                id="otpInput"
+                name="otp"
+                style="display: none"
+                placeholder="Enter the OTP sent to your email"
+              />
+              <div
+                id="otpError"
+                class="error-message"
+                style="display: none"
+              ></div>
+              <div class="phone_numbers">
+                <div class="name-field">
+                  <button type="button" id="verifyOtpBtn" style="display: none">
+                    Verify OTP
+                  </button>
+                </div>
+                <div class="name-field">
+                  <button type="button" id="resendOtpBtn" style="display: none">
+                    Resend OTP
+                  </button>
+                </div>
+              </div>
 
               <label for="newUsername">New Username</label>
               <input
                 type="text"
                 id="newUsername"
                 name="newUsername"
+                autocomplete="off"
                 value="@{{ current_user.user_name[1:] }}"
-                required
+                maxlength="16"
               />
+              <div
+                id="usernameError"
+                class="error-message"
+                style="display: none"
+              ></div>
 
               <label for="bioInput">Bio</label>
-              <textarea id="bioInput" name="bio" rows="4" required>
+              <textarea
+                id="bioInput"
+                name="bio"
+                maxlength="60"
+                autocomplete="off"
+              >
 {{ current_user.bio }}</textarea
               >
-              <button type="submit" class="submit">
+
+              <div id="bioCount" style="font-size: 12px">0/60</div>
+
+              <button
+                type="submit"
+                class="submit"
+                id="updateInfoBtn"
+                style="display: none"
+              >
                 Update Account Information
               </button>
             </form>
@@ -543,19 +613,18 @@
             </form>
           </section>
 
-
           <section class="about-text">
             <div class="log-out">
               <div class="title">
-                <h3>Log Out Other Sessions</h3>
+                <h3>Log Out</h3>
                 <p>
                   Please enter your password to confirm you would like to log
-                  out of your other sessions across all of your devices.
+                  out.
                 </p>
               </div>
               <div class="form-log_out">
                 <form
-                  action="{{ url_for('auth.logout_other_sessions') }}"
+                  action="{{ url_for('auth.logout') }}"
                   method="POST"
                   id="checkSessions"
                 >
@@ -673,80 +742,16 @@
             <div class="spinner"></div>
             <p>Deleting Data...</p>
           </div>
-
-          <section id="activateUsers">
-            <h1>Manage Users</h1>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Email</th>
-                  <th>Full Name</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                  <th>Make Admin</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for user in users %}
-                <tr>
-                  <td>{{ user.id }}</td>
-                  <td>{{ user.email }}</td>
-                  <td>{{ user.full_name }}</td>
-                  <td>
-                    {% if user.is_active %}
-                    <i
-                      class="fas fa-check-circle"
-                      style="color: green"
-                      title="Active"
-                    ></i>
-                    {% else %}
-                    <i
-                      class="fas fa-times-circle"
-                      style="color: red"
-                      title="Inactive"
-                    ></i>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if not user.is_active %}
-                    <form
-                      action="{{ url_for('auth.activate_account', user_id=user.id) }}"
-                      method="post"
-                    ><input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}"
-                  />
-                      <button type="submit">Activate</button>
-                    </form>
-                    {% else %}
-                    <span>Active</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if not user.is_admin %}
-                    <form
-                      action="{{ url_for('auth.make_admin', user_id=user.id) }}"
-                      method="post"
-                    >
-                      <button type="submit">Make Admin</button>
-                    </form>
-                    {% else %}
-                    <span>Admin</span>
-                    {% endif %}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </section>
         </article>
 
         <article class="portfolio" id="notification.">
           <header>
-            <h2 class="h2 article-title">Notification</h2>
+            <h2 class="h2 article-title">
+              Notification
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
           </header>
           <section id="emailNotifications" class="notification-section">
             <h3 class="section-title">Email Notifications</h3>
@@ -853,7 +858,12 @@
 
         <article class="portfolio" id="billing.">
           <header>
-            <h2 class="h2 article-title">Billing</h2>
+            <h2 class="h2 article-title">
+              Billing
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
           </header>
 
           <section id="currentPlan">
@@ -901,7 +911,12 @@
 
         <article class="portfolio" id="privacy.">
           <header>
-            <h2 class="h2 article-title">Privacy</h2>
+            <h2 class="h2 article-title">
+              Privacy
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
           </header>
 
           <section id="privacySettings" class="settings-card">
@@ -1246,7 +1261,12 @@
 
         <article class="portfolio" id="data.">
           <header>
-            <h2 class="h2 article-title">Data</h2>
+            <h2 class="h2 article-title">
+              Data
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
           </header>
 
           <section id="privacySettings" class="notification-section">
@@ -1396,10 +1416,244 @@
             </form>
           </section>
         </article>
+
+        <article class="admin" id="admin.">
+          <header>
+            <h2 class="h2 article-title">
+              Admin Dashboard
+              <a href="/user_home" class="home-link">
+                <i class="bx bx-home"></i>
+              </a>
+            </h2>
+          </header>
+
+          {% if current_user.role == 'superadmin' %}
+          <section id="superAdminSection" class="superAdminSection">
+            <h2>Platform Statistics</h2>
+            <div class="chart-container">
+              <canvas id="platformStatisticsChart"></canvas>
+            </div>
+
+            <h2>Monthly Statistics</h2>
+            <div class="chart-container">
+              <canvas id="monthlyStatisticsChart"></canvas>
+            </div>
+            <section id="loinActivites">
+              <h2>Login Activities</h2>
+              <div class="table-responsive">
+                {% if login_activities %}
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Email</th>
+                      <th>Timestamp</th>
+                      <th>IP Address</th>
+                      <th>User Agent</th>
+                      <th>Time Zone</th>
+                      <th>Browser Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for activity in login_activities %}
+                    <tr>
+                      <td>{{ activity.user_id }}</td>
+                      <td>{{ activity.email }}</td>
+                      <td>
+                        {{ activity.timestamp.strftime('%d/%m/%y %H:%M') }}
+                      </td>
+                      <td>{{ activity.ip_address }}</td>
+                      <td>{{ activity.user_agent[:10] }}</td>
+
+                      <td>{{ activity.time_zone }}</td>
+                      <td>{{ activity.browser_name }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                {% else %}
+                <p>No login activities found.</p>
+                {% endif %}
+              </div>
+            </section>
+            <section id="loinActivites">
+              {% if current_user.role == 'superadmin' %}
+              <h2>User Note Statistics</h2>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Username</th>
+                      <th>Imported Notes Count</th>
+                      <th>Exported Notes Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for note in note_counts %}
+                    <tr>
+                      <td>{{ note.user_id }}</td>
+                      <td>{{ note.username }}</td>
+                      <td>{{ note.imported_notes_count }}</td>
+                      <td>{{ note.exported_notes_count }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% endif %}
+            </section>
+            <section id="userStats">
+              <h2>User Statistics</h2>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Full Name</th>
+                      <th>Username</th>
+                      <th>Total Notes</th>
+                      <th>Total Todos</th>
+                      <th>Total Note Tags</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user_data in statistics.users_data %}
+                    <tr>
+                      <td>{{ user_data.id }}</td>
+                      <td>{{ user_data.full_name }}</td>
+                      <td>{{ user_data.username }}</td>
+                      <td>{{ user_data.total_notes }}</td>
+                      <td>{{ user_data.total_todos }}</td>
+                      <td>{{ user_data.note_tags }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <h2>Manage Users</h2>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Full Name</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                    <th>Make Admin</th>
+                    <th>Delete User</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %}
+                  <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>
+                      {% if user.is_active %}
+                      <i
+                        class="fas fa-check-circle"
+                        style="color: green"
+                        title="Active"
+                      ></i>
+                      {% else %}
+                      <i
+                        class="fas fa-times-circle"
+                        style="color: red"
+                        title="Inactive"
+                      ></i>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if not user.is_active %}
+                      <!-- Activate user if inactive -->
+                      <form
+                        action="{{ url_for('auth.activate_account', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Activate
+                        </button>
+                      </form>
+                      {% else %} {% if user.role != 'superadmin' %}
+                      <!-- Deactivate user if active -->
+                      <form
+                        action="{{ url_for('auth.deactivate_user', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Deactivate
+                        </button>
+                      </form>
+                      {% else %}
+                      <span>No action</span>
+                      {% endif %} {% endif %}
+                    </td>
+                    <td>
+                      {% if not user.is_admin %}
+                      <form
+                        action="{{ url_for('auth.make_admin', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Make Admin
+                        </button>
+                      </form>
+                      {% else %}
+                      <span>Admin</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if user.role != 'superadmin' %}
+                      <form
+                        action="{{ url_for('auth.delete_user', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Delete
+                        </button>
+                      </form>
+                      {% else %}
+                      <span>No action</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {% endif %}
+        </article>
       </div>
     </main>
     <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
@@ -1414,19 +1668,92 @@
       });
     </script>
     <script>
+           const platformStatisticsCtx = document.getElementById('platformStatisticsChart').getContext('2d');
+      const platformStatisticsChart = new Chart(platformStatisticsCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Total Users', 'Total Notes', 'Total Posts', 'Total Todos', 'Total Note Tags'],
+          datasets: [{
+            label: 'Counts',
+            data: [
+              {{ statistics.total_users }},
+              {{ statistics.total_notes }},
+              {{ statistics.total_posts }},
+              {{ statistics.total_todos }},
+              {{ statistics.note_tags }}
+            ],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Monthly Statistics Chart
+      const monthlyStatisticsCtx = document.getElementById('monthlyStatisticsChart').getContext('2d');
+      const monthlyStatisticsChart = new Chart(monthlyStatisticsCtx, {
+        type: 'bar',
+        data: {
+          labels: ['New Users', 'New Notes', 'New ToDos'],
+          datasets: [{
+            label: 'Counts This Month',
+            data: [
+              {{ view_monthly_statistics.users_this_month }},
+              {{ view_monthly_statistics.notes_this_month }},
+              {{ view_monthly_statistics.todos_this_month }}
+            ],
+            backgroundColor: [
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    </script>
+
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const contactForm = document.getElementById("contactForm");
         const phoneNumberInput = document.getElementById("phoneNumber");
         const countryCodeSelect = document.getElementById("countryCode");
         const timeZoneSelect = document.getElementById("timeZoneSearch");
         const updateButton = document.getElementById("updateButton");
-
-        // Store original values
         const originalPhoneNumber = phoneNumberInput.value;
         const originalCountryCode = countryCodeSelect.value;
         const originalTimeZone = timeZoneSelect.value;
-
-        // Function to check if any value has changed
         function checkForChanges() {
           const currentPhoneNumber = phoneNumberInput.value;
           const currentCountryCode = countryCodeSelect.value;
@@ -1437,13 +1764,11 @@
             currentCountryCode !== originalCountryCode ||
             currentTimeZone !== originalTimeZone
           ) {
-            updateButton.style.display = "block"; // Show the button if values have changed
+            updateButton.style.display = "block";
           } else {
-            updateButton.style.display = "none"; // Hide the button if values are the same
+            updateButton.style.display = "none";
           }
         }
-
-        // Event listeners for input changes
         phoneNumberInput.addEventListener("input", checkForChanges);
         countryCodeSelect.addEventListener("change", checkForChanges);
         timeZoneSelect.addEventListener("change", checkForChanges);
