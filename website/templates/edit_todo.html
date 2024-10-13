@@ -71,17 +71,15 @@
               <i class="bx bxs-badge-check" style="color: #1877f2"></i>
               {% endif %}
             </h1>
-
-            <p class="title" title="{{ current_user.bio }}">
-              {% if current_user.bio %} {{ current_user.bio }} {% else %}
-              <a
-                href="{{ url_for('views.settings') }}"
-                style="color: #f1c40f; text-decoration: underline"
-              >
-                Add your bio
-              </a>
-              {% endif %}
-            </p>
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
+            href="{{ url_for('views.settings') }}"
+            style="color: #f1c40f; text-decoration: underline"
+          >Add your bio</a>
+          {% endif %}
+        </pre>
           </div>
 
           <button class="info_more-btn" data-sidebar-btn>
@@ -262,6 +260,11 @@
               method="post"
             >
               <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input
                 type="text"
                 id="title"
                 name="title"
@@ -434,7 +437,7 @@
           });
       });
     </script>
-     <script>
+    <script>
       "use strict";
       const elementToggleFunc = function (elem) {
         elem.classList.toggle("active");

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To-Dos</title>
     <link
@@ -72,17 +73,15 @@
               <i class="bx bxs-badge-check" style="color: #1877f2"></i>
               {% endif %}
             </h1>
-
-            <p class="title" title="{{ current_user.bio }}">
-              {% if current_user.bio %} {{ current_user.bio }} {% else %}
-              <a
-                href="{{ url_for('views.settings') }}"
-                style="color: #f1c40f; text-decoration: underline"
-              >
-                Add your bio
-              </a>
-              {% endif %}
-            </p>
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
+            href="{{ url_for('views.settings') }}"
+            style="color: #f1c40f; text-decoration: underline"
+          >Add your bio</a>
+          {% endif %}
+        </pre>
           </div>
 
           <button class="info_more-btn" data-sidebar-btn>
@@ -313,9 +312,20 @@
               
                   <pre class="note-content">{{ todo.content | striptags  | truncate(20, True, '...') }}</pre>
                   <div class="todo-actions">
-                    <a href="{{ url_for('views.edit_todo', id=todo.id) }}" class="edit-button" style="--background-: {{ current_user.generated_color }}">Edit</a>
+                    {% if not todo.is_completed %}
+    <a href="{{ url_for('views.edit_todo', id=todo.id) }}" class="edit-button" style="--background-: {{ current_user.generated_color }}">Edit</a>
+{% else %}
+    <span style="color: gray;">Completed - No editing allowed</span> <!-- Optional message -->
+{% endif %}
+
                         <form action="{{ url_for('views.delete_todo', todo_id=todo.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this To-Do?');">
+                          <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                          />
                             <button type="submit" class="delete-button" style="--background-: {{ current_user.generated_color }}">Delete</button>
+                            
                         </form>
                   </div>
                 </li>
@@ -333,6 +343,159 @@
       </div>
     </main>
     <script src="{{ url_for('static', filename='js/todos.js') }}"></script>
+    <script>
+      const csrfToken = "{{ csrf_token() }}"; 
+      document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("searchInput");
+  const todosList = document.getElementById("todosList");
+
+  // Fetch and display todos initially
+  fetchTodos();
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim();
+    if (query.length > 0) {
+      searchTodos(query);
+    } else {
+      fetchTodos();
+    }
+  });
+
+  function searchTodos(query) {
+    fetch(`/search_todos?query=${encodeURIComponent(query)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrf_token"),
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        renderTodos(data);
+      })
+      .catch((error) => console.error("Error fetching todos:", error));
+  }
+
+  function fetchTodos() {
+    fetch("/search_todos", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrf_token"),
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        renderTodos(data);
+      })
+      .catch((error) => console.error("Error fetching todos:", error));
+  }
+  function renderTodos(todos) {
+    todosList.innerHTML = ""; // Clear the current list
+    if (todos.length === 0) {
+      const noNotesMessage = document.createElement("p");
+      noNotesMessage.classList.add("no-notes");
+      noNotesMessage.textContent = "No Available To-Do";
+      todosList.appendChild(noNotesMessage);
+      return;
+    }
+
+    todos.forEach((todo) => {
+      const li = document.createElement("li");
+      li.classList.add("note-item");
+      li.style.setProperty("--background-", todo.color);
+      li.setAttribute("data-note-id", todo.id);
+      const truncatedTitle =
+        todo.title.split("\n")[0].slice(0, 13) +
+        (todo.title.length > 13 ? "..." : "");
+
+      const truncatedContent =
+        processTodoContent(todo.content).slice(0, 20) +
+        (todo.content.length > 20 ? "..." : "");
+
+      const dueDate = todo.due_date
+        ? new Date(todo.due_date).toLocaleDateString()
+        : "";
+      const csrfToken = "{{ csrf_token() }}"; // Get CSRF token from the template
+
+      li.innerHTML = `
+        <div class="note-header">
+          <h3>${truncatedTitle}</h3>
+          ${
+            todo.due_date
+              ? `
+            <span class="note-tag">
+              <input type="checkbox"
+              class="checkbox"
+                ${todo.is_completed ? "checked" : ""}
+                onclick="updateTodoStatus(${todo.id}, this.checked)"
+                id="todo-${todo.id}" disabled/>
+              Due: ${dueDate}
+            </span>
+          `
+              : ""
+          }
+        </div>
+        <pre class="note-content">${truncatedContent}</pre>
+        <div class="todo-actions">
+          
+          ${
+            !todo.is_completed
+              ? `<a href="/todos/edit/${todo.id}" class="edit-button" style="--background-: ${todo.color};">Edit</a>`
+              : `<span style="color: gray;">Completed - No editing allowed</span>` // Message for completed todos
+          }
+          <form action="/delete_todo/${
+            todo.id
+          }" method="post" onsubmit="return confirm('Are you sure you want to delete this To-Do?');">
+          <input type="hidden" name="csrf_token" value="${csrfToken}" />
+            <button type="submit" class="delete-button" style="--background-: ${
+              todo.color
+            };">Delete</button>
+          </form>
+        </div>
+      `;
+      todosList.appendChild(li);
+      const separator = document.createElement("hr");
+      separator.style.setProperty("--background-", todo.color);
+      todosList.appendChild(separator);
+    });
+  }
+
+  function processTodoContent(content) {
+    const lines = content.replace(/<br\s*\/?>/gi, "\n").split("\n");
+    const firstLine = lines[0] ? lines[0].slice(0, 50) : "";
+    return decodeHtmlEntities(stripHtmlTags(firstLine));
+  }
+
+  function decodeHtmlEntities(text) {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+
+  function stripHtmlTags(text) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = text;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+    </script>
+    
     <script>
 document.addEventListener("DOMContentLoaded", function () {
   const todosList = document.getElementById("todosList");

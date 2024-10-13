@@ -397,7 +397,7 @@
 
         notesThingDiv.style.display = "none";
         uploadAgainDiv.style.display = "none";
-        afterUpload.style.display = "none"; // Initially hide the afterUpload div
+        afterUpload.style.display = "none";
 
         // Upload button click event
         uploadButton.addEventListener("click", () => {
@@ -460,8 +460,6 @@
             resetLoading();
           }
         });
-
-        // Insert text into Quill and reset UI
         function insertTextIntoQuill(text) {
           quill.setText(text);
           resetLoading();
@@ -469,8 +467,6 @@
           selectUploadDiv.style.display = "none";
           uploadAgainDiv.style.display = "block";
         }
-
-        // Extract text from PDF
         async function extractPDFText(url, password) {
           try {
             let pdf;
@@ -495,7 +491,7 @@
               for (let i = 1; i <= pages; i++) {
                 pageSelect.innerHTML += `<option value="${i}">Page ${i}</option>`;
               }
-              afterUpload.style.display = "block"; 
+              afterUpload.style.display = "block";
             } else {
               afterUpload.style.display = "none";
             }

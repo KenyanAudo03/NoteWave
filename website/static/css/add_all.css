@@ -2773,7 +2773,9 @@ select {
   color: #333;
   transition: border-color 0.2s ease;
 }
-
+#pageSelect{
+  width: 100%;
+}
 .selectpage:hover,
 .selectpage:focus {
   border-color: #007bff;
@@ -2816,7 +2818,6 @@ select {
   background-color: #0056b3;
 }
 
-/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .afterupload, .upload-again {
     padding: 10px;

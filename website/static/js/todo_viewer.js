@@ -124,8 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function updateTodoStatus(todoId, isCompleted, dueDate) {
   const currentDate = new Date();
-
-  // Check if the due date is set and if it's in the future
   if (dueDate && new Date(dueDate) > currentDate && !isCompleted) {
     console.warn("Cannot mark as completed; due date has not been reached.");
     alert(
@@ -133,19 +131,16 @@ function updateTodoStatus(todoId, isCompleted, dueDate) {
     );
     return;
   }
-
-  // If already completed and trying to mark it again
   if (isCompleted) {
     displayAlreadyCompletedNote();
-    return; // Prevent further execution if already completed
+    return;
   }
-
   const newStatus = !isCompleted;
-
   fetch(`/update_todo_status/${todoId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken,
     },
     body: JSON.stringify({ is_completed: newStatus }),
   })
@@ -153,10 +148,10 @@ function updateTodoStatus(todoId, isCompleted, dueDate) {
     .then((data) => {
       if (data.message) {
         console.log(data.message);
-        displayCompletionNote(); // Show the completion note
+        displayCompletionNote(); 
         setTimeout(() => {
-          location.reload(); // Reload after the note is displayed
-        }, 3000); // Adjust the duration as necessary
+          location.reload();
+        }, 3000); 
       } else {
         console.error("Update failed:", data.error || "Unknown error");
       }
@@ -165,8 +160,6 @@ function updateTodoStatus(todoId, isCompleted, dueDate) {
       console.error("Error:", error);
     });
 }
-
-// Function to display a completion note
 function displayCompletionNote() {
   const note = document.createElement("div");
   note.innerText = `Completed on ${new Date().toLocaleString()}`;

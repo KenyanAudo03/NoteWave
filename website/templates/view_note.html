@@ -75,17 +75,15 @@
               <i class="bx bxs-badge-check" style="color: #1877f2"></i>
               {% endif %}
             </h1>
-
-            <p class="title" title="{{ current_user.bio }}">
-              {% if current_user.bio %} {{ current_user.bio }} {% else %}
-              <a
-                href="{{ url_for('views.settings') }}"
-                style="color: #f1c40f; text-decoration: underline"
-              >
-                Add your bio
-              </a>
-              {% endif %}
-            </p>
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
+            href="{{ url_for('views.settings') }}"
+            style="color: #f1c40f; text-decoration: underline"
+          >Add your bio</a>
+          {% endif %}
+        </pre>
           </div>
 
           <button class="info_more-btn" data-sidebar-btn>
@@ -205,6 +203,11 @@
                 method="post"
                 onsubmit="return confirm('Are you sure you want to delete this note?');"
               >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <button
                   class="del"
                   style="--background-: {{ current_user.generated_color }}"
@@ -269,17 +272,7 @@
             <h2>Title: <span>{{ note.title }}</span></h2>
           </header>
           <p>Content:</p>
-          <div id="editor">{{ note.content | safe}}</div>
-          <button id="readNoteButton">Read Note Aloud</button>
-
-          <!-- <small
-            style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
-          >
-            {% if note.updated_at and note.updated_at > note.created_at %}
-            Updated on: {{ note.updated_at.strftime('%Y/%m/%d %H:%M') }} {% else
-            %} Created on: {{ note.created_at.strftime('%Y/%m/%d %H:%M') }} {%
-            endif %}
-          </small> -->
+          <div id="editor" style="color: #fff;">{{ note.content | safe}}</div>
         </article>
       </div>
 
@@ -365,61 +358,15 @@
         </div>
       </div>
     </main>
-
-    <script>
-       const readButton = document.getElementById("readNoteButton");
-        const editor = document.getElementById("editor");
-
-        let isReading = false; // Track whether the text is being read
-        let utterance; // Variable to store the SpeechSynthesisUtterance
-
-        readButton.addEventListener("click", function () {
-            const noteContent = editor.textContent;
-
-            // Toggle the reading state
-            if (isReading) {
-                // If reading is in progress, stop it
-                stopReading();
-            } else {
-                // If not reading, start the reading process
-                startReading(noteContent);
-            }
-        });
-
-        function startReading(text) {
-            utterance = new SpeechSynthesisUtterance(text); // Create a new utterance for the text
-            utterance.onend = function() {
-                isReading = false; // Mark as not reading when done
-                readButton.textContent = "Read Note Aloud"; // Reset button text
-                console.log("Reading finished");
-            };
-
-            // Start speaking
-            window.speechSynthesis.speak(utterance);
-            isReading = true;
-            readButton.textContent = "Stop"; // Change the button to "Stop"
-            console.log("Reading started");
-        }
-
-        function stopReading() {
-            // Stop the reading process
-            window.speechSynthesis.cancel(); // Stop any ongoing speech
-            isReading = false;
-            readButton.textContent = "Read Note Aloud"; // Reset button text
-            console.log("Reading stopped");
-        }
-
-        // Stop reading if the page is refreshed or closed
-        window.addEventListener("beforeunload", function () {
-            stopReading();
-        });
-    </script>
-
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"
     ></script>
+    <script>
+      const csrfToken = "{{ csrf_token() }}";
+    </script>
+
     <script>
       "use strict";
       const elementToggleFunc = function (elem) {
