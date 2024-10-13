@@ -70,8 +70,8 @@ def all_reviews():
 
 @views.route("/pdf-text")
 def pdf_text():
-    return render_template("scan.html")
-
+    tags = NoteTag.query.filter_by(user_id=current_user.id).all()
+    return render_template("scan.html", tags=tags)
 
 @views.route("/user_home")
 @login_required
@@ -82,9 +82,7 @@ def user_home():
             "id": tag.id,
             "name": tag.name,
             "color": tag.color,
-            "note_count": Note.query.filter_by(
-                tag_id=tag.id, user_id=current_user.id
-            ).count(),
+            "note_count": Note.query.filter_by(tag_id=tag.id, user_id=current_user.id).count(),
         }
         for tag in tags
     ]
@@ -93,8 +91,20 @@ def user_home():
         .order_by(Note.created_at.desc(), Note.updated_at.desc())
         .all()
     )
-
-    return render_template("user_home.html", tags=tags_with_counts, notes=notes)
+    todos_count = ToDo.query.filter_by(user_id=current_user.id).count()
+    user_statistics = {
+        'notes_count': len(notes),
+        'note_tags_count': len(tags),
+        'todos_count': todos_count,
+        'imported_notes_count': current_user.imported_notes_count,
+        'exported_notes_count': current_user.exported_notes_count
+    }
+    return render_template(
+        "user_home.html",
+        tags=tags_with_counts,
+        notes=notes,
+        user_statistics=user_statistics
+    )
 
 
 @views.route("/profile")

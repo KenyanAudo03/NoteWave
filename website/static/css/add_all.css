@@ -317,31 +317,41 @@ main {
   align-items: center;
   gap: 15px;
 }
-
 .avatar-box img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
+  width: 75px;
+  height: 75px;
+  border-radius: 15%;
   object-fit: cover;
   overflow: hidden;
   background: var(--bg-gradient-onyx);
+}
+.avatar-box i {
+  color: #fff;
+  background: var(--background-color);
+  width: 75px;
+  height: 75px;
+  border-radius: 15%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  font-family: "Fascinate Inline", system-ui;
+  font-weight: 600;
+  font-size: 45px;
+  font-style: normal;
 }
 .info-content .name {
   color: var(--white-2);
   font-size: var(--fs-3);
   font-weight: var(--fw-500);
   letter-spacing: -0.25px;
-  margin-bottom: 10px;
+  margin-top: 10px;
+  margin-bottom: 3px;
 }
-
 .info-content .title {
   color: var(--white-1);
-  background: var(--onyx);
   font-size: var(--fs-8);
   font-weight: var(--fw-300);
   width: max-content;
-  padding: 3px 12px;
-  border-radius: 8px;
 }
 
 .info_more-btn {
@@ -1215,21 +1225,34 @@ textarea.form-input::-webkit-resizer {
     gap: 25px;
   }
   .avatar-box img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
+    width: 75px;
+    height: 75px;
+    border-radius: 15%;
     object-fit: cover;
     overflow: hidden;
     background: var(--bg-gradient-onyx);
   }
 
-  .info-content .name {
-    margin-bottom: 15px;
+  .avatar-box i {
+    color: #fff;
+    background: var(--background-color);
+    width: 75px;
+    height: 75px;
+    border-radius: 15%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-family: "Fascinate Inline", system-ui;
+    font-weight: 600;
+    font-size: 45px;
+    font-style: normal;
   }
 
-  .info-content .title {
-    padding: 5px 18px;
+
+  .info-content .name {
+    margin-bottom: 5px;
   }
+
 
   .info_more-btn {
     top: -30px;
@@ -1409,10 +1432,29 @@ textarea.form-input::-webkit-resizer {
     max-width: 680px;
   }
 
-  .modal-avatar-box img {
-    width: 80px;
+  .avatar-box img {
+    width: 65px;
+    height: 65px;
+    border-radius: 15%;
+    object-fit: cover;
+    overflow: hidden;
+    background: var(--bg-gradient-onyx);
   }
 
+  .avatar-box i {
+    color: #fff;
+    background: var(--background-color);
+    width: 65px;
+    height: 65px;
+    border-radius: 15%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-family: "Fascinate Inline", system-ui;
+    font-weight: 600;
+    font-size: 40px;
+    font-style: normal;
+  }
   .article-title {
     padding-bottom: 20px;
   }
@@ -1639,28 +1681,28 @@ textarea.form-input::-webkit-resizer {
   }
 
   .avatar-box img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 75px;
+    height: 75px;
+    border-radius: 15%;
     object-fit: cover;
   }
   @import url("https://fonts.googleapis.com/css2?family=Fascinate+Inline&family=Sofadi+One&display=swap");
   .avatar-box i {
     color: #fff;
-    background: var(--background-);
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    background: var(--background-color);
+    width: 75px;
+    height: 75px;
+    border-radius: 15%;
     align-items: center;
     justify-content: center;
     display: flex;
     font-family: "Fascinate Inline", system-ui;
     font-weight: 600;
     font-style: normal;
+    font-size: 44px;
   }
   .info-content .name {
     white-space: nowrap;
-    text-align: center;
   }
 
   .info-content .title {
@@ -1978,58 +2020,38 @@ textarea.form-input::-webkit-resizer {
   }
 }
 
-.speech-text {
-  position: absolute;
-  bottom: 20px;
-  right: 80px;
+.about-text {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-around; 
+  align-items: center; 
+  padding: 30px;
 }
 
-.add-note-toggle {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
+.speech-text, .scan-pdf {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.speech-text-toggle-add {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 24px;
   width: 50px;
   height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-}
-.speech-text-toggle-add:hover {
-  background-color: var(--background-);
+  background-color: var(--background-, #3498db); 
+  border-radius: 50%; 
+  transition: background-color 0.3s ease; 
 }
 
-.toggle-add {
-  padding: 10px;
-  background-color: #007bff;
+.speech-text a, .scan-pdf a {
   color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 24px;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
+  font-size: 1.7rem; 
+  text-align: center;
+  display: block;
 }
 
+.speech-text:hover, .scan-pdf:hover {
+  background-color: #2ecc71; 
+}
+
+.speech-text i, .scan-pdf i {
+  cursor: pointer; 
+}
 .toggle-add:hover {
   background-color: var(--background-);
 }
@@ -2525,11 +2547,11 @@ textarea.form-input::-webkit-resizer {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+/* h1 {
   text-align: center;
   color: #333;
   margin-bottom: 20px;
-}
+} */
 
 .inputs {
   width: 100%;
@@ -2616,4 +2638,196 @@ select {
     height: 50vh; 
     font-size: 14px;
 }
+}
+/* General container styling */
+.select_upload {
+  background-color: #f9f9f9; /* Light background for contrast */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  max-width: 600px; /* Limit width for readability */
+  margin: 20px auto; /* Center the div */
+}
+
+/* Heading style */
+.select_upload h3 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333; /* Dark color for strong contrast */
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Input group styling */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input-group span {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #555; /* Softer color for labels */
+  margin-bottom: 5px;
+}
+
+/* Input fields styling */
+.selectfile, .pwd {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  padding: 10px;
+  color: #000;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.selectfile:hover, .pwd:hover {
+  border-color: #aaa;
+}
+
+.selectfile:focus, .pwd:focus {
+  outline: none;
+  border-color: #007bff; /* Focus color */
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+/* Button styling */
+.upload {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  background-color: #007bff; /* Primary button color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.upload:hover {
+  background-color: #0056b3; /* Darker on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow on hover */
+}
+
+.upload:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Loading indicator */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.loading-indicator {
+  border: 4px solid rgba(0, 123, 255, 0.2);
+  border-top: 4px solid #007bff; 
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .select_upload {
+    padding: 15px;
+  }
+
+  .upload {
+    padding: 8px 15px;
+  }
+}
+
+.afterupload, .upload-again {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling the page selection dropdown */
+.selectpage {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  transition: border-color 0.2s ease;
+}
+
+.selectpage:hover,
+.selectpage:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Styling the PDF text area */
+.pdftext {
+  width: 100%;
+  height: 200px;
+  margin-top: 15px;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f8f8f8;
+  color: #333;
+  resize: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the "Upload Again" button */
+.upload-again {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.upload-another {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.upload-another:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .afterupload, .upload-again {
+    padding: 10px;
+  }
+
+  .selectpage, .pdftext, .upload-another {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .upload-another {
+    width: 100%;
+  }
 }

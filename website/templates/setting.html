@@ -651,7 +651,7 @@
                     style="--background: {{ current_user.generated_color }};"
                     class="submit"
                   >
-                    Log out sessions
+                    Log out
                   </button>
                 </form>
               </div>
@@ -1438,7 +1438,8 @@
             <div class="chart-container">
               <canvas id="monthlyStatisticsChart"></canvas>
             </div>
-            <section id="loinActivites">
+
+            <section id="loginActivities">
               <h2>Login Activities</h2>
               <div class="table-responsive">
                 {% if login_activities %}
@@ -1464,7 +1465,6 @@
                       </td>
                       <td>{{ activity.ip_address }}</td>
                       <td>{{ activity.user_agent[:10] }}</td>
-
                       <td>{{ activity.time_zone }}</td>
                       <td>{{ activity.browser_name }}</td>
                     </tr>
@@ -1476,8 +1476,8 @@
                 {% endif %}
               </div>
             </section>
-            <section id="loinActivites">
-              {% if current_user.role == 'superadmin' %}
+
+            <section id="userNoteStatistics">
               <h2>User Note Statistics</h2>
               <div class="table-responsive">
                 <table class="table table-striped">
@@ -1501,8 +1501,8 @@
                   </tbody>
                 </table>
               </div>
-              {% endif %}
             </section>
+
             <section id="userStats">
               <h2>User Statistics</h2>
               <div class="table-responsive">
@@ -1570,7 +1570,6 @@
                     </td>
                     <td>
                       {% if not user.is_active %}
-                      <!-- Activate user if inactive -->
                       <form
                         action="{{ url_for('auth.activate_account', user_id=user.id) }}"
                         method="post"
@@ -1585,7 +1584,6 @@
                         </button>
                       </form>
                       {% else %} {% if user.role != 'superadmin' %}
-                      <!-- Deactivate user if active -->
                       <form
                         action="{{ url_for('auth.deactivate_user', user_id=user.id) }}"
                         method="post"
@@ -1604,24 +1602,75 @@
                       {% endif %} {% endif %}
                     </td>
                     <td>
-                      {% if not user.is_admin %}
+                      {% if user.role == 'superadmin' %}
+                      <span>No action</span>
+                      {% elif not user.is_admin %}
                       <form
                         action="{{ url_for('auth.make_admin', user_id=user.id) }}"
                         method="post"
+                        class="make-admin-form"
                       >
                         <input
                           type="hidden"
                           name="csrf_token"
                           value="{{ csrf_token() }}"
                         />
-                        <button type="submit" class="activate_user">
+
+                        <button
+                          type="button"
+                          class="activate_user"
+                          onclick="showRoleSelector(this)"
+                        >
                           Make Admin
                         </button>
+
+                        <div
+                          class="role-selector"
+                          style="display: none; margin-top: 10px"
+                        >
+                          <select
+                            name="role"
+                            required
+                            class="form-control"
+                            style="
+                              margin-right: 5px;
+                              display: inline-block;
+                              width: auto;
+                            "
+                          >
+                            <option value="admin">Admin</option>
+                            <option value="user_activator">
+                              User Activator
+                            </option>
+                            <option value="superadmin">Superadmin</option>
+                          </select>
+                          <button type="submit" class="btn btn-success">
+                            Submit
+                          </button>
+                        </div>
                       </form>
                       {% else %}
-                      <span>Admin</span>
+                      <form
+                        action="{{ url_for('auth.remove_admin', user_id=user.id) }}"
+                        method="post"
+                        style="display: inline"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button
+                          type="submit"
+                          class="activate_user"
+                          style="background-color: red"
+                        >
+                          Remove
+                        </button>
+                      </form>
                       {% endif %}
                     </td>
+
                     <td>
                       {% if user.role != 'superadmin' %}
                       <form
@@ -1633,7 +1682,11 @@
                           name="csrf_token"
                           value="{{ csrf_token() }}"
                         />
-                        <button type="submit" class="activate_user">
+                        <button
+                          type="submit"
+                          class="activate_user"
+                          style="background-color: red"
+                        >
                           Delete
                         </button>
                       </form>
@@ -1647,6 +1700,80 @@
               </table>
             </div>
           </section>
+          {% endif %} {% if current_user.role == 'user_activator' %}
+          <section id="userActivatorSection">
+            <h2>Manage Users</h2>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %} {% if user.role != 'superadmin' %}
+                  <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                      {% if user.is_active %}
+                      <i
+                        class="fas fa-check-circle"
+                        style="color: green"
+                        title="Active"
+                      ></i>
+                      {% else %}
+                      <i
+                        class="fas fa-times-circle"
+                        style="color: red"
+                        title="Inactive"
+                      ></i>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if not user.is_active %}
+                      <form
+                        action="{{ url_for('auth.activate_account', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Activate
+                        </button>
+                      </form>
+                      {% else %} {% if user.role != 'admin' and user.id !=
+                      current_user.id %}
+                      <!-- Only allow deactivate for non-admins and not themselves -->
+                      <form
+                        action="{{ url_for('auth.deactivate_user', user_id=user.id) }}"
+                        method="post"
+                      >
+                        <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
+                        <button type="submit" class="activate_user">
+                          Deactivate
+                        </button>
+                      </form>
+                      {% else %}
+                      <span>No action</span>
+                      {% endif %} {% endif %}
+                    </td>
+                  </tr>
+                  {% endif %} {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
           {% endif %}
         </article>
       </div>
@@ -1656,6 +1783,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      function showRoleSelector(button) {
+        const roleSelector = button.nextElementSibling;
+        if (
+          roleSelector.style.display === "none" ||
+          roleSelector.style.display === ""
+        ) {
+          roleSelector.style.display = "block";
+        } else {
+          roleSelector.style.display = "none";
+        }
+      }
+    </script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         flatpickr("#dobInput", {

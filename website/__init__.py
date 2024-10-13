@@ -4,10 +4,8 @@ from os import path
 from flask_login import LoginManager
 import os
 from flask_wtf.csrf import CSRFProtect
-from flask_socketio import SocketIO
 
 db = SQLAlchemy()
-socketio = SocketIO()
 DB_NAME = "database.db"
 
 
@@ -20,11 +18,11 @@ def create_app():
         os.getcwd(), "website/static", "profile_pics"
     )
 
+    # Ensure the upload folder exists
     if not os.path.exists(app.config["UPLOAD_FOLDER"]):
         os.makedirs(app.config["UPLOAD_FOLDER"])
 
     db.init_app(app)
-    socketio.init_app(app)
 
     from .views import views
     from .auth import auth

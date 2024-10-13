@@ -1,140 +1,643 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <!-- Set the character encoding to UTF-8 -->
-    <meta charset="UTF-8">
-    <!-- Specify the compatibility mode for Internet Explorer -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- Set the viewport to control the layout on mobile devices -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Set the title of the web page -->
-    <title>PDF to Text Extractor</title>
-    <!-- Include the PDF.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js" integrity="sha512-ml/QKfG3+Yes6TwOzQb7aCNtJF4PUyha6R3w8pSTo/VJSywl7ZreYvvtUso7fKevpsI+pYVVwnu82YO0q3V6eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Add some styling for the web page -->
-    <style>
-        /* Center align the heading */
-        h1 {
-            width: 100%;
-            text-align: center;
-        }
-        /* Set the display and alignment for the main and result sections */
-        .pdfwork, .afterupload {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            width: 100%;
-        }
-        .pdfwork * {
-            margin-top: 5px;
-        }
-        /* Hide the result section initially */
-        .afterupload {
-            display: none;
-        }
-        /* Hide the "Extract Another PDF" button initially */
-        .another {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <!-- Display the heading -->
-    <h1>PDF To Text Extractor</h1>
-    <!-- Create a div container for the file upload form and result section -->
-    <div class="pdfwork">
-        <!-- Button to extract another PDF (hidden initially) -->
-        <button class="another" onclick="location.reload()">Extract Another PDF</button>
-        <!-- Display text "Select PDF" -->
-        <span>Select PDF</span>
-        <!-- File input field for selecting the PDF file -->
-        <input type="file" class="selectpdf">
-        <!-- Display text "Password :" -->
-        <span>Password :</span>
-        <!-- Password input field (optional) -->
-        <input type="password" class="pwd" placeholder='optional'>
-        <!-- Button to upload the selected PDF -->
-        <button class="upload">Upload</button>
-        <!-- Result section (hidden initially) -->
-        <div class="afterupload">
-            <!-- Display text "Select Page" -->
-            <span>Select Page</span>
-            <!-- Dropdown menu for selecting the page -->
-            <select class="selectpage" onchange="afterProcess()"></select>
-            <!-- Download link for the extracted text file -->
-            <a href="" class="download" download>Download Pdf Text</a>
-            <!-- Textarea to display the extracted text -->
-            <textarea class="pdftext"></textarea>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Note</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/add_all.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Tesseract.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
+    <!-- Mammoth.js for DOCX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
     </div>
-    <!-- JavaScript code -->
-<script>
-    // Set the worker source for PDF.js library
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
-    
-    // Get references to various elements
-    let pdfinput = document.querySelector(".selectpdf"); // Reference to the PDF file input field
-    let pwd = document.querySelector(".pwd"); // Reference to the password input field
-    let upload = document.querySelector(".upload"); // Reference to the upload button
-    let afterupload = document.querySelector(".afterupload"); // Reference to the result section
-    let select = document.querySelector("select"); // Reference to the page selection dropdown
-    let download = document.querySelector(".download"); // Reference to the download link
-    let pdftext = document.querySelector(".pdftext"); // Reference to the text area for displaying extracted text
-    
-    // Event listener for the upload button click
-    upload.addEventListener('click', () => {
-        let file = pdfinput.files[0]; // Get the selected PDF file
-        if (file != undefined && file.type == "application/pdf") {
-            let fr = new FileReader(); // Create a new FileReader object
-            fr.readAsDataURL(file); // Read the file as data URL
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ current_user.generated_color }}"
+              >{{ current_user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
+
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
+            href="{{ url_for('views.settings') }}"
+            style="color: #f1c40f; text-decoration: underline"
+          >Add your bio</a>
+          {% endif %}
+        </pre>
+          </div>
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show More</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
+
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
+
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Notifications on"></i>
+                <span id="notificationBadge" class="badge">0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="Notifications off"></i>
+                {% endif %}
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link">
+                <p>
+                  All notes
+                  <span
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    ({{ current_user.notes|length }})
+                  </span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.show_todo_page') }}"
+                class="navbar-link"
+              >
+                <p style="--background-: {{ current_user.generated_color }}">
+                  To-dos
+                  <span> (<span id="todoCount">0</span>)</span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a href="/favorites" class="navbar-link" id="favoriteLink">
+                <p style="--background-: {{ current_user.generated_color }}">
+                  My favorites
+                  <span> (<span id="favoriteCount">0</span>) </span>
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              {% if current_user.email_verified %}
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>
+                  Tag Used
+                  <span> ({{ current_user.note_tags | length }}) </span>
+                </p></a
+              >
+              {% endif %}
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{url_for('views.settings')}}"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Settings</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="all_add">
+          <header>
+            <h2
+              class="h2 article-title"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Add Note
+            </h2>
+          </header>
+          <section class="about-text">
+            <form
+              id="addNoteForm"
+              action="{{ url_for('views.add_note_all') }}"
+              method="POST"
+            >
+              <div class="select_upload">
+                <h3>Upload File for Extraction</h3>
+                <div class="input-group">
+                  <span>Select File:</span>
+                  <input
+                    type="file"
+                    class="selectfile"
+                    accept=".pdf,.jpg,.jpeg,.png,.docx,.txt"
+                  />
+                </div>
+                <div class="input-group">
+                  <span>Password (for PDF, optional):</span>
+                  <input
+                    type="password"
+                    class="pwd inputs"
+                    placeholder="optional"
+                  />
+                </div>
+                <button type="button" class="upload submit">
+                  Upload & Extract
+                </button>
+                <div class="loading" style="display: none">
+                  <div class="loading-indicator"></div>
+                </div>
+              </div>
+
+              <div class="notes_thing" style="display: none">
+                <div class="afterupload" style="display: none">
+                  <span>Select Page:</span>
+                  <select class="selectpage"></select>
+                  <textarea
+                    class="pdftext"
+                    readonly
+                    style="display: none"
+                  ></textarea>
+                </div>
+                <div class="upload-again">
+                  <p>Want to upload another document?</p>
+                  <button type="button" class="upload-another">
+                    Upload Again
+                  </button>
+                </div>
+                <br />
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <input
+                  type="text"
+                  id="noteTitle"
+                  name="title"
+                  class="inputs"
+                  required
+                  placeholder="Note Title"
+                />
+                <div id="quillEditor"></div>
+                <input type="hidden" name="content" id="hiddenContent" />
+                <br />
+                <button
+                  type="button"
+                  class="next"
+                  id="nextButton"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Next
+                </button>
+                <div id="tagSelection" style="display: none">
+                  <select id="noteTag" name="tag_id" required>
+                    <option value="">--select tag--</option>
+                    {% for tag in tags %}
+                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <br /><br />
+                  <button
+                    type="submit"
+                    class="submit"
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    Submit Note
+                  </button>
+                </div>
+              </div>
+            </form>
+          </section>
+        </article>
+      </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/add_all.js') }}"></script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const quill = new Quill("#quillEditor", {
+          theme: "snow",
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, false] }],
+              ["bold", "italic", "underline", "strike"],
+              [{ list: "ordered" }, { list: "bullet" }],
+              ["link", "image"],
+              [{ color: [] }, { background: [] }],
+              [{ align: [] }],
+              [{ font: [] }],
+              [{ size: ["small", "medium", "large", "huge"] }],
+            ],
+          },
+        });
+
+        const contentField = document.getElementById("hiddenContent");
+        const fileInput = document.querySelector(".selectfile");
+        const pwd = document.querySelector(".pwd");
+        const uploadButton = document.querySelector(".upload");
+        const afterUpload = document.querySelector(".afterupload");
+        const pageSelect = document.querySelector(".selectpage");
+        const textArea = document.querySelector(".pdftext");
+        const loadingIndicator = document.querySelector(".loading");
+        const selectUploadDiv = document.querySelector(".select_upload");
+        const uploadAgainDiv = document.querySelector(".upload-again");
+        const uploadAnotherButton = document.querySelector(".upload-another");
+        const notesThingDiv = document.querySelector(".notes_thing");
+        let allText = [];
+
+        notesThingDiv.style.display = "none";
+        uploadAgainDiv.style.display = "none";
+        afterUpload.style.display = "none"; // Initially hide the afterUpload div
+
+        // Upload button click event
+        uploadButton.addEventListener("click", () => {
+          let file = fileInput.files[0];
+          if (!file) {
+            alert("Please select a file");
+            return;
+          }
+
+          loadingIndicator.style.display = "flex";
+          uploadButton.disabled = true;
+
+          let fileType = file.type;
+
+          if (fileType === "application/pdf") {
+            let fr = new FileReader();
+            fr.readAsDataURL(file);
             fr.onload = () => {
-                let res = fr.result; // Get the result of file reading
-                if (pwd.value == "") {
-                    extractText(res, false); // Extract text without password
-                } else {
-                    extractText(res, true); // Extract text with password
-                }
-            }
-        } else {
-            alert("Select a valid PDF file");
+              let result = fr.result;
+              extractPDFText(result, pwd.value);
+            };
+          } else if (
+            fileType ===
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ) {
+            let reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onload = function (event) {
+              mammoth
+                .extractRawText({ arrayBuffer: event.target.result })
+                .then(function (result) {
+                  insertTextIntoQuill(result.value);
+                })
+                .catch((err) => {
+                  alert("Error in extracting text from DOCX: " + err.message);
+                  resetLoading();
+                });
+            };
+          } else if (fileType === "text/plain") {
+            let reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function () {
+              insertTextIntoQuill(reader.result);
+            };
+          } else if (fileType === "image/jpeg" || fileType === "image/png") {
+            Tesseract.recognize(file, "eng")
+              .then(({ data: { text } }) => {
+                allText = [text];
+                insertTextIntoQuill(text);
+                textArea.value = text;
+              })
+              .catch((err) => {
+                alert("Error in extracting text from image: " + err.message);
+                resetLoading();
+              });
+          } else {
+            alert(
+              "Unsupported file type. Please select a PDF, DOCX, TXT, or supported image file."
+            );
+            resetLoading();
+          }
+        });
+
+        // Insert text into Quill and reset UI
+        function insertTextIntoQuill(text) {
+          quill.setText(text);
+          resetLoading();
+          notesThingDiv.style.display = "block";
+          selectUploadDiv.style.display = "none";
+          uploadAgainDiv.style.display = "block";
         }
-    });
-    
-    let alltext = []; // Array to store all extracted text
-    
-    // Asynchronous function to extract text from the PDF
-    async function extractText(url, pass) {
-        try {
+
+        // Extract text from PDF
+        async function extractPDFText(url, password) {
+          try {
             let pdf;
-            if (pass) {
-                pdf = await pdfjsLib.getDocument({ url: url, password: pwd.value }).promise; // Get the PDF document with password
+            if (password) {
+              pdf = await pdfjsLib.getDocument({ url: url, password: password })
+                .promise;
             } else {
-                pdf = await pdfjsLib.getDocument(url).promise; // Get the PDF document without password
+              pdf = await pdfjsLib.getDocument(url).promise;
             }
-            let pages = pdf.numPages; // Get the total number of pages in the PDF
+
+            let pages = pdf.numPages;
+            allText = [];
             for (let i = 1; i <= pages; i++) {
-                let page = await pdf.getPage(i); // Get the page object for each page
-                let txt = await page.getTextContent(); // Get the text content of the page
-                let text = txt.items.map((s) => s.str).join(""); // Concatenate the text items into a single string
-                alltext.push(text); // Add the extracted text to the array
+              let page = await pdf.getPage(i);
+              let txt = await page.getTextContent();
+              let text = txt.items.map((s) => s.str).join(" ");
+              allText.push(text);
             }
-            alltext.map((e, i) => {
-                select.innerHTML += `<option value="${i+1}">${i+1}</option>`; // Add options for each page in the page selection dropdown
+
+            if (pages > 1) {
+              pageSelect.innerHTML = "";
+              for (let i = 1; i <= pages; i++) {
+                pageSelect.innerHTML += `<option value="${i}">Page ${i}</option>`;
+              }
+              afterUpload.style.display = "block"; 
+            } else {
+              afterUpload.style.display = "none";
+            }
+
+            quill.setText(allText[0]);
+            textArea.value = allText[0];
+
+            pageSelect.addEventListener("change", () => {
+              let selectedPage = pageSelect.value;
+              quill.setText(allText[selectedPage - 1]);
+              textArea.value = allText[selectedPage - 1];
             });
-            afterProcess(); // Display the result section
-        } catch (err) {
-            alert(err.message);
+
+            resetLoading();
+            selectUploadDiv.style.display = "none";
+            notesThingDiv.style.display = "block";
+            uploadAgainDiv.style.display = "block";
+          } catch (err) {
+            alert("Error in extracting text from PDF: " + err.message);
+            resetLoading();
+          }
         }
-    }
-    
-    // Function to handle the post-processing after text extraction
-    function afterProcess() {
-        pdftext.value = alltext[select.value - 1]; // Display the extracted text for the selected page
-        download.href = "data:text/plain;charset=utf-8," + encodeURIComponent(alltext[select.value - 1]); // Set the download link URL for the extracted text
-        afterupload.style.display = "flex"; // Display the result section
-        document.querySelector(".another").style.display = "unset"; // Display the "Extract Another PDF" button
-    }
-</script>
-	</body>
+
+        function resetLoading() {
+          loadingIndicator.style.display = "none";
+          uploadButton.disabled = false;
+        }
+
+        // Upload another file
+        uploadAnotherButton.addEventListener("click", () => {
+          selectUploadDiv.style.display = "block";
+          uploadAgainDiv.style.display = "none";
+          notesThingDiv.style.display = "none";
+          quill.setText("");
+          fileInput.value = "";
+          textArea.value = "";
+          pageSelect.innerHTML = "";
+        });
+        const nextButton = document.getElementById("nextButton");
+        const tagSelection = document.getElementById("tagSelection");
+        nextButton.addEventListener("click", () => {
+          contentField.value = cleanUpContent(quill.root.innerHTML);
+          nextButton.style.display = "none";
+          tagSelection.style.display = "block";
+        });
+        const addNoteForm = document.getElementById("addNoteForm");
+        addNoteForm.addEventListener("submit", (event) => {
+          contentField.value = cleanUpContent(quill.root.innerHTML);
+
+          if (tagSelection.style.display === "block") {
+            // Proceed with form submission
+            addNoteForm.submit();
+          } else {
+            event.preventDefault();
+            nextButton.click();
+          }
+        });
+        const initialContent = contentField.value;
+        if (initialContent) {
+          quill.root.innerHTML = initialContent;
+        }
+        function cleanUpContent(content) {
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = content;
+          const paragraphs = tempDiv.querySelectorAll("p");
+          paragraphs.forEach((p) => {
+            if (p.innerHTML.trim()) {
+              const br = document.createElement("br");
+              p.replaceWith(...Array.from(p.childNodes).concat(br));
+            }
+          });
+          return tempDiv.innerHTML;
+        }
+      });
+
+      document
+        .getElementById("notificationBtn")
+        .addEventListener("click", () => {
+          window.location.href = "/notifications";
+        });
+    </script>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll("[data-nav-link]");
+        const articles = document.querySelectorAll("article");
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((btn) => btn.classList.remove("active"));
+            link.classList.add("active");
+            const targetPage = link.textContent.trim().toLowerCase();
+            articles.forEach((article) => (article.style.display = "none"));
+            const targetArticle = document.getElementById(targetPage);
+            if (targetArticle) {
+              targetArticle.style.display = "block";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>

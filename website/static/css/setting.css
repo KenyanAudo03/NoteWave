@@ -2830,7 +2830,7 @@ input[type="checkbox"]:checked::before {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 1;
   padding: 20px;
   text-align: center;
 }
@@ -3166,7 +3166,8 @@ input[type="checkbox"]:checked::before {
   margin-bottom: 10px;
 }
 
-.superAdminSection h2 {
+.superAdminSection h2,
+#userActivatorSection h2 {
   color: #FFFFF0;
   border-bottom: 2px solid #007bff;
   padding-bottom: 10px;

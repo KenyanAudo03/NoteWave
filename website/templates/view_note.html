@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+
     <title>{{ note.title }}</title>
     <link
       rel="stylesheet"
@@ -27,6 +29,7 @@
       href="{{ url_for('static', filename='img/notewave.ico') }}"
       type="image/x-icon"
     />
+
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/6.2.0/docx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -267,6 +270,8 @@
           </header>
           <p>Content:</p>
           <div id="editor">{{ note.content | safe}}</div>
+          <button id="readNoteButton">Read Note Aloud</button>
+
           <!-- <small
             style="float: right; color: hsl(0, 0%, 84%); margin-top: -24px"
           >
@@ -281,12 +286,15 @@
       <div class="modal" id="scrollableModal">
         <div class="modal-content">
           <div class="modal-header">
-            <span class="close" id="closeModalButton" style="color: #fff">&times;</span>
+            <span class="close" id="closeModalButton" style="color: #fff"
+              >&times;</span
+            >
             <header>
-            <h2 class="modal-title" style="--bookmark-: {{ tag.color }}">Other Notes</h2>
-          </header>
+              <h2 class="modal-title" style="--bookmark-: {{ tag.color }}">
+                Other Notes
+              </h2>
+            </header>
           </div>
-         
 
           <section class="about-text">
             <div class="search">
@@ -296,7 +304,7 @@
                 data-tag-id="{{ tag.id }}"
                 id="searchInput"
                 placeholder="Search notes..."
-                class="input-search"  
+                class="input-search"
                 autocomplete="off"
               />
             </div>
@@ -357,7 +365,56 @@
         </div>
       </div>
     </main>
-    
+
+    <script>
+       const readButton = document.getElementById("readNoteButton");
+        const editor = document.getElementById("editor");
+
+        let isReading = false; // Track whether the text is being read
+        let utterance; // Variable to store the SpeechSynthesisUtterance
+
+        readButton.addEventListener("click", function () {
+            const noteContent = editor.textContent;
+
+            // Toggle the reading state
+            if (isReading) {
+                // If reading is in progress, stop it
+                stopReading();
+            } else {
+                // If not reading, start the reading process
+                startReading(noteContent);
+            }
+        });
+
+        function startReading(text) {
+            utterance = new SpeechSynthesisUtterance(text); // Create a new utterance for the text
+            utterance.onend = function() {
+                isReading = false; // Mark as not reading when done
+                readButton.textContent = "Read Note Aloud"; // Reset button text
+                console.log("Reading finished");
+            };
+
+            // Start speaking
+            window.speechSynthesis.speak(utterance);
+            isReading = true;
+            readButton.textContent = "Stop"; // Change the button to "Stop"
+            console.log("Reading started");
+        }
+
+        function stopReading() {
+            // Stop the reading process
+            window.speechSynthesis.cancel(); // Stop any ongoing speech
+            isReading = false;
+            readButton.textContent = "Read Note Aloud"; // Reset button text
+            console.log("Reading stopped");
+        }
+
+        // Stop reading if the page is refreshed or closed
+        window.addEventListener("beforeunload", function () {
+            stopReading();
+        });
+    </script>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
@@ -417,16 +474,18 @@
       // Get modal elements
       const modal = document.getElementById("scrollableModal");
       const openModalBtn = document.getElementById("openModal");
-      
+
       // Close buttons
-      const closeModalBtn = document.getElementById("closeModalButton"); 
+      const closeModalBtn = document.getElementById("closeModalButton");
       const closeModalFooterBtn = document.getElementById("closeModalFooter");
-    
+
       // Check if elements exist and log if they don't
       if (!modal || !openModalBtn || !closeModalBtn) {
-        console.error('Some elements are missing: modal, openModalBtn, or closeModalBtn.');
+        console.error(
+          "Some elements are missing: modal, openModalBtn, or closeModalBtn."
+        );
       }
-    
+
       // Open modal
       if (openModalBtn) {
         openModalBtn.onclick = function () {
@@ -436,32 +495,25 @@
       if (closeModalBtn) {
         closeModalBtn.onclick = function () {
           modal.style.display = "none";
-          console.log('Modal closed by close button');
+          console.log("Modal closed by close button");
         };
       }
-    
-      // Close modal when the close button in footer is clicked
       if (closeModalFooterBtn) {
         closeModalFooterBtn.onclick = function () {
           modal.style.display = "none";
-          console.log('Modal closed by footer button');
+          console.log("Modal closed by footer button");
         };
       }
-    
-      // Close modal when clicking outside of the modal
       window.onclick = function (event) {
         if (event.target === modal) {
           modal.style.display = "none";
         }
       };
-    
-      // Close modal when the Escape key is pressed
       window.onkeydown = function (event) {
         if (event.key === "Escape") {
           modal.style.display = "none";
         }
       };
     </script>
-    
   </body>
 </html>

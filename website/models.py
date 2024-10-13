@@ -6,8 +6,18 @@ from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 import os
 import secrets
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text, JSON, Enum, extract
-
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    ForeignKey,
+    Boolean,
+    Text,
+    JSON,
+    Enum,
+    extract,
+)
 
 
 class EmailVerificationToken(db.Model):
@@ -50,15 +60,25 @@ class User(db.Model, UserMixin):
     lockout_time = db.Column(DateTime)
     is_admin = db.Column(db.Boolean, default=False)
     otp_expiry = db.Column(DateTime)
-    profile_visibility = db.Column(db.String(20), default='public')
-    role = db.Column(db.Enum('user', 'admin', 'superadmin', name='user_roles'), default='user')
-    assigned_by_id = db.Column(db.Integer, ForeignKey('user.id'), nullable=True)
-    assigned_admins = db.relationship('User', backref='assigned_by', remote_side=[id])
+    profile_visibility = db.Column(db.String(20), default="public")
+    role = db.Column(
+        Enum(
+            "user",
+            "admin",
+            "superadmin",
+            "user_activator",  
+            name="user_roles",
+        ),
+        default="user",
+    )
+
+    assigned_by_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=True)
+    assigned_admins = db.relationship("User", backref="assigned_by", remote_side=[id])
     imported_notes_count = db.Column(db.Integer, default=0)
     exported_notes_count = db.Column(db.Integer, default=0)
 
-    encrypt_password = db.Column(db.String(128), nullable=True) 
-    reset_encrypt_password = db.Column(db.String(128), nullable=True) 
+    encrypt_password = db.Column(db.String(128), nullable=True)
+    reset_encrypt_password = db.Column(db.String(128), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     note_tags = db.relationship(
@@ -108,7 +128,6 @@ class User(db.Model, UserMixin):
             return verification_token.user.email
         return None
 
-
     def __init__(
         self,
         email,
@@ -119,20 +138,20 @@ class User(db.Model, UserMixin):
         user_name,
         time_zone,
         generated_color=None,
-        role='user',
+        role="user",
         assigned_by_id=None,
         failed_attempts=0,
-        assigned_admins = None,
+        assigned_admins=None,
         account_locked=False,
         lockout_time=None,
-        otp_expiry = None,
+        otp_expiry=None,
         otp_method=None,
-        is_admin = False,
-        encrypt_password=None, 
+        is_admin=False,
+        encrypt_password=None,
         reset_encrypt_password=None,
-        imported_notes_count = None,
-        exported_notes_count = None,
-        profile_visibility='public' 
+        imported_notes_count=None,
+        exported_notes_count=None,
+        profile_visibility="public",
     ):
         self.email = email
         self.password = password
@@ -151,7 +170,7 @@ class User(db.Model, UserMixin):
         self.gender = None
         self.generated_color = generated_color
         self.is_active = True
-        self.role = role 
+        self.role = role
         self.is_admin = is_admin
         self.assigned_admins = assigned_admins
         self.failed_attempts = failed_attempts
@@ -167,7 +186,6 @@ class User(db.Model, UserMixin):
         self.imported_notes_count = imported_notes_count
         self.exported_notes_count = exported_notes_count
         self.push_preferences = PushPreferences(new_message=True)
-
 
     def serialize(self):
         return {
@@ -191,7 +209,7 @@ class User(db.Model, UserMixin):
             "failed_attempts": self.failed_attempts,
             "account_locked": self.account_locked,
             "lockout_time": self.lockout_time,
-            "created_at": self.created_at,  
+            "created_at": self.created_at,
             "profile_visibility": self.profile_visibility,
             "encrypt_password": self.encrypt_password,
             "imported_notes_count": self.imported_notes_count,
@@ -199,13 +217,24 @@ class User(db.Model, UserMixin):
             "reset_encrypt_password": self.reset_encrypt_password,
             "otp_method": self.otp_method,
             "email_preferences": {
-                "newsletter": self.email_preferences.newsletter if self.email_preferences else None,
-                "activity_alerts": self.email_preferences.activity_alerts if self.email_preferences else None,
+                "newsletter": (
+                    self.email_preferences.newsletter
+                    if self.email_preferences
+                    else None
+                ),
+                "activity_alerts": (
+                    self.email_preferences.activity_alerts
+                    if self.email_preferences
+                    else None
+                ),
             },
             "push_preferences": {
-                "new_message": self.push_preferences.new_message if self.push_preferences else None,
+                "new_message": (
+                    self.push_preferences.new_message if self.push_preferences else None
+                ),
             },
         }
+
 
 class Admin:
     @staticmethod
@@ -217,22 +246,20 @@ class Admin:
             user_data = {
                 "id": user.id,
                 "full_name": user.full_name,
-                "username" : user.user_name,
+                "username": user.user_name,
                 "total_notes": Note.query.filter_by(user_id=user.id).count(),
                 "total_todos": ToDo.query.filter_by(user_id=user.id).count(),
-                "note_tags": NoteTag.query.filter_by(user_id=user.id).count()
+                "note_tags": NoteTag.query.filter_by(user_id=user.id).count(),
             }
             users_data.append(user_data)
 
         return {
             "total_users": len(users),
-            "users_data": users_data,  
+            "users_data": users_data,
             "total_notes": Note.query.count(),
             "total_todos": ToDo.query.count(),
-            "note_tags": NoteTag.query.count()
+            "note_tags": NoteTag.query.count(),
         }
-
-
 
     @staticmethod
     def deactivate_user(user_id):
@@ -255,8 +282,8 @@ class Admin:
     @staticmethod
     def assign_admin(user_id):
         user = User.query.get(user_id)
-        if user and user.role != 'admin':
-            user.role = 'admin'
+        if user and user.role != "admin":
+            user.role = "admin"
             db.session.commit()
             return True
         return False
@@ -269,66 +296,70 @@ class Admin:
             db.session.commit()
             return True
         return False
-    
+
     @staticmethod
     def view_monthly_statistics():
         current_year = datetime.now().year
         current_month = datetime.now().month
         users_this_month = User.query.filter(
-            extract('year', User.created_at) == current_year,
-            extract('month', User.created_at) == current_month
+            extract("year", User.created_at) == current_year,
+            extract("month", User.created_at) == current_month,
         ).count()
         notes_this_month = Note.query.filter(
-            extract('year', Note.created_at) == current_year,
-            extract('month', Note.created_at) == current_month
+            extract("year", Note.created_at) == current_year,
+            extract("month", Note.created_at) == current_month,
         ).count()
         todos_this_month = ToDo.query.filter(
-            extract('year', ToDo.created_at) == current_year,
-            extract('month', ToDo.created_at) == current_month
+            extract("year", ToDo.created_at) == current_year,
+            extract("month", ToDo.created_at) == current_month,
         ).count()
 
         return {
             "users_this_month": users_this_month,
             "notes_this_month": notes_this_month,
-            "todos_this_month": todos_this_month
+            "todos_this_month": todos_this_month,
         }
 
     @staticmethod
     def view_login_activities():
-        login_activities = LoginActivity.query.order_by(LoginActivity.timestamp.desc()).all()
+        login_activities = LoginActivity.query.order_by(
+            LoginActivity.timestamp.desc()
+        ).all()
         activities_data = []
         for activity in login_activities:
-            activities_data.append({
-                "user_id": activity.user_id,
-                "email": activity.user.email,
-                "timestamp": activity.get_local_timestamp(),
-                "ip_address": activity.ip_address,
-                "user_agent": activity.user_agent,
-                "time_zone": activity.time_zone,
-                "browser_name": activity.browser_name
-            })
+            activities_data.append(
+                {
+                    "user_id": activity.user_id,
+                    "email": activity.user.email,
+                    "timestamp": activity.get_local_timestamp(),
+                    "ip_address": activity.ip_address,
+                    "user_agent": activity.user_agent,
+                    "time_zone": activity.time_zone,
+                    "browser_name": activity.browser_name,
+                }
+            )
         return activities_data
-    
+
     @staticmethod
     def view_user_notes_statistics():
         users_data = []
         users = User.query.all()
 
         for user in users:
-            users_data.append({
-                "id": user.id,
-                "full_name": user.full_name,
-                "username": user.user_name,
-                "imported_notes_count": user.imported_notes_count,
-                "exported_notes_count": user.exported_notes_count,
-            })
+            users_data.append(
+                {
+                    "id": user.id,
+                    "full_name": user.full_name,
+                    "username": user.user_name,
+                    "imported_notes_count": user.imported_notes_count,
+                    "exported_notes_count": user.exported_notes_count,
+                }
+            )
 
         return {
             "total_users": len(users),
             "users_data": users_data,
         }
-
-
 
 
 class UserSession(db.Model):

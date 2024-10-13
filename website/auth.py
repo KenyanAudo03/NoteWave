@@ -38,6 +38,7 @@ from .models import (
     Subtask,
     EmailVerificationToken,
     PasswordResetToken,
+    Admin
 )
 import random
 from pytz import timezone
@@ -60,15 +61,10 @@ from cryptography.fernet import Fernet
 import base64
 from flask_socketio import emit, join_room
 import hashlib
-from . import socketio
 
 
 auth = Blueprint("auth", __name__)
-
-
 SESSION_TIMEOUT = 30
-
-
 def session_timeout_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -372,14 +368,37 @@ def make_admin(user_id):
         return redirect(url_for("views.settings"))
 
     if not user.email_verified:
-        flash(
-            "Only verified accounts can be granted admin privileges.", category="danger"
-        )
+        flash("Only verified accounts can be granted admin privileges.", category="danger")
         return redirect(url_for("views.settings"))
 
     user.is_admin = True
+    role = request.form.get('role')
+    if role:
+        user.role = role  
+        db.session.commit()
+        flash(f"User {user.email} has been granted admin privileges with role '{role}'.", category="success")
+    else:
+        flash("No role selected. Admin privileges not granted.", category="danger")
+    
+    return redirect(url_for("views.settings"))
+
+@auth.route("/remove_admin/<int:user_id>", methods=["POST"])
+@login_required
+def remove_admin(user_id):
+    if current_user.role != 'superadmin':
+        flash("You do not have permission to remove admins.", "error")
+        return redirect(url_for("views.settings"))
+    
+    user = User.query.get_or_404(user_id)
+    
+    if not user.is_admin:
+        flash("User is not an admin.", "info")
+        return redirect(url_for("views.settings"))
+    user.is_admin = False
+    user.role = 'user'
     db.session.commit()
-    flash(f"User {user.email} has been granted admin privileges.", category="success")
+    
+    flash(f"User {user.full_name} has been removed as admin.", "success")
     return redirect(url_for("views.settings"))
 
 
@@ -2338,21 +2357,17 @@ def delete_user(user_id):
     return redirect(url_for("views.settings"))
 
 
-# Deactivate User Route (prevents deactivating superadmin)
 @auth.route("/deactivate_user/<int:user_id>", methods=["POST"])
 @login_required
 def deactivate_user(user_id):
-    if not current_user.role == 'superadmin':
+    if current_user.role not in ['superadmin', 'user_activator']:
         flash("You do not have permission to deactivate users.", "error")
         return redirect(url_for("views.settings"))
     
     user = User.query.get_or_404(user_id)
-    
-    # Ensure superadmin accounts cannot be deactivated
     if user.role == 'superadmin':
         flash("You cannot deactivate a superadmin account.", "error")
         return redirect(url_for("views.settings"))
-    
     if user.is_active:
         user.is_active = False
         db.session.commit()
@@ -2361,4 +2376,5 @@ def deactivate_user(user_id):
         flash(f"User {user.full_name} is already inactive.", "info")
     
     return redirect(url_for("views.settings"))
+
 

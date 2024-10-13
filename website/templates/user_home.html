@@ -28,66 +28,25 @@
     />
   </head>
   <body>
-    <!-- {% if not current_user.email_verified %}
-    <div class="message-container">
-        <div class="email-verification-alert" role="alert">
-            <i class="fas fa-exclamation-circle"></i> Your email is not verified.
-            Please verify your email to access all features.
-            <form
-                action="{{ url_for('auth.resend_verification') }}"
-                method="POST"
-                class="resend-verification"
-            >
-                <div class="form-group" style="display: none">
-                    <input
-                        type="email"
-                        class="form-control"
-                        id="email"
-                        name="email"
-                        value="{{ current_user.email }}"
-                        readonly
-                        required
-                        style="--background-: {{ current_user.generated_color }}"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                    style="--background-: {{ current_user.generated_color }}"
-                >
-                    Resend Verification Email
-                </button>
-            </form>
-        </div>
-    </div>
-{% endif %}
-
-<div class="messages-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div
-                    class="alert alert-{{ category }} alert-dismissible fade show"
-                    role="alert"
-                >
-
-                    {% if category == 'success' %}
-                        <i class="fas fa-check-circle"></i>
-                    {% else %}
-                        <i class="fas fa-times-circle"></i>
-                    {% endif %}
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-</div> -->
-
-
     <main>
+      <div class="messages-container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ category }} alert-dismissible fade show"
+          role="alert"
+        >
+          {% if category == 'success' %}
+          <i class="fas fa-check-circle"></i>
+          {% else %}
+          <i class="fas fa-times-circle"></i>
+          {% endif %} {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
       <aside class="sidebar" data-sidebar>
         <div class="sidebar-info">
-          <figure class="avatar-box"  id="avatar-box">
+          <figure class="avatar-box" id="avatar-box">
             {% if current_user.profile_picture %}
             <img
               src="/static/profile_pics/{{ current_user.profile_picture }}"
@@ -102,29 +61,25 @@
             >
             {% endif %}
           </figure>
-  
-          
           <div class="info-content">
             <h1 class="name" title="{{ current_user.full_name }}">
               {{ current_user.full_name }} {% if current_user.email_verified %}
               <i class="bx bxs-badge-check" style="color: #1877f2"></i>
               {% endif %}
             </h1>
-
-            <p class="title" title="{{ current_user.bio }}">
-              {% if current_user.bio %} {{ current_user.bio }} {% else %}
-              <a
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
                 href="{{ url_for('views.settings') }}"
                 style="color: #f1c40f; text-decoration: underline"
-              >
-                Add your bio
-              </a>
+              >Add your bio</a>
               {% endif %}
-            </p>
+            </pre>
           </div>
 
           <button class="info_more-btn" data-sidebar-btn>
-            <span>Show Contacts</span>
+            <span>Show More</span>
 
             <ion-icon name="chevron-down"></ion-icon>
           </button>
@@ -138,69 +93,48 @@
               <div class="icon-box">
                 <ion-icon name="person-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Username</p>
                 <span style="color: #fff">{{ current_user.user_name }}</span>
               </div>
             </li>
+
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="mail-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Email</p>
                 <span style="color: #fff">{{ current_user.email }}</span>
               </div>
             </li>
 
+            {% if current_user.phone_number %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="phone-portrait-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Phone</p>
-                {% if current_user.phone_number %}
-                <span style="color: #fff">
-                  {{ current_user.phone_number }}
-                </span>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your phone number
-                </a>
-                {% endif %}
+                <span style="color: #fff">{{ current_user.phone_number }}</span>
               </div>
             </li>
-
+            {% endif %} {% if current_user.date_birth %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="calendar-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Birthday</p>
-                {% if current_user.date_birth %}
                 <time
                   datetime="{{ current_user.date_birth }}"
                   style="color: #fff"
                 >
                   {{ current_user.date_birth }}
                 </time>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your birthday
-                </a>
-                {% endif %}
               </div>
             </li>
+            {% endif %}
           </ul>
 
           <div class="separator"></div>
@@ -285,27 +219,46 @@
         <article class="about active" id="about">
           <section class="testimonials">
             <div class="tags">
+              <p class="section-title">STATISTICS</p>
+              <div class="statistic-wrapper">
+                <canvas id="userStatisticsChart"></canvas>
+              </div>
+              <button class="toggle-statistics">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+            </div>
+          </section>
+
+          <section class="testimonials">
+            <div class="tags">
               <p class="section-title">
-                BOOKMARKS
-                {% if current_user.email_verified %}
-                <a href="" class="edit-notes" title="edit tags"><i class="bx bxs-edit"></i></a>
+                BOOKMARKS {% if current_user.email_verified %}
+                <a href="" class="edit-notes" title="edit tags"
+                  ><i class="bx bxs-edit"></i
+                ></a>
                 {% endif %}
               </p>
               <div class="tags-wrapper">
                 {% for tag in tags %}
-                <a href="{{ url_for('views.tag_notes', tag_id=tag.id) }}" class="tag" data-tag-id="{{ tag.id }}">
-                  <i class="fas fa-bookmark" style="--bookmark-: {{ tag.color }}"></i>
+                <a
+                  href="{{ url_for('views.tag_notes', tag_id=tag.id) }}"
+                  class="tag"
+                  data-tag-id="{{ tag.id }}"
+                >
+                  <i
+                    class="fas fa-bookmark"
+                    style="--bookmark-: {{ tag.color }}"
+                  ></i>
                   <span class="tag-name">{{ tag.name }}</span>
                   <span class="note-count">({{ tag.note_count }})</span>
                 </a>
                 {% endfor %}
               </div>
               <button class="toggle-tags">
-                <i class="fas fa-chevron-down"></i> 
+                <i class="fas fa-chevron-down"></i>
               </button>
             </div>
           </section>
-          
 
           <header>
             <h2 class="h2 article-title">All Notes</h2>
@@ -342,7 +295,7 @@
                   <pre class="note-content">
 {{ note.content | striptags  | truncate(20, True, '...')}}</pre
                   >
-                  
+
                   <p class="note-time">
                     {% if note.updated_at %} Updated at: {{
                     note.updated_at.strftime('%Y-%m-%d %H:%M') }} {% else %}
@@ -363,24 +316,7 @@
                   >+</a
                 >
               </div>
-              <div class="speech-text">
-                <a
-                  href="{{url_for('views.speech_text')}}"
-                  style="--background-: {{ current_user.generated_color }}"
-                  class="speech-text-toggle-add"
-                  ><i class="bx bxs-microphone-alt" title="Speech-Text"></i
-                ></a>
-              </div>
-              <div class="scan-pdf">
-                <a
-                  href="{{url_for('views.pdf_text')}}"
-                  style="--background-: {{ current_user.generated_color }}"
-                  class="speech-text-toggle-add"
-                  ><i class='bx bx-scan' title="Scan-Pdf/Docz-Text"></i
-                ></a>
-              </div>
             </div>
-
 
             <div id="addTagModal" class="modal-overlay">
               <div class="modal-body">
@@ -391,6 +327,11 @@
                 >
                 <h2>Add New Tag</h2>
                 <form id="addTagForm">
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <input
                     type="text"
                     class="inputs"
@@ -470,6 +411,7 @@
                 </form>
               </div>
             </div>
+
             <div id="editTagsModal" class="modal">
               <div class="modal-content">
                 <span
@@ -579,13 +521,62 @@
         </article>
       </div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const userStatistics = {{ user_statistics | tojson }};
+      const ctx = document.getElementById('userStatisticsChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Notes', 'Note Tags', 'Todos', 'Notes Imported', 'Notes Exported'],
+          datasets: [{
+            label: 'User Statistics',
+            data: [
+              userStatistics.notes_count,
+              userStatistics.note_tags_count,
+              userStatistics.todos_count,
+              userStatistics.imported_notes_count,
+              userStatistics.exported_notes_count
+            ],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Prevents distortion in smaller screens
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true // Ensures the Y-axis starts at 0
+            }
+          }
+        }
+      });
+    </script>
     <script src="{{ url_for('static', filename='js/user_home.js') }}"></script>
     <script
       type="module"
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
     ></script>
 
-   
     <script
       nomodule
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
@@ -648,6 +639,28 @@
             }
           });
         });
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+          const alerts = document.querySelectorAll(".alert");
+          alerts.forEach((alert, index) => {
+            alert.classList.remove("show");
+            alert.classList.add("fade");
+            setTimeout(() => {
+              alert.remove();
+              if (index === alerts.length - 1) {
+                const messagesContainer = document.querySelector(
+                  ".messages-container"
+                );
+                if (messagesContainer) {
+                  messagesContainer.remove();
+                }
+              }
+            }, 150);
+          });
+        }, 3000);
       });
     </script>
   </body>
