@@ -28,21 +28,6 @@
     />
   </head>
   <body>
-    <div class="messages-container">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div
-        class="alert alert-{{ category }} alert-dismissible fade show"
-        role="alert"
-      >
-        {% if category == 'success' %}
-        <i class="fas fa-check-circle"></i>
-        {% else %}
-        <i class="fas fa-times-circle"></i>
-        {% endif %} {{ message }}
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
-    </div>
     <main>
       <aside class="sidebar" data-sidebar>
         <div class="sidebar-info">
@@ -298,7 +283,7 @@
                 </li>
                 <hr />
                 {% endfor %} {% else %}
-                <p class="no-notes">No Available Notes</p>
+                <p class="no-notes">No Available Favorite Notes</p>
                 {% endif %}
               </ul>
             </div>

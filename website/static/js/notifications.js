@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() }}",
+          "X-CSRFToken": csrfToken, 
         },
       })
         .then((response) => response.json())
@@ -124,7 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Fix: Adding a dot for class selector
   const notificationBell = document.querySelector(".mark_all_read");
 
   if (notificationBell) {
@@ -133,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() }}",
+          "X-CSRFToken": csrfToken, 
         },
       })
         .then((response) => response.json())
