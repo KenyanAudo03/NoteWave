@@ -66,6 +66,7 @@
           <span id="email">{{ current_user.email }}</span>.
         </p>
         <div class="otp-input">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <input
             type="tel"
             id="digit-1"
@@ -135,156 +136,166 @@
       </form>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const resendBtn = document.getElementById("resend-otp-btn");
-        const timerEl = document.getElementById("timer");
-        const verifyBtn = document.getElementById("verify-btn");
-        const otpDigits = document.querySelectorAll(".otp-digit");
-        let countdown = 30;
-        let interval;
+      <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const resendBtn = document.getElementById("resend-otp-btn");
+    const timerEl = document.getElementById("timer");
+    const verifyBtn = document.getElementById("verify-btn");
+    const otpDigits = document.querySelectorAll(".otp-digit");
+    let countdown = 30;
+    let interval;
 
-        function startCountdown() {
-          resendBtn.classList.add("inactive");
-          resendBtn.style.cursor = "not-allowed";
-          countdown = 30;
-          timerEl.textContent = countdown;
-          interval = setInterval(() => {
-            countdown--;
-            timerEl.textContent = countdown;
-            if (countdown === 0) {
-              clearInterval(interval);
-              resendBtn.classList.remove("inactive");
-              resendBtn.style.cursor = "pointer";
-              resendBtn.textContent = "Resend Code";
-            }
-          }, 1000);
+    function startCountdown() {
+      resendBtn.classList.add("inactive");
+      resendBtn.style.cursor = "not-allowed";
+      countdown = 30;
+      timerEl.textContent = countdown;
+      interval = setInterval(() => {
+        countdown--;
+        timerEl.textContent = countdown;
+        if (countdown === 0) {
+          clearInterval(interval);
+          resendBtn.classList.remove("inactive");
+          resendBtn.style.cursor = "pointer";
+          resendBtn.textContent = "Resend Code";
         }
-        function resendOtp() {
-          resendBtn.classList.add("inactive");
-          resendBtn.textContent = "Sending...";
-          fetch('{{ url_for("auth.resend_otp_login") }}', {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({}),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                startCountdown();
-                setTimeout(() => {
-                  location.reload();
-                }, 1000);
-              } else {
-                showError("Failed to resend OTP. Please try again.");
-              }
-            })
-            .catch(() => {
-              showError("An error occurred. Please try again.");
-            });
-        }
-        function verifyOtp(event) {
-          event.preventDefault();
+      }, 1000);
+    }
 
-          let otp = "";
-          otpDigits.forEach((input) => {
-            otp += input.value;
-          });
+    function resendOtp() {
+      resendBtn.classList.add("inactive");
+      resendBtn.textContent = "Sending...";
+      
+      // Get CSRF token from the form
+      const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
-          document.getElementById("combined-otp").value = otp;
-
-          if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-            showError("OTP must be a 6-digit number.");
-            clearOtpInputs();
-            return;
+      fetch('{{ url_for("auth.resend_otp_login") }}', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken, // Add CSRF token to headers
+        },
+        body: JSON.stringify({}),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            startCountdown();
+            setTimeout(() => {
+              location.reload(); // Refresh the page after 1 second
+            }, 1000);
+          } else {
+            showError("Failed to resend OTP. Please try again.");
           }
-
-          const verifyBtn = document.getElementById("verify-btn");
-          verifyBtn.textContent = "Verifying...";
-          verifyBtn.disabled = true;
-          setTimeout(() => {
-            document.getElementById("form-authentication").submit();
-          }, 3000);
-        }
-
-        function clearOtpInputs() {
-          otpDigits.forEach((input) => {
-            input.value = "";
-          });
-          otpDigits[0].focus();
-        }
-
-        otpDigits.forEach((input, index) => {
-          input.addEventListener("input", function () {
-            if (input.value.length === 1 && index < otpDigits.length - 1) {
-              otpDigits[index + 1].focus();
-            }
-            if (index === otpDigits.length - 1) {
-              verifyOtp(event);
-            }
-          });
-
-          input.addEventListener("keydown", function (event) {
-            if (
-              event.key === "Backspace" &&
-              input.value.length === 0 &&
-              index > 0
-            ) {
-              otpDigits[index - 1].focus();
-            }
-          });
-
-          input.addEventListener("paste", function (event) {
-            const pastedData = event.clipboardData.getData("text");
-            if (/^\d{6}$/.test(pastedData)) {
-              otpDigits.forEach((input, idx) => {
-                input.value = pastedData[idx] || "";
-              });
-              verifyOtp(event);
-            }
-            event.preventDefault();
-          });
+        })
+        .catch(() => {
+          showError("An error occurred. Please try again.");
         });
+    }
 
-        function showError(message) {
-          const errorMessage = document.getElementById("error-message");
-          const errorText = document.getElementById("error-text");
-          errorText.textContent = message;
-          errorMessage.style.display = "block";
-          setTimeout(() => {
-            errorMessage.classList.add("slide-out");
-            setTimeout(() => {
-              errorMessage.style.display = "none";
-              errorMessage.classList.remove("slide-out");
-            }, 500);
-          }, 3000);
+    function verifyOtp(event) {
+      event.preventDefault();
+
+      let otp = "";
+      otpDigits.forEach((input) => {
+        otp += input.value;
+      });
+
+      document.getElementById("combined-otp").value = otp;
+
+      if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+        showError("OTP must be a 6-digit number.");
+        clearOtpInputs();
+        return;
+      }
+
+      verifyBtn.textContent = "Verifying...";
+      verifyBtn.disabled = true;
+      setTimeout(() => {
+        document.getElementById("form-authentication").submit();
+      }, 3000);
+    }
+
+    function clearOtpInputs() {
+      otpDigits.forEach((input) => {
+        input.value = "";
+      });
+      otpDigits[0].focus();
+    }
+
+    otpDigits.forEach((input, index) => {
+      input.addEventListener("input", function () {
+        // Allow only numbers (0-9) and prevent invalid characters
+        this.value = this.value.replace(/[^0-9]/g, "");
+
+        // Move to next input if the current input is filled
+        if (this.value.length === 1 && index < otpDigits.length - 1) {
+          otpDigits[index + 1].focus();
         }
-
-        window.closeErrorMessage = function () {
-          const errorMessage = document.getElementById("error-message");
-          errorMessage.classList.add("slide-out");
-          setTimeout(() => {
-            errorMessage.style.display = "none";
-            errorMessage.classList.remove("slide-out");
-          }, 500);
-        };
-
-        resendBtn.addEventListener("click", resendOtp);
-        startCountdown();
+        if (index === otpDigits.length - 1) {
+          verifyOtp(event);
+        }
       });
-      document.addEventListener("DOMContentLoaded", function () {
-        const alerts = document.querySelectorAll(".alert");
-        alerts.forEach((alert) => {
-          setTimeout(() => {
-            alert.classList.add("fade");
-            setTimeout(() => {
-              alert.remove();
-            }, 150);
-          }, 3000);
-        });
+
+      input.addEventListener("keydown", function (event) {
+        // Navigate to the previous input on backspace if the current is empty
+        if (event.key === "Backspace" && input.value.length === 0 && index > 0) {
+          otpDigits[index - 1].focus();
+        }
       });
-    </script>
+
+      input.addEventListener("paste", function (event) {
+        const pastedData = event.clipboardData.getData("text");
+        if (/^\d{6}$/.test(pastedData)) {
+          otpDigits.forEach((input, idx) => {
+            input.value = pastedData[idx] || "";
+          });
+          verifyOtp(event);
+        }
+        event.preventDefault();
+      });
+    });
+
+    function showError(message) {
+      const errorMessage = document.getElementById("error-message");
+      const errorText = document.getElementById("error-text");
+      errorText.textContent = message;
+      errorMessage.style.display = "block";
+      setTimeout(() => {
+        errorMessage.classList.add("slide-out");
+        setTimeout(() => {
+          errorMessage.style.display = "none";
+          errorMessage.classList.remove("slide-out");
+        }, 500);
+      }, 3000);
+    }
+
+    window.closeErrorMessage = function () {
+      const errorMessage = document.getElementById("error-message");
+      errorMessage.classList.add("slide-out");
+      setTimeout(() => {
+        errorMessage.style.display = "none";
+        errorMessage.classList.remove("slide-out");
+      }, 500);
+    };
+
+    resendBtn.addEventListener("click", resendOtp);
+    startCountdown();
+  });
+
+  // Fade out alerts after a few seconds
+  document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll(".alert");
+    alerts.forEach((alert) => {
+      setTimeout(() => {
+        alert.classList.add("fade");
+        setTimeout(() => {
+          alert.remove();
+        }, 150);
+      }, 3000);
+    });
+  });
+</script>
+
   </body>
 </html>

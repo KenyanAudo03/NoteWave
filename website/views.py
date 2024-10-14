@@ -69,6 +69,7 @@ def all_reviews():
     return render_template("all_reviews.html", all_ratings=all_ratings)
 
 @views.route("/pdf-text")
+@login_required
 def pdf_text():
     tags = NoteTag.query.filter_by(user_id=current_user.id).all()
     return render_template("scan.html", tags=tags)
@@ -1270,8 +1271,10 @@ def privacy_policy():
 
 
 @views.route("speech_text")
+@login_required
 def speech_text():
-    return render_template("speech-to-text.html")
+    tags = NoteTag.query.filter_by(user_id=current_user.id).all()
+    return render_template("speech-to-text.html", tags=tags)
 
 
 @views.route("/search_users", methods=["GET"])

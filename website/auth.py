@@ -38,7 +38,7 @@ from .models import (
     Subtask,
     EmailVerificationToken,
     PasswordResetToken,
-    Admin
+    Admin,
 )
 import random
 from pytz import timezone
@@ -65,6 +65,8 @@ import hashlib
 
 auth = Blueprint("auth", __name__)
 SESSION_TIMEOUT = 30
+
+
 def session_timeout_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -118,10 +120,17 @@ def login():
         if user:
             if user.account_locked:
                 if datetime.utcnow() < user.lockout_time:
-                    user_tz = pytz.timezone(user.time_zone) if user.time_zone else pytz.utc
+                    user_tz = (
+                        pytz.timezone(user.time_zone) if user.time_zone else pytz.utc
+                    )
                     lockout_time_local = user.lockout_time.astimezone(user_tz)
-                    remaining_time = (lockout_time_local - datetime.now(user_tz)).seconds // 60
-                    flash(f"Your account is temporarily locked. Please try again in {remaining_time} minutes.", category="error")
+                    remaining_time = (
+                        lockout_time_local - datetime.now(user_tz)
+                    ).seconds // 60
+                    flash(
+                        f"Your account is temporarily locked. Please try again in {remaining_time} minutes.",
+                        category="error",
+                    )
                     return redirect(url_for("auth.login"))
                 else:
                     user.account_locked = False
@@ -152,7 +161,7 @@ def login():
                 )
                 db.session.add(new_login_activity)
 
-                db.session.commit()  
+                db.session.commit()
 
                 if user.email_preferences and user.email_preferences.activity_alerts:
                     send_activity_alert(user, new_login_activity)
@@ -177,7 +186,10 @@ def login():
                 user.account_locked = True
                 user.lockout_time = datetime.utcnow() + timedelta(minutes=30)
                 db.session.commit()
-                flash("Account locked for 30 minutes due to multiple failed attempts.", category="error")
+                flash(
+                    "Account locked for 30 minutes due to multiple failed attempts.",
+                    category="error",
+                )
             else:
                 db.session.commit()
                 flash("Login failed. Check your email and password.", category="error")
@@ -292,7 +304,7 @@ def verify_email_otp():
                 "2FA verification successful. You are now logged in.",
                 category="success",
             )
-            return redirect(url_for("views.settings"))
+            return redirect(url_for("views.user_home"))
         else:
             flash("Invalid OTP code. Please try again.", category="danger")
 
@@ -368,36 +380,42 @@ def make_admin(user_id):
         return redirect(url_for("views.settings"))
 
     if not user.email_verified:
-        flash("Only verified accounts can be granted admin privileges.", category="danger")
+        flash(
+            "Only verified accounts can be granted admin privileges.", category="danger"
+        )
         return redirect(url_for("views.settings"))
 
     user.is_admin = True
-    role = request.form.get('role')
+    role = request.form.get("role")
     if role:
-        user.role = role  
+        user.role = role
         db.session.commit()
-        flash(f"User {user.email} has been granted admin privileges with role '{role}'.", category="success")
+        flash(
+            f"User {user.email} has been granted admin privileges with role '{role}'.",
+            category="success",
+        )
     else:
         flash("No role selected. Admin privileges not granted.", category="danger")
-    
+
     return redirect(url_for("views.settings"))
+
 
 @auth.route("/remove_admin/<int:user_id>", methods=["POST"])
 @login_required
 def remove_admin(user_id):
-    if current_user.role != 'superadmin':
+    if current_user.role != "superadmin":
         flash("You do not have permission to remove admins.", "error")
         return redirect(url_for("views.settings"))
-    
+
     user = User.query.get_or_404(user_id)
-    
+
     if not user.is_admin:
         flash("User is not an admin.", "info")
         return redirect(url_for("views.settings"))
     user.is_admin = False
-    user.role = 'user'
+    user.role = "user"
     db.session.commit()
-    
+
     flash(f"User {user.full_name} has been removed as admin.", "success")
     return redirect(url_for("views.settings"))
 
@@ -841,6 +859,7 @@ def logout():
     flash("Logged out successfully", category="success")
     return redirect(url_for("auth.login"))
 
+
 @auth.route("/logout_idle", methods=["POST"])
 @login_required
 def logout_idle():
@@ -1110,7 +1129,13 @@ def sign_up():
         password2 = request.form.get("confirm-password").strip()
 
         # Validate input fields
-        if not first_name or not second_name or not email or not password1 or not password2:
+        if (
+            not first_name
+            or not second_name
+            or not email
+            or not password1
+            or not password2
+        ):
             flash("All fields are required.", "error")
         elif password1 != password2:
             flash("Passwords do not match.", "error")
@@ -1122,10 +1147,10 @@ def sign_up():
             # Check if the email belongs to the superadmin
             if email == "vo4685336@gmail.com":
                 role = "superadmin"  # Set role to superadmin
-                is_admin = True       # Set is_admin to True
+                is_admin = True  # Set is_admin to True
             else:
                 role = "user"
-                is_admin = False     
+                is_admin = False
 
             # Create the new user
             new_user = User(
@@ -1137,8 +1162,8 @@ def sign_up():
                 password=generate_password_hash(password1, method="pbkdf2:sha256"),
                 time_zone="Africa/Nairobi",
                 generated_color=generated_color,
-                role=role,          
-                is_admin=is_admin    
+                role=role,
+                is_admin=is_admin,
             )
             db.session.add(new_user)
             db.session.commit()
@@ -1167,12 +1192,13 @@ def sign_up():
 
             # Log in the user
             login_user(new_user, remember=True)
-            flash("Account created! Please check your email to verify your account.", "success")
+            flash(
+                "Account created! Please check your email to verify your account.",
+                "success",
+            )
             return redirect(url_for("views.user_home"))
 
     return render_template("sign_up.html")
-
-
 
 
 @auth.route("/verify/<token>")
@@ -1426,6 +1452,8 @@ def forgot_password():
                     category="error",
                 )
                 return redirect(url_for("auth.forgot_password"))
+            session["reset_email"] = email
+
             token = generate_token()
             expiration = datetime.utcnow() + timedelta(hours=5)
             password_reset_token = PasswordResetToken(
@@ -1463,7 +1491,11 @@ def reset_password(token):
 
 @auth.route("/resend-password-reset", methods=["POST"])
 def resend_password_reset():
-    email = request.form.get("email")
+    email = session.get("reset_email")
+    if email is None:
+        flash("No email found in the session.", "error")
+        return redirect(url_for("auth.password_reset_email_sent"))
+
     user = User.query.filter_by(email=email).first()
 
     if user:
@@ -1472,13 +1504,32 @@ def resend_password_reset():
         password_reset_token = PasswordResetToken(
             user_id=user.id, token=token, expiration=expiration
         )
-        db.session.add(password_reset_token)
-        db.session.commit()
-        send_password_reset_email(user, token)
-        flash("Password reset email resent successfully!", "success")
+
+        try:
+            db.session.add(password_reset_token)
+            db.session.commit()
+            try:
+                send_password_reset_email(user, token)
+                flash("Password reset email resent successfully!", "success")
+            except Exception as e:
+                print(f"Error sending email: {e}")
+                flash(
+                    "Failed to send the password reset email. Please check your email settings.",
+                    "error",
+                )
+        except Exception as e:
+            print(f"Database commit error: {e}")
+            flash(
+                "There was an error sending the reset email. Please try again later.",
+                "error",
+            )
+        session.pop("reset_email", None)
+
     else:
         flash("User not found. Please check the email address.", "error")
-    return redirect(url_for("auth.password_reset_email_sent"))
+        session.pop("reset_email", None)
+
+    return redirect(url_for("auth.login"))
 
 
 @auth.route("/update_username", methods=["POST"])
@@ -1666,14 +1717,14 @@ def update_profile_pic():
     flash("Profile picture updated successfully!", "success")
     return redirect(url_for("views.settings"))
 
+
 def allowed_file(filename):
     allowed_extensions = {"png", "jpg", "jpeg", "gif"}
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
 
 
-
-
 from datetime import datetime
+
 
 @auth.route("/update_generated_color", methods=["POST"])
 @login_required
@@ -1706,9 +1757,6 @@ def update_generated_color():
     return jsonify({"error": "Failed to update color"}), 400
 
 
-
-
-
 @auth.route("/calculate_age", methods=["GET"])
 @login_required
 def calculate_age():
@@ -1735,6 +1783,7 @@ def calculate_age():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 def generate_encrypted_filename(user_first_name):
     """
     Generates a unique filename for encrypted notes using the user's first name
@@ -1746,6 +1795,7 @@ def generate_encrypted_filename(user_first_name):
 
     filename = f"{safe_first_name}_{timestamp}_{unique_id}.enc"
     return filename
+
 
 def generate_json_filename(user_first_name):
     """
@@ -1775,7 +1825,9 @@ def export_notes():
         flash("No notes selected for export.", "error")
         return redirect(url_for("views.settings"))
 
-    notes = Note.query.filter(Note.id.in_(selected_note_ids), Note.user_id == user.id).all()
+    notes = Note.query.filter(
+        Note.id.in_(selected_note_ids), Note.user_id == user.id
+    ).all()
     notes_data = [note.serialize() for note in notes]
 
     export_data = {
@@ -1790,7 +1842,9 @@ def export_notes():
     try:
         if user.encrypt_password and original_password:
             if check_password_hash(user.encrypt_password, original_password):
-                key = base64.urlsafe_b64encode(hashlib.sha256(original_password.encode()).digest())
+                key = base64.urlsafe_b64encode(
+                    hashlib.sha256(original_password.encode()).digest()
+                )
                 cipher = Fernet(key)
                 encrypted_data = cipher.encrypt(json_data.encode("utf-8"))
 
@@ -1833,6 +1887,8 @@ def export_notes():
 
 
 import logging
+
+
 @auth.route("/export_user_details", methods=["GET"])
 @login_required
 def export_user_details():
@@ -1842,7 +1898,7 @@ def export_user_details():
         return redirect(url_for("views.settings"))
 
     try:
-        user_data = user.serialize() 
+        user_data = user.serialize()
         export_data = {"user": user_data}
         json_data = json.dumps(export_data, indent=4)
         buffer = io.BytesIO()
@@ -1862,7 +1918,6 @@ def export_user_details():
         logging.error(f"Error exporting user details: {str(e)}")
         flash(f"An error occurred while exporting user details: {str(e)}", "error")
         return redirect(url_for("views.settings"))
-
 
 
 @auth.route("/import_notes", methods=["POST"])
@@ -1899,7 +1954,10 @@ def import_notes():
                 export_data = json.loads(decrypted_data.decode("utf-8"))
 
                 if not validate_import_data(export_data):
-                    flash("Invalid file structure. Please provide a valid notes file.", "error")
+                    flash(
+                        "Invalid file structure. Please provide a valid notes file.",
+                        "error",
+                    )
                     return redirect(url_for("views.settings"))
 
                 notes_data = export_data.get("notes", [])
@@ -1920,7 +1978,9 @@ def import_notes():
                 flash("Notes imported successfully from encrypted file.", "success")
 
             except Exception as e:
-                flash("Failed to decrypt the notes. Check your password or file.", "error")
+                flash(
+                    "Failed to decrypt the notes. Check your password or file.", "error"
+                )
                 return redirect(url_for("views.settings"))
 
         else:
@@ -1928,7 +1988,10 @@ def import_notes():
                 export_data = json.load(f)
 
             if not validate_import_data(export_data):
-                flash("Invalid JSON file structure. Please provide a valid notes file.", "error")
+                flash(
+                    "Invalid JSON file structure. Please provide a valid notes file.",
+                    "error",
+                )
                 return redirect(url_for("views.settings"))
 
             notes_data = export_data.get("notes", [])
@@ -1949,7 +2012,6 @@ def import_notes():
             os.remove(temp_file_path)
 
     return redirect(url_for("views.settings"))
-
 
 
 def validate_import_data(data):
@@ -1974,6 +2036,7 @@ def validate_import_data(data):
 from datetime import datetime
 import pytz
 
+
 def import_notes_data(notes):
     default_tag = NoteTag.query.filter_by(
         name="Default", user_id=current_user.id
@@ -1984,30 +2047,33 @@ def import_notes_data(notes):
         db.session.commit()
 
     default_tag_id = default_tag.id
-    user_timezone = pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
-    current_time = datetime.now(user_timezone) 
+    user_timezone = (
+        pytz.timezone(current_user.time_zone) if current_user.time_zone else pytz.UTC
+    )
+    current_time = datetime.now(user_timezone)
 
     for note_data in notes:
         tag_id = note_data.get("tag_id")
-        existing_tag = NoteTag.query.filter_by(id=tag_id, user_id=current_user.id).first()
+        existing_tag = NoteTag.query.filter_by(
+            id=tag_id, user_id=current_user.id
+        ).first()
         if not existing_tag:
             tag_id = default_tag_id
-        created_at = current_time  
-        updated_at = None  
+        created_at = current_time
+        updated_at = None
 
         note = Note(
             title=note_data["title"],
             content=note_data["content"],
             tag_id=tag_id,
-            user_id=current_user.id, 
-            created_at=created_at,  
-            updated_at=updated_at,  
+            user_id=current_user.id,
+            created_at=created_at,
+            updated_at=updated_at,
             is_favorite=note_data.get("is_favorite", False),
         )
-        db.session.add(note) 
+        db.session.add(note)
 
     db.session.commit()
-
 
 
 @auth.route("/update_email_preferences", methods=["POST"])
@@ -2148,7 +2214,6 @@ def edit_message(message_id):
     return redirect(url_for("chat", receiver_id=message.receiver_id))
 
 
-
 @auth.route("/update_personal_info", methods=["POST"])
 @login_required
 def update_personal_info():
@@ -2157,7 +2222,9 @@ def update_personal_info():
     dob = request.form.get("date_of_birth")
     gender = request.form.get("gender")
     generated_color = request.form.get("generated_color")
-    print(f"Received data: first_name={first_name}, second_name={second_name}, dob={dob}, gender={gender}, generated_color={generated_color}" )
+    print(
+        f"Received data: first_name={first_name}, second_name={second_name}, dob={dob}, gender={gender}, generated_color={generated_color}"
+    )
 
     if first_name and first_name != current_user.first_name:
         current_user.first_name = first_name
@@ -2173,8 +2240,6 @@ def update_personal_info():
     db.session.commit()
     flash("Personal information updated successfully!", "success")
     return redirect(url_for("views.settings"))
-
-
 
 
 def send_email_verification(subject, body, recipient):
@@ -2204,7 +2269,7 @@ def send_otp():
     if User.query.filter_by(email=email).first():
         return jsonify({"exists": True})
 
-    otp = secrets.token_hex(3).upper()  
+    otp = secrets.token_hex(3).upper()
     otp_expiry = datetime.utcnow() + timedelta(minutes=10)  # OTP expires in 10 minutes
 
     current_user.temp_otp = otp
@@ -2216,6 +2281,7 @@ def send_otp():
     send_email_verification(subject, body, email)
 
     return jsonify({"exists": False})
+
 
 @auth.route("/verify_otp_verification", methods=["POST"])
 @login_required
@@ -2234,6 +2300,7 @@ def verify_otp_verification():
     else:
         return jsonify({"success": False, "message": "OTP expired. Please resend OTP."})
 
+
 @auth.route("/update_email", methods=["POST"])
 @login_required
 def update_email():
@@ -2242,25 +2309,33 @@ def update_email():
         if User.query.filter_by(email=new_email).first():
             return jsonify({"success": False, "message": "Email already exists."}), 400
         current_user.email = new_email
-        current_user.email_verified = True  
+        current_user.email_verified = True
 
-        db.session.commit() 
+        db.session.commit()
         flash("Email updated successfully!", "success")
         return jsonify({"success": True, "redirect": url_for("views.settings")})
     return jsonify({"success": False, "message": "No changes made."}), 400
 
-@auth.route('/check_username_verification', methods=['GET'])
-def check_username_verification():
-    username = request.args.get('username', '').strip()
-    if len(username) < 3 or len(username) > 10:
-        return jsonify({"valid": False, "error": "Username must be between 3 and 10 characters."})
 
-    if not username.isalnum() and '_' not in username and '-' not in username:
-        return jsonify({"valid": False, "error": "Username can only contain letters, numbers, underscores, and hyphens."})
+@auth.route("/check_username_verification", methods=["GET"])
+def check_username_verification():
+    username = request.args.get("username", "").strip()
+    if len(username) < 3 or len(username) > 10:
+        return jsonify(
+            {"valid": False, "error": "Username must be between 3 and 10 characters."}
+        )
+
+    if not username.isalnum() and "_" not in username and "-" not in username:
+        return jsonify(
+            {
+                "valid": False,
+                "error": "Username can only contain letters, numbers, underscores, and hyphens.",
+            }
+        )
     existing_user = User.query.filter_by(user_name=username).first()
     if existing_user:
         return jsonify({"valid": False, "exists": True})
-    
+
     return jsonify({"valid": True, "exists": False})
 
 
@@ -2279,17 +2354,19 @@ def update_account_info():
     flash("Account information updated successfully!", "success")
     return redirect(url_for("views.settings"))
 
+
 @auth.route("/check_username", methods=["GET"])
 def check_username():
     username = request.args.get("username", "").strip()
 
     if not username:
-        return jsonify({"exists": False}), 400 
+        return jsonify({"exists": False}), 400
     username_with_at = f"@{username}"
 
     user_exists = User.query.filter_by(user_name=username_with_at).first() is not None
 
     return jsonify({"exists": user_exists}), 200
+
 
 @auth.route("/update_contact_info", methods=["POST"])
 @login_required
@@ -2298,18 +2375,19 @@ def update_contact_info():
     country_code = request.form.get("country_code")
     time_zone = request.form.get("time_zone")
     if phone_number:
-        phone_number = phone_number.replace("(", "").replace(")", "").replace(" ", "").strip()
+        phone_number = (
+            phone_number.replace("(", "").replace(")", "").replace(" ", "").strip()
+        )
         if phone_number != current_user.phone_number:
             current_user.phone_number = phone_number
     if country_code and country_code != current_user.country_code:
-        current_user.country_code = country_code  
+        current_user.country_code = country_code
 
     if time_zone and time_zone != current_user.time_zone:
         current_user.time_zone = time_zone
     db.session.commit()
     flash("Contact information updated successfully!", "success")
     return redirect(url_for("views.settings"))
-
 
 
 @auth.route("/create_user", methods=["POST"])
@@ -2337,35 +2415,38 @@ def create_user():
 @auth.route("/delete_user/<int:user_id>", methods=["POST"])
 @login_required
 def delete_user(user_id):
-    if not current_user.role == 'superadmin':
+    if not current_user.role == "superadmin":
         flash("You do not have permission to delete users.", "error")
         return redirect(url_for("views.settings"))
-    
+
     user = User.query.get_or_404(user_id)
-    
+
     # Ensure superadmin accounts cannot be deleted
-    if user.role == 'superadmin':
+    if user.role == "superadmin":
         flash("You cannot delete a superadmin account.", "error")
         return redirect(url_for("views.settings"))
-    
+
     success = Admin().delete_user(user_id)
     if success:
-        flash(f"User {user.full_name} and all related data deleted successfully.", "success")
+        flash(
+            f"User {user.full_name} and all related data deleted successfully.",
+            "success",
+        )
     else:
         flash("User not found or could not be deleted.", "error")
-    
+
     return redirect(url_for("views.settings"))
 
 
 @auth.route("/deactivate_user/<int:user_id>", methods=["POST"])
 @login_required
 def deactivate_user(user_id):
-    if current_user.role not in ['superadmin', 'user_activator']:
+    if current_user.role not in ["superadmin", "user_activator"]:
         flash("You do not have permission to deactivate users.", "error")
         return redirect(url_for("views.settings"))
-    
+
     user = User.query.get_or_404(user_id)
-    if user.role == 'superadmin':
+    if user.role == "superadmin":
         flash("You cannot deactivate a superadmin account.", "error")
         return redirect(url_for("views.settings"))
     if user.is_active:
@@ -2374,7 +2455,5 @@ def deactivate_user(user_id):
         flash(f"User {user.full_name} has been deactivated.", "success")
     else:
         flash(f"User {user.full_name} is already inactive.", "info")
-    
+
     return redirect(url_for("views.settings"))
-
-

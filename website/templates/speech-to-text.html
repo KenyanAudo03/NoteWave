@@ -1,126 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
-<title>Home</title>
-<link rel="stylesheet" type="text/css" href="css/style.css">
-<style>
-    *,*:after,*:before{
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-	box-sizing: border-box;
-}
-body{
-	font-family: arial;
-	font-size: 16px;
-	margin: 0;
-	background:linear-gradient(to right bottom, #d13cff, #031f6a);
-	color: #000;
-	
-	display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Note</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/add_all.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="messages-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% else %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %} {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <main>
+      <aside class="sidebar" data-sidebar>
+        <div class="sidebar-info">
+          <figure class="avatar-box">
+            {% if current_user.profile_picture %}
+            <img
+              src="/static/profile_pics/{{ current_user.profile_picture }}"
+              alt="Profile Picture"
+              class="profile-image"
+            />
+            {% else %}
+            <i
+              class="fas fa-5x"
+              style="--background-: {{ current_user.generated_color }}"
+              >{{ current_user.first_name[0] }}</i
+            >
+            {% endif %}
+          </figure>
 
-.voice_to_text{
-  width: 600px;
-  text-align: center;
-}
-h1{
-	color: #fff;
-	font-size: 50px;
-}
-#convert_text{
-  width: 100%;
-  height: 200px;
-  border-radius: 10px;
-  resize: none;
-  padding: 10px;
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-button{
-	padding: 12px 20px;
-  background: #0ea4da;
-  border: 0;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 5px;
-}
+          <div class="info-content">
+            <h1 class="name" title="{{ current_user.full_name }}">
+              {{ current_user.full_name }} {% if current_user.email_verified %}
+              <i class="bx bxs-badge-check" style="color: #1877f2"></i>
+              {% endif %}
+            </h1>
+            <pre
+              class="title"
+              title="{{ current_user.bio }}"
+            >{% if current_user.bio %}{{ current_user.bio }}{% else %}<a
+          href="{{ url_for('views.settings') }}"
+          style="color: #f1c40f; text-decoration: underline"
+        >Add your bio</a>
+        {% endif %}
+      </pre>
+          </div>
 
-button.stop{
-	background: red;
-}
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show More</span>
 
-</style>
-</head>
-<body>
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+        </div>
 
-	<div class="voice_to_text"> 
-		<h1>Voice to Text Converter</h1>
-    <textarea id="convert_text"></textarea>
-    <button id="click_to_record">Start Voice To Text</button>
-    <button id="stop_recording" class="stop">Stop Voice To Text</button>
-  </div>
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const micButton = document.getElementById('click_to_record');
-        const stopButton = document.getElementById('stop_recording');
-        const convertText = document.getElementById('convert_text');
-        let recognition;
-        function initSpeechRecognition() {
-            window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = true; // Keep the mic active
-            recognition.interimResults = true; // Show partial results
+          <ul class="contacts-list">
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
 
-            recognition.addEventListener('result', function(e) {
-                const transcript = Array.from(e.results)
-                    .map(result => result[0])
-                    .map(result => result.transcript)
-                    .join('');
+              <div class="contact-info">
+                <p class="contact-title">Username</p>
+                <span style="color: #fff">{{ current_user.user_name }}</span>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
 
-                convertText.value = transcript; // Update the textarea with the transcript
-            });
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <span style="color: #fff">{{ current_user.email }}</span>
+              </div>
+            </li>
 
-            recognition.addEventListener('end', function() {
-                console.log("Recognition ended, restarting...");
-                if (micButton.disabled) {
-                    recognition.start(); // Auto-restart recognition unless manually stopped
-                }
-            });
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
 
-            recognition.addEventListener('error', function(event) {
-                console.error("Speech recognition error:", event.error);
-            });
-        }
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+                {% if current_user.phone_number %}
+                <span style="color: #fff">
+                  {{ current_user.phone_number }}
+                </span>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your phone number
+                </a>
+                {% endif %}
+              </div>
+            </li>
 
-        // Start recording when button is clicked
-        micButton.addEventListener('click', function() {
-            micButton.disabled = true;
-            stopButton.disabled = false;
-            initSpeechRecognition();
-            recognition.start();
-            console.log("Speech recognition started...");
-        });
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
 
-        // Stop recording when stop button is clicked
-        stopButton.addEventListener('click', function() {
-            micButton.disabled = false;
-            stopButton.disabled = true;
-            recognition.stop(); // Manually stop recognition
-            console.log("Speech recognition stopped.");
-        });
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
+                {% if current_user.date_birth %}
+                <time
+                  datetime="{{ current_user.date_birth }}"
+                  style="color: #fff"
+                >
+                  {{ current_user.date_birth }}
+                </time>
+                {% else %}
+                <a
+                  href="{{ url_for('views.settings') }}"
+                  style="color: #f1c40f; text-decoration: underline"
+                >
+                  Add your birthday
+                </a>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
 
-        // Initially disable stop button
-        stopButton.disabled = true;
+          <div class="separator"></div>
+          <ul class="social-list">
+            <li class="social-item notification">
+              <a href="{{ url_for('views.notifications') }}">
+                {% if current_user.push_preferences.new_message %}
+                <i class="bx bxs-bell" title="Notifications on"></i>
+                <span id="notificationBadge" class="badge">0</span>
+                {% else %}
+                <i class="bx bx-bell-off" title="Notifications off"></i>
+                {% endif %}
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="{{ url_for('views.search_users')}}" class="social-link">
+                <i class="fas fa-comments" title="Socialize"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="main-content">
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="/user_home" class="navbar-link">
+                <p>
+                  All notes
+                  <span
+                    style="--background-: {{ current_user.generated_color }}"
+                  >
+                    ({{ current_user.notes|length }})
+                  </span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{ url_for('views.show_todo_page') }}"
+                class="navbar-link"
+              >
+                <p style="--background-: {{ current_user.generated_color }}">
+                  To-dos
+                  <span> (<span id="todoCount">0</span>)</span>
+                </p>
+              </a>
+            </li>
+
+            <li class="navbar-item">
+              <a href="/favorites" class="navbar-link" id="favoriteLink">
+                <p style="--background-: {{ current_user.generated_color }}">
+                  My favorites
+                  <span> (<span id="favoriteCount">0</span>) </span>
+                </p>
+              </a>
+            </li>
+            <li class="navbar-item">
+              {% if current_user.email_verified %}
+              <a
+                href="#"
+                class="navbar-link new-tag"
+                style="--background-: {{ current_user.generated_color }}"
+                ><p>
+                  Tag Used
+                  <span> ({{ current_user.note_tags | length }}) </span>
+                </p></a
+              >
+              {% endif %}
+            </li>
+
+            <li class="navbar-item">
+              <a
+                href="{{url_for('views.settings')}}"
+                class="navbar-link"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                <p>Settings</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <article class="about active" id="all_add">
+          <header>
+            <h2
+              class="h2 article-title"
+              style="--background-: {{ current_user.generated_color }}"
+            >
+              Add Note
+            </h2>
+          </header>
+          <section class="about-text">
+            <form
+              id="addNoteForm"
+              action="{{ url_for('views.add_note_all') }}"
+              method="POST"
+            >
+              <select id="language-select">
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="sw-KE">Kiswahili</option>
+                <option value="fr-FR">French</option>
+                <option value="es-ES">Spanish</option>
+              </select>
+              <div class="recor_clear-buttons">
+              <button id="start-btn">Start Listening</button>
+              <button id="clear-btn">Clear Output</button>
+            </div>
+              <button id="backspace-btn" style="display: none;">Backspace</button>
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input
+                type="text"
+                id="noteTitle"
+                name="title"
+                class="inputs"
+                required
+                placeholder="Note Title"
+              />
+              <div id="quillEditor"></div>
+              <input type="hidden" name="content" id="hiddenContent" />
+              <br />
+              <button
+                type="button"
+                class="next"
+                id="nextButton"
+                style="--background-: {{ current_user.generated_color }}"
+              >
+                Next
+              </button>
+              <br>
+              <div id="tagSelection" style="display: none">
+                <select id="noteTag" name="tag_id" required>
+                  <option value="">--select tag--</option>
+                  {% for tag in tags %}
+                  <option value="{{ tag.id }}">{{ tag.name }}</option>
+                  {% endfor %}
+                </select>
+                <br />
+                <button
+                  type="submit"
+                  class="submit"
+                  style="--background-: {{ current_user.generated_color }}"
+                >
+                  Submit Note
+                </button>
+              </div>
+            </form>
+          </section>
+        </article>
+      </div>
+    </main>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="{{ url_for('static', filename='js/add_all.js') }}"></script>
+    <script>
+     let quill;
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize Quill editor
+  quill = new Quill("#quillEditor", {
+    theme: "snow",
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ font: [] }],
+        [{ size: ["small", "medium", "large", "huge"] }],
+        [{ indent: "-1" }, { indent: "+1" }],
+      ],
+    },
+  });
+
+  const contentField = document.getElementById("hiddenContent");
+  quill.on("text-change", () => {
+    const html = quill.root.innerHTML;
+    contentField.value = cleanUpContent(html);
+  });
+
+  const initialContent = contentField.value;
+  if (initialContent) {
+    quill.root.innerHTML = initialContent;
+  }
+
+  function cleanUpContent(content) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = content;
+
+    const paragraphs = tempDiv.querySelectorAll("p");
+    paragraphs.forEach((p) => {
+      if (p.innerHTML.trim()) {
+        const br = document.createElement("br");
+        p.replaceWith(
+          ...Array.from(p.childNodes)
+            .map((node) => (node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR" ? node : node))
+            .concat(br)
+        );
+      }
     });
-</script>
 
-</body>
+    return tempDiv.innerHTML;
+  }
+});
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  let isRecording = false;
+  const startButton = document.getElementById("start-btn");
+  startButton.addEventListener("click", handleStart);
+  startButton.addEventListener("touchstart", handleStart);
+
+  function handleStart(e) {
+    e.preventDefault();
+    if (!isRecording) {
+      const selectedLanguage = document.getElementById("language-select").value;
+      recognition.lang = selectedLanguage;
+      recognition.start();
+      startButton.innerText = "Listening...";
+      isRecording = true;
+    } else {
+      recognition.stop();
+      startButton.innerText = "Start Listening";
+      isRecording = false;
+    }
+  }
+
+  const clearButton = document.getElementById("clear-btn");
+  clearButton.addEventListener("click", () => {
+    quill.setText(""); 
+  });
+  clearButton.addEventListener("touchstart", () => {
+    quill.setText(""); 
+  });
+  const backspaceButton = document.getElementById("backspace-btn");
+  backspaceButton.addEventListener("click", handleBackspace);
+  backspaceButton.addEventListener("touchstart", handleBackspace);
+
+  function handleBackspace() {
+    const quillEditor = quill.root;
+    const currentText = quillEditor.innerHTML;
+    if (currentText.length > 0) {
+      quillEditor.innerHTML = currentText.slice(0, -1); 
+    }
+  }
+  recognition.onresult = (event) => {
+    const speechToText = event.results[event.resultIndex][0].transcript;
+    const currentPos = quill.getLength();
+    quill.insertText(currentPos - 1, speechToText + " ");
+  };
+
+  recognition.onerror = (event) => {
+    const errorMessage = {
+      "no-speech": "No speech was detected. Please try again.",
+      "audio-capture": "No microphone was found.",
+      "not-allowed": "Permission to use microphone is denied.",
+    };
+    document.getElementById("result").innerText =
+      errorMessage[event.error] || "Error occurred during recognition.";
+  };
+
+  recognition.onend = () => {
+    if (isRecording) {
+      startButton.innerText = "Start Listening";
+      isRecording = false;
+    }
+  };
+} else {
+  document.getElementById("quillEditor").innerText = "SpeechRecognition is not supported in this browser.";
+}
+document.getElementById("nextButton").addEventListener("click", (e) => {
+  e.preventDefault(); 
+
+  const tagSelectionDiv = document.getElementById("tagSelection");
+  tagSelectionDiv.style.display = "block"; 
+  document.getElementById("nextButton").disabled = true;
+
+  tagSelectionDiv.scrollIntoView({ behavior: "smooth" });
+});
+document.getElementById("addNoteForm").addEventListener("submit", (e) => {
+  const tagSelect = document.getElementById("noteTag");
+
+  if (tagSelect.value === "") {
+    e.preventDefault(); 
+    alert("Please select a tag before submitting.");
+  }
+});
+
+    </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+    <script>
+      "use strict";
+      const elementToggleFunc = function (elem) {
+        elem.classList.toggle("active");
+      };
+      const sidebar = document.querySelector("[data-sidebar]");
+      const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+
+      sidebarBtn.addEventListener("click", function () {
+        elementToggleFunc(sidebar);
+      });
+      const testimonialsItem = document.querySelectorAll(
+        "[data-testimonials-item]"
+      );
+      const modalContainer = document.querySelector("[data-modal-container]");
+      const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+      const overlay = document.querySelector("[data-overlay]");
+      const modalImg = document.querySelector("[data-modal-img]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalText = document.querySelector("[data-modal-text]");
+      const testimonialsModalFunc = function () {
+        modalContainer.classList.toggle("active");
+        overlay.classList.toggle("active");
+      };
+      for (let i = 0; i < testimonialsItem.length; i++) {
+        testimonialsItem[i].addEventListener("click", function () {
+          modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+          modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+          modalTitle.innerHTML = this.querySelector(
+            "[data-testimonials-title]"
+          ).innerHTML;
+          modalText.innerHTML = this.querySelector(
+            "[data-testimonials-text]"
+          ).innerHTML;
+
+          testimonialsModalFunc();
+        });
+      }
+      modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+      overlay.addEventListener("click", testimonialsModalFunc);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll("[data-nav-link]");
+        const articles = document.querySelectorAll("article");
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((btn) => btn.classList.remove("active"));
+            link.classList.add("active");
+            const targetPage = link.textContent.trim().toLowerCase();
+            articles.forEach((article) => (article.style.display = "none"));
+            const targetArticle = document.getElementById(targetPage);
+            if (targetArticle) {
+              targetArticle.style.display = "block";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>

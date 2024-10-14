@@ -2832,3 +2832,42 @@ select {
     width: 100%;
   }
 }
+#clear-btn, #start-btn {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  padding: 10px 20px;
+  margin: 10px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  background-color: #007BFF; 
+  color: white; 
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#clear-btn:hover, #start-btn:hover{
+  background-color: #0056b3; 
+  transform: translateY(-2px); 
+}
+#clear-btn:focus, #start-btn:focus {
+  outline: none;
+  border-color: #004080; 
+}
+
+#clear-btn:active, #start-btn:active{
+  transform: translateY(0); 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#clear-btn {
+  background-color: #28A745;
+}
+
+#clear-btn:hover {
+  background-color: #218838; 
+}
+.recor_clear-buttons{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

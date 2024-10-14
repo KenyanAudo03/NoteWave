@@ -200,7 +200,7 @@ button:disabled {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
+  font-size: 12px;
   max-width: auto;
   z-index: 1000;
   opacity: 1;
@@ -226,7 +226,7 @@ button:disabled {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
+  font-size: 12px;
   max-width: auto;
   z-index: 1000;
   opacity: 1;
@@ -238,7 +238,7 @@ button:disabled {
   width: auto;
   padding: 10px 20px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 12px;
   margin-bottom: 10px;
 }
 .alert-error {

@@ -82,6 +82,11 @@
         action="{{ url_for('auth.confirm_enable_2fa') }}"
         method="POST"
       >
+      <input
+                          type="hidden"
+                          name="csrf_token"
+                          value="{{ csrf_token() }}"
+                        />
         <div class="otp-input">
           <input
             type="tel"

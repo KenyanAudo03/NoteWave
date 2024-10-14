@@ -67,10 +67,10 @@
     </div>
 
     <div class="container">
-      <h1>2FA Verification. <b>(APP)</b>
-      </h1>
+      <h1>2FA Verification. <b>(APP)</b></h1>
       <form method="post" id="otp-form">
         <div class="otp-input">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <input
             type="tel"
             id="digit-1"
@@ -132,105 +132,104 @@
     </div>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const verifyBtn = document.getElementById("verify-btn");
-  const otpDigits = document.querySelectorAll(".otp-digit");
-  const combinedOtpInput = document.getElementById("combined-otp");
+      document.addEventListener("DOMContentLoaded", function () {
+        const verifyBtn = document.getElementById("verify-btn");
+        const otpDigits = document.querySelectorAll(".otp-digit");
+        const combinedOtpInput = document.getElementById("combined-otp");
 
-  // Function to verify OTP
-  function verifyOtp(event) {
-    event.preventDefault();
+        // Function to verify OTP
+        function verifyOtp(event) {
+          event.preventDefault();
 
-    let otp = "";
-    otpDigits.forEach((input) => {
-      otp += input.value;
-    });
+          let otp = "";
+          otpDigits.forEach((input) => {
+            otp += input.value;
+          });
 
-    combinedOtpInput.value = otp;
+          combinedOtpInput.value = otp;
 
-    if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-      showError("OTP must be a 6-digit number.");
-      clearOtpInputs();
-      return;
-    }
+          if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+            showError("OTP must be a 6-digit number.");
+            clearOtpInputs();
+            return;
+          }
 
-    verifyBtn.textContent = "Verifying...";
-    verifyBtn.disabled = true;
+          verifyBtn.textContent = "Verifying...";
+          verifyBtn.disabled = true;
 
-    setTimeout(() => {
-      document.getElementById("otp-form").submit(); // Submit the form after 3 seconds
-    }, 3000);
-  }
+          setTimeout(() => {
+            document.getElementById("otp-form").submit(); // Submit the form after 3 seconds
+          }, 3000);
+        }
 
-  function clearOtpInputs() {
-    otpDigits.forEach((input) => {
-      input.value = "";
-    });
-    otpDigits[0].focus();
-  }
+        function clearOtpInputs() {
+          otpDigits.forEach((input) => {
+            input.value = "";
+          });
+          otpDigits[0].focus();
+        }
 
-  otpDigits.forEach((input, index) => {
-    input.addEventListener("input", function (event) {
-      // Allow only digits
-      if (!/^\d?$/.test(input.value)) {
-        input.value = ""; // Clear input if it's not a digit
-      }
+        otpDigits.forEach((input, index) => {
+          input.addEventListener("input", function (event) {
+            // Allow only digits
+            if (!/^\d?$/.test(input.value)) {
+              input.value = ""; // Clear input if it's not a digit
+            }
 
-      if (input.value.length === 1 && index < otpDigits.length - 1) {
-        otpDigits[index + 1].focus();
-      } else if (input.value.length === 0 && index > 0) {
-        otpDigits[index - 1].focus();
-      }
+            if (input.value.length === 1 && index < otpDigits.length - 1) {
+              otpDigits[index + 1].focus();
+            } else if (input.value.length === 0 && index > 0) {
+              otpDigits[index - 1].focus();
+            }
 
-      if (index === otpDigits.length - 1) {
-        verifyOtp(event);
-      }
-    });
+            if (index === otpDigits.length - 1) {
+              verifyOtp(event);
+            }
+          });
 
-    input.addEventListener("keydown", function (event) {
-      if (
-        event.key === "Backspace" &&
-        input.value.length === 0 &&
-        index > 0
-      ) {
-        otpDigits[index - 1].focus();
-      }
-    });
+          input.addEventListener("keydown", function (event) {
+            if (
+              event.key === "Backspace" &&
+              input.value.length === 0 &&
+              index > 0
+            ) {
+              otpDigits[index - 1].focus();
+            }
+          });
 
-    input.addEventListener("paste", function (event) {
-      const pastedData = event.clipboardData.getData("text");
-      if (/^\d{6}$/.test(pastedData)) {
-        otpDigits.forEach((input, idx) => {
-          input.value = pastedData[idx] || "";
+          input.addEventListener("paste", function (event) {
+            const pastedData = event.clipboardData.getData("text");
+            if (/^\d{6}$/.test(pastedData)) {
+              otpDigits.forEach((input, idx) => {
+                input.value = pastedData[idx] || "";
+              });
+              verifyOtp(event);
+            } else {
+              showError("Please paste a valid 6-digit OTP.");
+            }
+            event.preventDefault();
+          });
         });
-        verifyOtp(event);
-      } else {
-        showError("Please paste a valid 6-digit OTP.");
+
+        verifyBtn.addEventListener("click", verifyOtp);
+      });
+
+      function showError(message) {
+        console.error(message);
       }
-      event.preventDefault();
-    });
-  });
 
-  verifyBtn.addEventListener("click", verifyOtp);
-});
-
-function showError(message) {
-  console.error(message);
-}
-
-// Alert handling
-document.addEventListener("DOMContentLoaded", function () {
-  const alerts = document.querySelectorAll(".alert");
-  alerts.forEach((alert) => {
-    setTimeout(() => {
-      alert.classList.add("fade");
-      setTimeout(() => {
-        alert.remove();
-      }, 150);
-    }, 3000);
-  });
-});
-
+      // Alert handling
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.classList.add("fade");
+            setTimeout(() => {
+              alert.remove();
+            }, 150);
+          }, 3000);
+        });
+      });
     </script>
 
     <script>

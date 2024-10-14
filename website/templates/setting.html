@@ -929,6 +929,7 @@
                   <strong>{{ current_user.otp_method }}</strong>.
                 </p>
                 <form action="{{ url_for('auth.disable_2fa') }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <button
                     type="submit"
                     id="disable2FAButton"
@@ -938,55 +939,37 @@
                     Disable 2FA
                   </button>
                 </form>
+                
                 {% else %}
                 <p>Your Two-Factor Authentication is not enabled.</p>
-
-                <form
-                  action="{{ url_for('auth.enable_2fa') }}"
-                  method="post"
-                  class="activeForm"
-                  id="2faForm"
-                >
-                  <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}"
-                  />
+                
+                <form action="{{ url_for('auth.enable_2fa') }}" method="post" class="activeForm" id="twoFac">
+                  <!-- CSRF Token to protect against CSRF attacks -->
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  
                   <div class="radio-group">
                     <label class="radio-label">
                       <input
                         type="checkbox"
                         name="otp_method"
                         value="app"
-                        {%
-                        if
-                        current_user.otp_method
-                        is
-                        none
-                        %}disabled{%
-                        endif
-                        %}
+                        onclick="submit2FAForm(this)"
                       />
                       Use Authenticator App
                     </label>
+                  
                     <label class="radio-label">
                       <input
                         type="checkbox"
                         name="otp_method"
                         value="email"
-                        {%
-                        if
-                        current_user.otp_method
-                        is
-                        none
-                        %}disabled{%
-                        endif
-                        %}
+                        onclick="submit2FAForm(this)"
                       />
                       Send OTP to Email
                     </label>
                   </div>
                 </form>
+              
                 {% endif %}
 
                 <div id="twoFAStatusMessage" class="status-message"></div>
@@ -1750,7 +1733,6 @@
                       </form>
                       {% else %} {% if user.role != 'admin' and user.id !=
                       current_user.id %}
-                      <!-- Only allow deactivate for non-admins and not themselves -->
                       <form
                         action="{{ url_for('auth.deactivate_user', user_id=user.id) }}"
                         method="post"
@@ -1778,6 +1760,19 @@
         </article>
       </div>
     </main>
+
+    
+    <script>
+      function submit2FAForm(checkbox) {
+        const checkboxes = document.querySelectorAll('input[name="otp_method"]');
+        checkboxes.forEach(function(box) {
+          if (box !== checkbox) {
+            box.checked = false; 
+          }
+        });
+        document.getElementById("twoFac").submit();
+      }
+    </script>
     <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2160,15 +2155,6 @@
         });
     </script>
 
-    <script>
-      document
-        .querySelectorAll('input[name="otp_method"]')
-        .forEach(function (radio) {
-          radio.addEventListener("click", function () {
-            document.getElementById("2faForm").submit();
-          });
-        });
-    </script>
     <script>
       function submitForm(checkbox) {
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
