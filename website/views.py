@@ -1257,7 +1257,7 @@ def send_email_contact():
     else:
         flash("Failed to send message. Please try again.", category="error")
 
-    return redirect(url_for("views.contact"))
+    return redirect(url_for("views.home"))
 
 
 @views.route("/contact")

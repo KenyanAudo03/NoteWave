@@ -1,4 +1,4 @@
-#!/home/audo-wrld/NoteWave/myvenv/bin/python3
+#!/home/audo-wrld/NoteWave/myvenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

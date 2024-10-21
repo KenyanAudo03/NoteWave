@@ -3,479 +3,440 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homepage | NoteWave</title>
+    <meta
+      name="description"
+      content="Capture, organize, and share your notes across devices with ease."
+    />
+    <meta
+      name="keywords"
+      content="Note-taking, Productivity, Organize notes, Collaboration, Cloud storage"
+    />
+    <meta name="author" content="Your Company Name" />
+    <title>NoteWave - Organize Your Thoughts</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom CSS -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='/css/home.css') }}"
     />
+
+    <!-- Google Fonts -->
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='img/notewave.ico') }}"
-      type="image/x-icon"
-    />
+    <style>
+      .hero {
+        background: url("static/img/pexels-thepaintedsquare-606541.jpg")
+          no-repeat center center/cover;
+        height: 100vh;
+        color: white;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+      }
+
+      .hero p {
+        font-size: 1.25rem;
+        margin-top: 20px;
+        margin-bottom: 30px;
+      }
+      .col-md-4 i {
+        color: #ff7f50;
+      }
+      .user-count-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 5px solid #ff7f50;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+        position: relative;
+        margin: 20px auto 0;
+        padding: 20px;
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+      }
+
+      .user-count-container i {
+        font-size: 48px;
+        color: #ff7f50;
+        margin-right: 10px;
+        transition: color 0.3s;
+      }
+
+      .user-count-container:hover {
+        background-color: #fff;
+        border-color: #fff;
+      }
+
+      .user-count-container:hover i,
+      .user-count-container:hover .user-count {
+        color: #000;
+      }
+
+      .user-count {
+        font-size: 36px;
+        color: #ff7f50;
+        transition: color 0.3s;
+      }
+    </style>
   </head>
   <body>
-    <div class="header-content-wrapper">
-      <header id="head">
-        <nav class="navbar">
-          <a href="/" class="logo"
-            ><p>Note<span>wave.</span></p></a
-          >
-          <ul class="menu-links">
-            <li><a href="/" type="menu">Home</a></li>
-            <li><a href="#" type="menu">About Us</a></li>
-            <li><a href="#" type="menu">Our Blog</a></li>
-            <li><a href="/contact" type="menu">Contact Us</a></li>
-            <li><a href="/auth/login" type="menu" target="_blank">Login</a></li>
-            <li><a type="started" href="/auth/sign_up">Get Started</a></li>
-          </ul>
-        </nav>
-      </header>
-      <section class="main-content" id="section1">
-        <img
-          src="static/img/notepad.jpg"
-          alt="Notepad Image"
-          class="notepad-image"
-        />
-        <div class="content">
-          <h4><span>|</span>Victor Owino<span>|</span></h4>
-          <p>
-            "Welcome to NoteWave! Our notepad is designed to simplify your life,
-            offering a completely free and intuitive way to capture your
-            thoughts. Whether you're a student, professional, or hobbyist,
-            NoteWave is for you. Our user-friendly interface lets you start
-            writing instantly, with no complicated setups. We believe in free
-            access, promoting creativity and productivity without financial
-            barriers. Your security and privacy are our top priorities. Your
-            notes are securely stored, ensuring your data is always protected.
-            Thank you for choosing NoteWave. We’re here to help you organize
-            your ideas effortlessly. Happy noting! "
-          </p>
-          <br />
-          <a href="#" class="how-it-works">See how it works</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">NoteWave</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#features">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#testimonials">Testimonials</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#pricing">Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact Us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/auth/login" target="_blank">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn btn-primary text-white" href="/auth/sign_up" target="_blank"
+              >Get Started</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero d-flex align-items-center">
+      <div class="container text-center">
+        <h1 class="display-4" style="color: #ff7f50">
+          Organize Your Ideas Anytime, Anywhere
+        </h1>
+        <p class="lead" style="color: #00ffff">
+          Capture, organize, and share your notes across devices with ease. Stay
+          productive wherever you go.
+        </p>
+        <a href="/auth/sign_up" class="btn btn-primary btn-lg" target="_blank"
+          >Get Started for Free</a
+        >
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+          <h2 class="text-center mb-4">Features</h2>
+          <div class="row">
+            <div class="col-md-4">
+              <i class="fas fa-cubes"></i>
+              <h4>All-in-One Organization</h4>
+              <p>
+                NoteWave is your all-in-one solution for organizing your notes and
+                ideas. Keep everything in one place, whether it's for work,
+                school, or personal use.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i class="fas fa-lock"></i>
+              <h4>Secure Storage</h4>
+              <p>
+                Your notes are encrypted and securely stored, ensuring the privacy
+                and protection of your data at all times.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i class="fas fa-sync-alt"></i>
+              <h4>Seamless Sync</h4>
+              <p>
+                Access your notes on any device, anytime, anywhere. Sync your data
+                seamlessly across all your devices for uninterrupted workflow.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i class="fas fa-user-friends"></i>
+              <h4>User-Friendly Interface</h4>
+              <p>
+                Capture your thoughts quickly and easily with NoteWave's intuitive
+                interface. Start writing instantly with no complicated setups.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i class="fas fa-bolt"></i>
+              <h4>Fast Search</h4>
+              <p>
+                Find any note instantly with NoteWave's powerful search feature.
+                Quickly filter through your content using keywords, tags, and dates.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i class="fas fa-cloud"></i>
+              <h4>Cloud Backup</h4>
+              <p>
+                Never lose your notes again with automatic cloud backups. Your data
+                is safely backed up, providing peace of mind and easy recovery
+                when needed.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
-      <div class="scroll-down-arrow">
-        <a href="#section2"><i class="fas fa-chevron-down"></i></a>
-      </div>
-    </div>
-
-    <section id="section2" class="features">
-      <h2>Our NoteWave Features</h2>
-      <span class="mu-title-dot"></span>
-      <p type="featureP">
-        NoteWave is your all-in-one solution for organizing your notes and
-        ideas. With NoteWave, you can store all your thoughts in one place,
-        marking them as to-dos, completed tasks, or ideas for later. Whether
-        it's for work, school, or personal use, NoteWave helps you keep
-        everything organized and easily accessible.
-      </p>
-      <br /><br />
-      <div class="feature-container">
-        <div class="feature-details">
-          <img
-            src="static/img/pexels-thepaintedsquare-606541.jpg"
-            alt="Feature Image"
-          />
-        </div>
-        <div class="features-list">
-          <div class="features-list">
-            <div class="feature">
-              <i class="fas fa-cubes"></i>
-              <div class="feature-content">
-                <h3>All-in-One Organization</h3>
-                <p>
-                  NoteWave is your all-in-one solution for organizing your notes
-                  and ideas. Keep everything in one place, whether it's for
-                  work, school, or personal use.
-                </p>
-              </div>
-            </div>
-            <hr />
-            <div class="feature">
-              <i class="fas fa-lock"></i>
-              <div class="feature-content">
-                <h3>Secure Storage</h3>
-                <p>
-                  Your notes are encrypted and securely stored, ensuring the
-                  privacy and protection of your data at all times.
-                </p>
-              </div>
-            </div>
-            <hr />
-            <div class="feature">
-              <i class="fas fa-sync-alt"></i>
-              <div class="feature-content">
-                <h3>Seamless Sync</h3>
-                <p>
-                  Access your notes on any device, anytime, anywhere. Sync your
-                  data seamlessly across all your devices for uninterrupted
-                  workflow.
-                </p>
-              </div>
-            </div>
-            <hr />
-            <div class="feature">
-              <i class="fas fa-user-friends"></i>
-              <div class="feature-content">
-                <h3>User-Friendly Interface</h3>
-                <p>
-                  Capture your thoughts quickly and easily with NoteWave's
-                  intuitive interface. Start writing instantly with no
-                  complicated setups.
-                </p>
-              </div>
-            </div>
-            <hr />
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <section id="section4" class="users">
-      <div class="no-users">
-        <h2>Number Of Users</h2>
-        <p>Number of Users who have created accounts in NoteWave</p>
-        <div class="user-count-container">
-          <i class="fas fa-users"></i>
-          <span class="user-count">{{ user_count }}</span>
-        </div>
-      </div>
-    </section>
-    <section class="QnA" id="section5">
-      <div class="questions">
-        <h2>FAQ</h2>
-        <br /><br />
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <i class="fas fa-plus"></i>
-            <span>What makes NoteWave an all-in-one organization tool?</span>
-          </div>
-          <div class="faq-answer">
-            <hr />
-            <p>
-              NoteWave is designed to be your comprehensive solution for
-              organizing notes and ideas. Whether for work, school, or personal
-              use, it allows you to keep everything in one place, ensuring easy
-              access and efficient management of your information.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <i class="fas fa-plus"></i>
-            <span>How secure is my data on NoteWave?</span>
-          </div>
-          <div class="faq-answer">
-            <hr />
-            <p>
-              NoteWave prioritizes the security and privacy of your data. Your
-              notes are encrypted and securely stored, ensuring that your
-              information is protected at all times from unauthorized access.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <i class="fas fa-plus"></i>
-            <span>Can I access my notes on multiple devices?</span>
-          </div>
-          <div class="faq-answer">
-            <hr />
-            <p>
-              Yes, you can. NoteWave offers seamless synchronization across all
-              your devices. This means you can access your notes anytime,
-              anywhere, ensuring your workflow remains uninterrupted, whether
-              you're on your phone, tablet, or computer.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ratings" id="section6">
-      <h2>Ratings</h2>
-      <div class="ratings-container">
-        <div class="ratings-left">
-          <h3>User Ratings</h3>
-          {% if latest_ratings %}
-          <div id="user-ratings"></div>
-          <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                       const ratings = [
-                           {% for rating in latest_ratings %}
-                           {
-                               username: "{{ rating.username }}",
-                               rating: {{ rating.rating }},
-                               comments: "{{ rating.comments }}"
-                           }{% if not loop.last %},{% endif %}
-                           {% endfor %}
-                       ];
-
-                       function generateStars(rating) {
-                           let starsHTML = '';
-                           for (let i = 1; i <= 5; i++) {
-                               if (i <= rating) {
-                                   starsHTML += '<i class="fas fa-star"></i>';
-                               } else {
-                                   starsHTML += '<i class="far fa-star"></i>';
-                               }
-                           }
-                           return starsHTML;
-                       }
-
-                       const userRatingsContainer = document.getElementById('user-ratings');
-                       userRatingsContainer.innerHTML = '';
-
-                       ratings.forEach((rating, index) => {
-                           const ratingElement = document.createElement('div');
-                           ratingElement.className = 'rating';
-                           ratingElement.innerHTML = `
-                               <p class="username">${rating.username}</p>
-                               <p class="comment">- ${rating.comments}</p>
-                               <div class="stars">${generateStars(rating.rating)}</div>
-                           `;
-                           userRatingsContainer.appendChild(ratingElement);
-
-                           // Add horizontal rule after each rating, except the last one
-                           if (index < ratings.length - 1) {
-                               const hrElement = document.createElement('hr');
-                               userRatingsContainer.appendChild(hrElement);
-                           }
-                       });
-                   });
-                       document.addEventListener("DOMContentLoaded", function() {
-                           const ratings = [
-                               {% for rating in latest_ratings %}
-                               {
-                                   username: "{{ rating.username }}",
-                                   rating: {{ rating.rating }},
-                                   comments: "{{ rating.comments }}"
-                               }{% if not loop.last %},{% endif %}
-                               {% endfor %}
-                           ];
-
-                           function generateStars(rating) {
-                               let starsHTML = '';
-                               for (let i = 1; i <= 5; i++) {
-                                   if (i <= rating) {
-                                       starsHTML += '<i class="fas fa-star"></i>';
-                                   } else {
-                                       starsHTML += '<i class="far fa-star"></i>';
-                                   }
-                               }
-                               return starsHTML;
-                           }
-
-                           const userRatingsContainer = document.getElementById('user-ratings');
-                           userRatingsContainer.innerHTML = '';
-
-                           ratings.forEach((rating, index) => {
-                               const ratingElement = document.createElement('div');
-                               ratingElement.className = 'rating';
-                               ratingElement.innerHTML = `
-                                   <p class="username">${rating.username}</p>
-                                   <p class="comment">- ${rating.comments}</p>
-                                   <div class="stars">${generateStars(rating.rating)}</div>
-                               `;
-                               userRatingsContainer.appendChild(ratingElement);
-
-                               // Add horizontal rule after each rating, except the last one
-                               if (index < ratings.length - 1) {
-                                   const hrElement = document.createElement('hr');
-                                   userRatingsContainer.appendChild(hrElement);
-                               }
-                           });
-                       });
-          </script>
-          <p>
-            Based on {{ total_reviews_count }} reviews
-            <a
-              href="{{ url_for('views.all_reviews') }}"
-              class="show-all-link"
-              style="text-decoration: none; color: #e76e3b"
-              >Show all</a
+      
+    <section class="py-5">
+      <div class="container" id="testimonials">
+        <h2 class="text-center mb-4">Submit Your Rating</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <form
+              id="rating-form"
+              method="POST"
+              action="{{ url_for('views.home') }}"
             >
-          </p>
-          {% else %}
-          <p>No ratings found.</p>
-          {% endif %}
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="form-group">
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  autocomplete="off"
+                  class="form-control"
+                  placeholder="Username"
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  class="form-control"
+                  autocomplete="off"
+                  placeholder="Enter Email"
+                />
+              </div>
+
+              <div class="form-group">
+                <select id="rating" name="rating" required class="form-control">
+                  <option value="5">5 Stars</option>
+                  <option value="4">4 Stars</option>
+                  <option value="3">3 Stars</option>
+                  <option value="2">2 Stars</option>
+                  <option value="1">1 Star</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <textarea
+                  id="comments"
+                  name="comments"
+                  rows="4"
+                  class="form-control"
+                  maxlength="50"
+                  oninput="updateCharacterCount()"
+                  placeholder="Comment"
+                  style="resize: none"
+                ></textarea>
+                <p
+                  id="char-count"
+                  style="display: flex; align-items: flex-start"
+                >
+                  0/50 characters used
+                </p>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
         </div>
-
-        <div class="ratings-right">
-          <h3>Submit Your Rating</h3>
-          <form
-            id="rating-form"
-            method="POST"
-            action="{{ url_for('views.home') }}"
-          >
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              autocomplete="off"
-              placeholder="Username"
-            />
-
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              autocomplete="off"
-              placeholder="Enter Email"
-            />
-
-            <label for="rating">Rating</label>
-            <select id="rating" name="rating" required>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
-            </select>
-
-            <textarea
-              id="comments"
-              name="comments"
-              rows="4"
-              maxlength="30"
-              oninput="updateCharacterCount()"
-              placeholder="Comment"
-            ></textarea>
-            <p id="char-count" style="display: flex; align-items: flex-start">
-              0/30 characters used
-            </p>
-
-            <button type="submit">Submit</button>
-          </form>
+      </div>
+    </section>
+    <section id="pricing" class="bg-light py-5">
+        <div class="container">
+          <h2 class="text-center mb-4">Choose Your Plan</h2>
+          <div class="row">
+            <div class="col-md-6 mb-4 mb-md-0">
+              <!-- Added margin on small screens -->
+              <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                  <h3 class="card-title">Free Mode</h3>
+                  <p class="card-text">No Payment Required</p>
+                  <ul style="text-align: left; margin: 0 auto; max-width: 300px;"> <!-- Added 'text-start' to left-align the list -->
+                    <li>Access to all basic features</li>
+                    <li>Real-time sync</li>
+                    <li>5GB storage</li>
+                    <li><strong>No data export/import, cloud backup, or sharing features</strong></li>
+                    <li><strong>No tags or admin privileges</strong></li>
+                  </ul>
+                  <p class="text-muted">Activate after verifying your email.</p>
+                  <a href="/auth/sign_up" class="btn btn-primary">Get Started</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                  <h3 class="card-title">Test Mode</h3>
+                  <p class="card-text">Full Features in Test Mode</p>
+                  <ul style="text-align: left; margin: 0 auto; max-width: 300px;"> <!-- Added 'text-start' to left-align the list -->
+                    <li>Unlimited storage</li>
+                    <li>Access to premium collaboration tools</li>
+                    <li>Priority support</li>
+                    <li>Data export/import and cloud backup</li>
+                    <li>Tagging system and admin privileges</li>
+                  </ul>
+                  <p class="text-muted">Test Mode activates after verifying your email. No payment needed.</p>
+                  <a href="/auth/sign_up" class="btn btn-primary">Start Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating bubbles for visual effect -->
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+      </section>
+      
+      
+    <!-- Contact Section -->
+    <section id="contact" class="py-5">
+      <div class="container">
+        <h2 class="text-center mb-4">Contact Us</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <form
+              id="contactForm"
+              action="{{ url_for('views.send_email_contact') }}"
+              method="post"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <div class="form-group">
+                <label for="name">Your Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">Your Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="mail"
+                  name="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">Your Phone Number</label>
+                <input
+                  type="text"
+                  name="phone"
+                  id="phone"
+                  class="form-control"
+                  placeholder="Enter your Phone"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="message">Your Message</label>
+                <textarea
+                  class="form-control"
+                  id="message"
+                  name="query"
+                  rows="5"
+                  placeholder="Enter your message"
+                  required
+                  style="resize: none"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Send Message
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="social-fixed">
-      <div class="social-icons2">
-        <a href="https://wa.me/254703853259" target="_blank"
-          ><i class="fab fa-whatsapp whatsapp"></i
-        ></a>
-        <a href="https://twitter.com/AudoWrld" target="_blank"
-          ><i class="fab fa-twitter"></i
-        ></a>
-        <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
-          ><i class="fab fa-instagram"></i
-        ></a>
-        <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
-          ><i class="fab fa-linkedin-in"></i
-        ></a>
-      </div>
-    </div>
-
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-logo">
-          <p>Note<span>wave.</span></p>
-          <div class="name">
-            <h2 class="web">NoteWave</h2>
-          </div>
-        </div>
-        <div class="footer-links">
-          <h4>Quick Links</h4>
-          <ul class="links">
-            <li><a href="/">Home</a></li>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="/contact">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-contact">
-          <h4>Contact Us</h4>
-          <div class="contact">
-            <p>
-              <i class="fas fa-map-marker-alt"></i> 0020, 002, nairobi, Lang'ata
-              District
-            </p>
-            <p><i class="fas fa-phone-alt"></i> +254 703 853 259</p>
-            <p><i class="fas fa-envelope"></i> owinovictor933@gmail.com</p>
-          </div>
-        </div>
-        <div class="footer-social">
-          <h4>Follow Us</h4>
-          <div class="social-icons">
-            <a href="https://wa.me/254703853259" target="_blank">
-              <i class="fab fa-whatsapp whatsapp"></i
-            ></a>
-            <a href="https://twitter.com/AudoWrld" target="_blank"
-              ><i class="fab fa-twitter"></i
-            ></a>
-            <a href="https://www.instagram.com/wrldaudo/?hl=en#" target="_blank"
-              ><i class="fab fa-instagram"></i
-            ></a>
-            <a href="https://www.linkedin.com/in/victorowino/" target="_blank"
-              ><i class="fab fa-linkedin-in"></i
-            ></a>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024 NoteWave. All rights reserved.</p>
+    <!-- Signup Section -->
+    <section id="signup" class="py-5 text-center">
+      <div class="container">
+        <h2>Get Started with NoteWave</h2>
         <p>
-          Designed by
-          <a href="https://kenyanaudo03.github.io/Portfolio/" target="_blank"
-            >Victor Owino</a
-          >
+          Join thousands of users who are already enjoying the benefits of
+          organized, accessible notes.
         </p>
+        <a href="/auth/sign_up" class="btn btn-primary btn-lg" target="_blank">Sign Up Now</a>
       </div>
-      <a href="#section1" class="scroll-up-arrow">
-        <i class="fas fa-chevron-up"></i>
-      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+      <div class="container text-center">
+        <p>&copy; 2024 NoteWave. All rights reserved.</p>
+        <ul class="list-inline">
+          <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+          <li class="list-inline-item"><a href="#">Terms of Service</a></li>
+          <li class="list-inline-item"><a href="#">Help</a></li>
+        </ul>
+      </div>
     </footer>
 
-    <div id="chat-icon" onclick="toggleChat()">
-      <i class="fas fa-comments"></i>
-    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script>
+      function updateCharacterCount() {
+        const textarea = document.getElementById("comments");
+        const charCountElement = document.getElementById("char-count");
+        const maxLength = 50;
+        const currentLength = textarea.value.length;
 
-    <div id="chat-window" class="chat-window">
-      <div class="chat-header">
-        <h4>Chat with us!</h4>
-        <span id="chat-close" onclick="toggleChat()">&times;</span>
-      </div>
-      <div class="chat-body">
-        <div id="chat-messages" class="chat-messages"></div>
-        <input
-          type="text"
-          id="user-input"
-          placeholder="Type your message..."
-          onkeydown="if(event.key === 'Enter') sendMessage()"
-        />
-        <button onclick="sendMessage()">Send</button>
-      </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+        charCountElement.textContent = `${currentLength}/${maxLength} characters used`;
+      }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
