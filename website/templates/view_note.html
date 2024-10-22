@@ -267,26 +267,12 @@
 
         <article class="about active" id="view_note">
           <header class="h2 article-title" style="--bookmark-: {{ tag.color }}">
-            <h2>Title: <span>{{ note.title }}</span></h2>
+              <h2>Title: <span>{{ note.title }}</span></h2>
           </header>
           <p>Content:</p>
-          <div id="editor" style="color: #fff;">{{ note.content | safe }}</div>
-        
-          <!-- Social Media Share Buttons -->
-          <div class="share-buttons">
-            <!-- Facebook Share -->
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
-               target="_blank" class="share-btn">Share on Facebook</a>
-        
-            <!-- Twitter Share -->
-            <a href="https://twitter.com/intent/tweet?text={{ note.title }}&url={{ request.build_absolute_uri }}" 
-               target="_blank" class="share-btn">Share on Twitter</a>
-        
-            <!-- WhatsApp Share -->
-            <a href="https://wa.me/?text={{ note.title }} - {{ request.build_absolute_uri }}" 
-               target="_blank" class="share-btn">Share on WhatsApp</a>
-          </div>
-        </article>
+          <div id="editor" style="color: #fff;">{{ note.content | safe }}</div>      
+      </article>
+      
 
       <div class="modal" id="scrollableModal">
         <div class="modal-content">
