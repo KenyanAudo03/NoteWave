@@ -2,3 +2,4 @@ instance/
 website/__pycache__/
 test.html
 website/static/profile_pics/
+.venv/
