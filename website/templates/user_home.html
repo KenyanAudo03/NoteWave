@@ -26,6 +26,14 @@
       href="{{ url_for('static', filename='img/notewave.ico') }}"
       type="image/x-icon"
     />
+    <style>
+      .social-link {
+    pointer-events: none; /* Disable all mouse events */
+    color: gray; /* Optional: change color to indicate it's disabled */
+    cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+}
+
+    </style>
   </head>
   <body>
     <main>
@@ -151,10 +159,11 @@
             </li>
 
             <li class="social-item">
-              <a href="{{ url_for('views.search_users')}}" class="social-link">
-                <i class="fas fa-comments" title="Socialize"></i>
+              <a href="#" class="social-link" title="Under Development" onclick="return false;">
+                  <i class="fas fa-comments"></i>
               </a>
-            </li>
+          </li>
+          
           </ul>
         </div>
       </aside>

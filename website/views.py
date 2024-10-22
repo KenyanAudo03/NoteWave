@@ -42,7 +42,11 @@ def home():
         email = request.form["email"]
         rating = int(request.form["rating"])
         comments = request.form["comments"]
+        existing_review = Rating.query.filter_by(email=email).first()
 
+        if existing_review:
+            flash("You have already submitted a review!", "danger")
+            return redirect(url_for("views.home"))
         new_rating = Rating(
             username=username, email=email, rating=rating, comments=comments
         )
@@ -52,7 +56,7 @@ def home():
         flash("Rating submitted successfully!", "success")
         return redirect(url_for("views.home"))
 
-    latest_ratings = Rating.query.order_by(Rating.timestamp.desc()).limit(4).all()
+    latest_ratings = Rating.query.order_by(Rating.timestamp.desc()).limit(2).all()
     user_count = User.query.count()
     total_reviews_count = Rating.query.count()
     return render_template(
@@ -61,6 +65,7 @@ def home():
         latest_ratings=latest_ratings,
         total_reviews_count=total_reviews_count,
     )
+
 
 
 @views.route("/all-reviews")
@@ -1415,6 +1420,15 @@ def friend_requests():
         has_pending_requests=has_pending_requests,
     )
 
+@views.route("/terms", methods=["GET", "POST"])
+def terms():
+    return render_template('terms.html')
+@views.route("/privacy", methods=["GET", "POST"])
+def privacy():
+    return render_template('privacy.html')
+@views.route("/help", methods=["GET", "POST"])
+def help():
+    return render_template('help.html')
 
 @views.route("/accept_friend_request/<int:user_id>", methods=["POST"])
 @login_required

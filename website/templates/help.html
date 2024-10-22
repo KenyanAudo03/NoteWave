@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
+    <title>Help - NoteWave</title>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+
+      .help-container {
+        padding: 10px;
+        margin: 10px auto;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #007bff;
+      }
+
+      p,
+      li {
+        margin-bottom: 15px;
+      }
+
+      ul {
+        padding-left: 20px;
+      }
+
+      /* Section dividers */
+      .section-divider {
+        margin: 40px 0;
+        border-top: 1px solid #ddd;
+      }
+
+      /* Sticky back to top button */
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50px;
+        display: none;
+        font-size: 20px;
+      }
+
+      .back-to-top i {
+        margin-right: 5px;
+      }
+
+      .back-to-top:hover {
+        background-color: #0056b3;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .help-container {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Help Content -->
+    <div class="container help-container">
+      <h1>Help & Support</h1>
+
+      <p>
+        Welcome to the NoteWave Help page! Here you will find answers to common
+        questions and tips to help you get the most out of our note-taking
+        application.
+      </p>
+
+      <div class="section-divider"></div>
+
+      <h2>Frequently Asked Questions (FAQs)</h2>
+
+      <h3>1. How do I create a new note?</h3>
+      <p>
+        To create a new note, click on the <b> "+" </b>button in your dashboard.
+        You can then enter your content and save it for later.
+      </p>
+
+      <h3>2. Can I organize my notes into folders?</h3>
+      <p>
+        Yes! You can create <b>Tags</b> to organize your notes by clicking on
+        the <b>New Tag</b> tab and selecting <b> "Create New Tag"</b>.
+      </p>
+
+      <h3>3. Is my data secure?</h3>
+      <p>
+        Absolutely! Your notes are securely encrypted and stored in our cloud.
+        We take privacy seriously and adhere to strict security measures.
+      </p>
+
+      <h3>4. How do I share a note with someone?</h3>
+      <p>
+        To share a note, open the note you want to share and click the "Share"
+        button. You can then enter the email address of the person you want to
+        share with. Additionally, you can export your notes by navigating to the
+        Settings section. In the Data section, select "Export" to save your
+        notes, and you can also import them back into the app later.
+      </p>
+
+      <h3>5. What should I do if I forget my password?</h3>
+      <p>
+        If you forget your password, click on the "Forgot Password?" link on the
+        login page. Follow the instructions to reset your password.
+      </p>
+
+      <div class="section-divider"></div>
+
+      <h2>Tips for Using NoteWave</h2>
+      <ul>
+        <li>Use tags to categorize your notes for easier searching.</li>
+        <li>Regularly back up your notes to avoid data loss.</li>
+        <li>Explore our templates for quick note-taking.</li>
+        <li>Utilize the search bar to find specific notes quickly.</li>
+        <li>
+          Set reminders for important notes to stay organized and on track.
+        </li>
+        <li>
+          Take advantage of keyboard shortcuts to speed up your note-taking
+          process.
+        </li>
+        <li>
+          Customize your notes with colors and fonts for better visual
+          organization.
+        </li>
+        <li>
+          Share your notes with friends or colleagues for collaborative
+          projects.
+        </li>
+        <li>
+          Use the checklist feature for task management within your notes.
+        </li>
+        <li>
+          Regularly review and clean up your notes to keep them organized.
+        </li>
+      </ul>
+
+      <div class="section-divider"></div>
+
+      <h2>Contact Support</h2>
+      <p>
+        If you have further questions or need assistance, please contact our
+        support team:
+      </p>
+      <p>
+        Email: <a href="mailto:vo4685336@gmail.com">vo4685336@gmail.com</a>
+      </p>
+      <p>We are here to help you!</p>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTopBtn">
+      <i class="fas fa-arrow-up"></i> Top
+    </button>
+
+    <!-- Back to Top Script -->
+    <script>
+      // Show/hide "back to top" button
+      const backToTopBtn = document.getElementById("backToTopBtn");
+      window.addEventListener("scroll", function () {
+        if (window.scrollY > 200) {
+          backToTopBtn.style.display = "block";
+        } else {
+          backToTopBtn.style.display = "none";
+        }
+      });
+
+      // Smooth scroll to top
+      backToTopBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>

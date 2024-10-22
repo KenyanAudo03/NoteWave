@@ -871,8 +871,8 @@
               <h3 class="section-title-card">Your Current Plan</h3>
               <p>
                 {% if current_user.email_verified %} You are currently on the
-                <strong>Free Plan</strong>. {% else %} You are currently on the
-                <strong>Testing Plan</strong>. Please verify your email to
+                <strong>Test Plan</strong>. {% else %} You are currently on the
+                <strong>Free Plan</strong>. Please verify your email to
                 upgrade your plan. {% endif %}
               </p>
 
@@ -929,7 +929,11 @@
                   <strong>{{ current_user.otp_method }}</strong>.
                 </p>
                 <form action="{{ url_for('auth.disable_2fa') }}" method="post">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
                   <button
                     type="submit"
                     id="disable2FAButton"
@@ -939,14 +943,23 @@
                     Disable 2FA
                   </button>
                 </form>
-                
+
                 {% else %}
                 <p>Your Two-Factor Authentication is not enabled.</p>
-                
-                <form action="{{ url_for('auth.enable_2fa') }}" method="post" class="activeForm" id="twoFac">
+
+                <form
+                  action="{{ url_for('auth.enable_2fa') }}"
+                  method="post"
+                  class="activeForm"
+                  id="twoFac"
+                >
                   <!-- CSRF Token to protect against CSRF attacks -->
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                  
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+
                   <div class="radio-group">
                     <label class="radio-label">
                       <input
@@ -957,7 +970,7 @@
                       />
                       Use Authenticator App
                     </label>
-                  
+
                     <label class="radio-label">
                       <input
                         type="checkbox"
@@ -969,7 +982,7 @@
                     </label>
                   </div>
                 </form>
-              
+
                 {% endif %}
 
                 <div id="twoFAStatusMessage" class="status-message"></div>
@@ -1242,6 +1255,7 @@
           </section>
         </article>
 
+        {% if current_user.email_verified %}
         <article class="portfolio" id="data.">
           <header>
             <h2 class="h2 article-title">
@@ -1315,7 +1329,6 @@
                   <strong>Tip:</strong> The exported notes can only be used
                   within this application.
                 </p>
-
                 {% endif %}
               </div>
             </form>
@@ -1337,9 +1350,7 @@
           </section>
 
           <section id="privacySettings" class="notification-section">
-            <h3 class="section-title">
-              Import Notes (File Format .json/.enc )
-            </h3>
+            <h3 class="section-title">Import Notes (File Format .json/.enc)</h3>
 
             <div class="drag-area">
               <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
@@ -1399,6 +1410,7 @@
             </form>
           </section>
         </article>
+        {% endif %}
 
         <article class="admin" id="admin.">
           <header>
@@ -1761,13 +1773,14 @@
       </div>
     </main>
 
-    
     <script>
       function submit2FAForm(checkbox) {
-        const checkboxes = document.querySelectorAll('input[name="otp_method"]');
-        checkboxes.forEach(function(box) {
+        const checkboxes = document.querySelectorAll(
+          'input[name="otp_method"]'
+        );
+        checkboxes.forEach(function (box) {
           if (box !== checkbox) {
-            box.checked = false; 
+            box.checked = false;
           }
         });
         document.getElementById("twoFac").submit();

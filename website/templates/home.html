@@ -33,6 +33,11 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/notewave.ico') }}"
+      type="image/x-icon"
+    />
     <style>
       .hero {
         background: url("static/img/pexels-thepaintedsquare-606541.jpg")
@@ -40,20 +45,63 @@
         height: 100vh;
         color: white;
         text-align: center;
+        position: relative;
+        background-attachment: fixed; /* Parallax effect */
       }
+      .signup-section {
+  position: relative;
+  background-image: url('static/img/pexels-thepaintedsquare-606541.jpg'); /* Set your image path here */
+  background-size: cover; /* Cover the entire section */
+  background-attachment: fixed; /* Fix the background image */
+  background-position: center; /* Center the background image */
+  color: white; /* Text color */
+  padding: 80px 0; /* Adjust padding for spacing */
+}
 
-      .hero h1 {
-        font-size: 3.5rem;
-      }
+.signup-section:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Dark overlay for fading effect */
+  z-index: 1; /* Make sure overlay is above the image */
+}
 
-      .hero p {
-        font-size: 1.25rem;
-        margin-top: 20px;
-        margin-bottom: 30px;
-      }
-      .col-md-4 i {
-        color: #ff7f50;
-      }
+.signup-section .container {
+  position: relative; /* Keep the text above the overlay */
+  z-index: 2; /* Ensure text is above the overlay */
+}
+
+.signup-section h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.signup-section p {
+  font-size: 1.25rem;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.signup-btn {
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.signup-btn:hover {
+  background-color: #005f87; /* Slightly darker shade on hover */
+  transform: translateY(-3px); /* Adds a lifting effect on hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
       .user-count-container {
         display: flex;
         justify-content: center;
@@ -94,336 +142,564 @@
     </style>
   </head>
   <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">NoteWave</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#features">Features</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#testimonials">Testimonials</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#pricing">Pricing</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#contact">Contact Us</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/auth/login" target="_blank">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link btn btn-primary text-white" href="/auth/sign_up" target="_blank"
-              >Get Started</a
-            >
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero d-flex align-items-center">
-      <div class="container text-center">
-        <h1 class="display-4" style="color: #ff7f50">
-          Organize Your Ideas Anytime, Anywhere
-        </h1>
-        <p class="lead" style="color: #00ffff">
-          Capture, organize, and share your notes across devices with ease. Stay
-          productive wherever you go.
-        </p>
-        <a href="/auth/sign_up" class="btn btn-primary btn-lg" target="_blank"
-          >Get Started for Free</a
+    <main>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-nav">
+        <a class="navbar-brand" href="#">NoteWave</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
-      </div>
-    </section>
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#features">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#testimonials">Testimonials</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#pricing">Pricing</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/auth/login" target="_blank">Login</a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-primary text-white"
+                href="/auth/sign_up"
+                target="_blank"
+                >Get Started</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="messages-container">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show"
+            role="alert"
+          >
+            {% if category == 'success' %}
+            <i class="fas fa-check-circle"></i>
+            {% else %}
+            <i class="fas fa-times-circle"></i>
+            {% endif %} {{ message }}
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+        </div>
+      </nav>
 
-    <!-- Features Section -->
-    <section id="features" class="py-5">
+      <!-- Hero Section -->
+      <section class="hero d-flex align-items-center">
+        <div class="container text-center">
+          <h1 class="display-4 animate-fade-in">
+            Organize Your Ideas Anytime, Anywhere
+          </h1>
+          <p class="lead animate-fade-in-slow">
+            Capture, organize, and share your notes across devices with ease.
+            Stay productive wherever you go.
+          </p>
+          <a
+            href="/auth/sign_up"
+            class="btn btn-primary btn-lg animate-fade-in-delay"
+            target="_blank"
+            >Get Started for Free</a
+          >
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="py-5">
         <div class="container">
-          <h2 class="text-center mb-4">Features</h2>
-          <div class="row">
-            <div class="col-md-4">
-              <i class="fas fa-cubes"></i>
-              <h4>All-in-One Organization</h4>
-              <p>
-                NoteWave is your all-in-one solution for organizing your notes and
-                ideas. Keep everything in one place, whether it's for work,
-                school, or personal use.
-              </p>
+            <h2 class="text-center mb-4">Features</h2>
+<div class="hr-with-dot text-center">
+  <hr class="line">
+  <span class="dot">•</span>
+  <hr class="line">
+</div>
+           
+          <div class="row text-center">
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-cubes"></i>
+                </div>
+                <h4>All-in-One Organization</h4>
+                <p>
+                  NoteWave is your all-in-one solution for organizing your notes
+                  and ideas. Keep everything in one place, whether it's for
+                  work, school, or personal use.
+                </p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <i class="fas fa-lock"></i>
-              <h4>Secure Storage</h4>
-              <p>
-                Your notes are encrypted and securely stored, ensuring the privacy
-                and protection of your data at all times.
-              </p>
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-lock"></i>
+                </div>
+                <h4>Secure Storage</h4>
+                <p>
+                  Your notes are encrypted and securely stored, ensuring the
+                  privacy and protection of your data at all times.
+                </p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <i class="fas fa-sync-alt"></i>
-              <h4>Seamless Sync</h4>
-              <p>
-                Access your notes on any device, anytime, anywhere. Sync your data
-                seamlessly across all your devices for uninterrupted workflow.
-              </p>
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-sync-alt"></i>
+                </div>
+                <h4>Seamless Sync</h4>
+                <p>
+                  Access your notes on any device, anytime, anywhere. Sync your
+                  data seamlessly across all your devices for uninterrupted
+                  workflow.
+                </p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <i class="fas fa-user-friends"></i>
-              <h4>User-Friendly Interface</h4>
-              <p>
-                Capture your thoughts quickly and easily with NoteWave's intuitive
-                interface. Start writing instantly with no complicated setups.
-              </p>
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-user-friends"></i>
+                </div>
+                <h4>User-Friendly Interface</h4>
+                <p>
+                  Capture your thoughts quickly and easily with NoteWave's
+                  intuitive interface. Start writing instantly with no
+                  complicated setups.
+                </p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <i class="fas fa-bolt"></i>
-              <h4>Fast Search</h4>
-              <p>
-                Find any note instantly with NoteWave's powerful search feature.
-                Quickly filter through your content using keywords, tags, and dates.
-              </p>
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Fast Search</h4>
+                <p>
+                  Find any note instantly with NoteWave's powerful search
+                  feature. Quickly filter through your content using keywords,
+                  tags, and dates.
+                </p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <i class="fas fa-cloud"></i>
-              <h4>Cloud Backup</h4>
-              <p>
-                Never lose your notes again with automatic cloud backups. Your data
-                is safely backed up, providing peace of mind and easy recovery
-                when needed.
-              </p>
+            <div class="col-md-4 mb-4">
+              <div class="feature-box p-4">
+                <div class="icon-box mb-3">
+                  <i class="fas fa-cloud"></i>
+                </div>
+                <h4>Cloud Backup</h4>
+                <p>
+                  Never lose your notes again with automatic cloud backups. Your
+                  data is safely backed up, providing peace of mind and easy
+                  recovery when needed.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      
-    <section class="py-5">
-      <div class="container" id="testimonials">
-        <h2 class="text-center mb-4">Submit Your Rating</h2>
-        <div class="row justify-content-center">
-          <div class="col-md-8">
-            <form
-              id="rating-form"
-              method="POST"
-              action="{{ url_for('views.home') }}"
-            >
-              <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-              />
-              <div class="form-group">
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  required
-                  autocomplete="off"
-                  class="form-control"
-                  placeholder="Username"
-                />
-              </div>
-              <div class="form-group">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  class="form-control"
-                  autocomplete="off"
-                  placeholder="Enter Email"
-                />
-              </div>
 
-              <div class="form-group">
-                <select id="rating" name="rating" required class="form-control">
-                  <option value="5">5 Stars</option>
-                  <option value="4">4 Stars</option>
-                  <option value="3">3 Stars</option>
-                  <option value="2">2 Stars</option>
-                  <option value="1">1 Star</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <textarea
-                  id="comments"
-                  name="comments"
-                  rows="4"
-                  class="form-control"
-                  maxlength="50"
-                  oninput="updateCharacterCount()"
-                  placeholder="Comment"
-                  style="resize: none"
-                ></textarea>
-                <p
-                  id="char-count"
-                  style="display: flex; align-items: flex-start"
-                >
-                  0/50 characters used
-                </p>
-              </div>
+      <section class="py-5">
+        <div class="container">
+          <div class="row">
+            <!-- Submit Your Rating Section -->
+            <div class="col-lg-6 col-md-12 mb-4">
+                <h2 class="text-center mb-4">Submit Your Rating</h2>
+                <div class="hr-with-dot text-center">
+                  <hr class="line3">
+                  <span class="dot">•</span>
+                  <hr class="line3">
+                </div>
+                
+              <div class="row justify-content-center">
+                <div class="col-md-12">
+                  <form
+                    id="rating-form"
+                    method="POST"
+                    action="{{ url_for('views.home') }}"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf_token"
+                      value="{{ csrf_token() }}"
+                    />
+                    <div class="form-group">
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autocomplete="off"
+                        class="form-control"
+                        placeholder="Username"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        class="form-control"
+                        autocomplete="off"
+                        placeholder="Enter Email"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <select
+                        id="rating"
+                        name="rating"
+                        required
+                        class="form-control"
+                      >
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <textarea
+                        id="comments"
+                        name="comments"
+                        rows="4"
+                        class="form-control"
+                        maxlength="50"
+                        oninput="updateCharacterCount()"
+                        placeholder="Comment"
+                        style="resize: none"
+                      ></textarea>
+                      <p
+                        id="char-count"
+                        style="display: flex; align-items: flex-start"
+                      >
+                        0/50 characters used
+                      </p>
+                    </div>
 
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+                    <button type="submit" class="btn btn-primary w-100 contact-btn">
+                      Submit
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Ratings Section -->
+            <div class="col-lg-6 col-md-12">
+                <h2 class="text-center mb-4">Latest User Ratings</h2>
+                <div class="hr-with-dot text-center">
+                  <hr class="line3">
+                  <span class="dot">•</span>
+                  <hr class="line3">
+                </div>
+                
+              <div class="row justify-content-center">
+                <div class="col-md-12">
+                  {% if latest_ratings %}
+                  <div
+                    id="user-ratings"
+                    class="p-4"
+                    style="
+                      border: 1px solid #ddd;
+                      border-radius: 10px;
+                      background: #f8f9fa;
+                      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    "
+                  ></div>
+                  <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                      const ratings = [
+                        {% for rating in latest_ratings %}
+                        {
+                          username: "{{ rating.username }}",
+                          rating: {{ rating.rating }},
+                          comments: "{{ rating.comments }}"
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                      ];
+
+                      function generateStars(rating) {
+                        let starsHTML = '';
+                        for (let i = 1; i <= 5; i++) {
+                          if (i <= rating) {
+                            starsHTML += '<i class="fas fa-star text-warning"></i>';
+                          } else {
+                            starsHTML += '<i class="far fa-star text-warning"></i>';
+                          }
+                        }
+                        return starsHTML;
+                      }
+
+                      const userRatingsContainer = document.getElementById('user-ratings');
+                      userRatingsContainer.innerHTML = '';
+
+                      ratings.forEach((rating, index) => {
+                        const ratingElement = document.createElement('div');
+                        ratingElement.className = 'rating mb-4';
+                        ratingElement.innerHTML = `
+                          <p class="font-weight-bold mb-1">@${rating.username}</p>
+                          <p class="text-muted mb-2">"${rating.comments}"</p>
+                          <div class="stars">${generateStars(rating.rating)}</div>
+                        `;
+                        userRatingsContainer.appendChild(ratingElement);
+
+                        // Add horizontal rule after each rating, except the last one
+                        if (index < ratings.length - 1) {
+                          const hrElement = document.createElement('hr');
+                          userRatingsContainer.appendChild(hrElement);
+                        }
+                      });
+                    });
+                  </script>
+                  <p class="mt-4">
+                    Based on {{ total_reviews_count }} reviews
+                    <a
+                      href="{{ url_for('views.all_reviews') }}"
+                      class="show-all-link"
+                      style="text-decoration: none; color: #e76e3b"
+                      >Show all</a
+                    >
+                  </p>
+                  {% else %}
+                  <p>No ratings found.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-    <section id="pricing" class="bg-light py-5">
+      </section>
+
+      <section id="pricing" class="bg-light py-5 position-relative">
         <div class="container">
-          <h2 class="text-center mb-4">Choose Your Plan</h2>
+            <h2 class="text-center mb-4">Choose Your Plan</h2>
+            <div class="hr-with-dot text-center">
+              <hr class="line1">
+              <span class="dot">•</span>
+              <hr class="line1">
+            </div>
+            
           <div class="row">
             <div class="col-md-6 mb-4 mb-md-0">
-              <!-- Added margin on small screens -->
-              <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                  <h3 class="card-title">Free Mode</h3>
-                  <p class="card-text">No Payment Required</p>
-                  <ul style="text-align: left; margin: 0 auto; max-width: 300px;"> <!-- Added 'text-start' to left-align the list -->
-                    <li>Access to all basic features</li>
-                    <li>Real-time sync</li>
-                    <li>5GB storage</li>
-                    <li><strong>No data export/import, cloud backup, or sharing features</strong></li>
-                    <li><strong>No tags or admin privileges</strong></li>
+              <!-- Free Mode -->
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h3 class="card-title text-center">Free Mode</h3>
+                  <p class="pricing-value text-primary text-center">
+                    $0<span class="text-muted">/month</span>
+                  </p>
+                  <p class="card-text text-center">No Payment Required</p>
+                  <ul class="pricing-list">
+                    <li>
+                      <i class="fas fa-check text-success"></i> Access to all
+                      basic features
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Real-time sync
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> 5GB storage
+                    </li>
+                    <li>
+                      <i class="fas fa-times text-danger"></i> No data
+                      export/import or cloud backup
+                    </li>
+                    <li>
+                      <i class="fas fa-times text-danger"></i> No tags or admin
+                      privileges
+                    </li>
                   </ul>
-                  <p class="text-muted">Activate after verifying your email.</p>
-                  <a href="/auth/sign_up" class="btn btn-primary">Get Started</a>
+                  <p class="text-muted text-center">
+                    Activate after verifying your email.
+                  </p>
+                  <div class="text-center">
+                    <a href="/auth/sign_up" class="btn btn-primary"
+                      >Get Started</a
+                    >
+                  </div>
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                  <h3 class="card-title">Test Mode</h3>
-                  <p class="card-text">Full Features in Test Mode</p>
-                  <ul style="text-align: left; margin: 0 auto; max-width: 300px;"> <!-- Added 'text-start' to left-align the list -->
-                    <li>Unlimited storage</li>
-                    <li>Access to premium collaboration tools</li>
-                    <li>Priority support</li>
-                    <li>Data export/import and cloud backup</li>
-                    <li>Tagging system and admin privileges</li>
+              <!-- Test Mode -->
+              <div class="card shadow-sm border-0 h-100 position-relative">
+                <!-- Recommended Badge -->
+                <div
+                  class="badge bg-danger text-white position-absolute"
+                  style="top: -10px; right: -10px; font-size: 0.75rem"
+                >
+                  Recommended
+                </div>
+                <div class="card-body">
+                  <h3 class="card-title text-center">Test Mode</h3>
+                  <p class="pricing-value text-primary text-center">
+                    $0<span class="text-muted">/month</span>
+                  </p>
+                  <p class="card-text text-center">
+                    Full Features in Test Mode
+                  </p>
+                  <ul class="pricing-list">
+                    <li>
+                      <i class="fas fa-check text-success"></i> Unlimited
+                      storage
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Premium
+                      collaboration tools
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Priority support
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Data
+                      export/import and cloud backup
+                    </li>
+                    <li>
+                      <i class="fas fa-check text-success"></i> Tagging system
+                      and admin privileges
+                    </li>
                   </ul>
-                  <p class="text-muted">Test Mode activates after verifying your email. No payment needed.</p>
-                  <a href="/auth/sign_up" class="btn btn-primary">Start Now</a>
+                  <p class="text-muted text-center">
+                    Test Mode activates after verifying your email. No payment
+                    needed.
+                  </p>
+                  <div class="text-center">
+                    <a href="/auth/sign_up" class="btn btn-primary"
+                      >Start Now</a
+                    >
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         <!-- Floating bubbles for visual effect -->
         <div class="bubble"></div>
         <div class="bubble"></div>
         <div class="bubble"></div>
         <div class="bubble"></div>
       </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Contact Us</h2>
+            <div class="hr-with-dot text-center">
+                <hr class="line2">
+                <span class="dot">•</span>
+                <hr class="line2">
+            </div>
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-8">
+                    <form id="contactForm" action="{{ url_for('views.send_email_contact') }}" method="post" class="p-4 shadow-lg rounded bg-light">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <div class="form-group mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="email" class="form-label">Your Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="phone" class="form-label">Your Phone Number</label>
+                            <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter your phone number" required />
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="message" class="form-label" >Your Message</label>
+                            <textarea class="form-control" id="message" name="query" rows="5" placeholder="Enter your message" required style="resize: none;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg contact-btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+
+      <!-- Signup Section -->
+      <section id="signup" class="signup-section py-5 text-center">
+        <div class="container">
+          <h2 class="display-4">Get Started with NoteWave</h2>
+          <p class="lead mb-4">
+            Join thousands of users who are already enjoying the benefits of organized, accessible notes.
+          </p>
+          <a href="/auth/sign_up" class="btn btn-primary btn-lg signup-btn" target="_blank">
+            Sign Up Now
+          </a>
+        </div>
+      </section>
       
       
-    <!-- Contact Section -->
-    <section id="contact" class="py-5">
-      <div class="container">
-        <h2 class="text-center mb-4">Contact Us</h2>
-        <div class="row justify-content-center">
-          <div class="col-md-8">
-            <form
-              id="contactForm"
-              action="{{ url_for('views.send_email_contact') }}"
-              method="post"
-            >
-              <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-              />
-              <div class="form-group">
-                <label for="name">Your Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="name"
-                  name="name"
-                  placeholder="Enter your name"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="email">Your Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="mail"
-                  name="email"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="email">Your Phone Number</label>
-                <input
-                  type="text"
-                  name="phone"
-                  id="phone"
-                  class="form-control"
-                  placeholder="Enter your Phone"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="message">Your Message</label>
-                <textarea
-                  class="form-control"
-                  id="message"
-                  name="query"
-                  rows="5"
-                  placeholder="Enter your message"
-                  required
-                  style="resize: none"
-                ></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Send Message
-              </button>
-            </form>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 footer">
+        <div class="container text-center">
+          <div class="row">
+            <div class="col-md-4">
+              <h5>Contact Us</h5>
+              <p>Email: <a href="mailto:vo4685336@gmail.com">vo4685336@gmail.com</a></p>
+              <p>Phone: <a href="tel:+2540703853259">+254 (038) 53259</a></p>
+              <p>
+                <a href="mailto:vo4685336@gmail.com" class="btn btn-outline-light">Send Us a Message</a>
+              </p>
+            </div>
+            <div class="col-md-4">
+              <h5>Location</h5>
+              <p>Lang'atta South C</p>
+              <p>South C</p>
+              <p>Nairobi Kenya, NK 00100</p>
+            </div>
+            <div class="col-md-4">
+              <h5>Subscribe to Our Newsletter</h5>
+              <form action="#" method="POST">
+                <div class="input-group mb-3">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input type="email" class="form-control" placeholder="Enter your email" aria-label="Email">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-light" type="submit">Subscribe</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <hr class="my-4 separate">
+          <div class="social-icons">
+            <a href="https://github.com/KenyanAudo03" class="social-icon" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://twitter.com/AudoWrld" class="social-icon" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/wrldaudo/" class="social-icon" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/254703853259" class="social-icon"  target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/VictorOwino" class="social-icon" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+            <a href="https://www.linkedin.com/in/victorowino/" class="social-icon" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+          
+          <div class="mt-3">
+            <p>&copy; 2024 NoteWave. All rights reserved.</p>
+            <ul class="list-inline">
+              <li class="list-inline-item"><a href="/privacy">Privacy Policy</a></li>
+              <li class="list-inline-item"><a href="/terms">Terms of Service</a></li>
+              <li class="list-inline-item"><a href="/help">Help</a></li>
+            </ul>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Signup Section -->
-    <section id="signup" class="py-5 text-center">
-      <div class="container">
-        <h2>Get Started with NoteWave</h2>
-        <p>
-          Join thousands of users who are already enjoying the benefits of
-          organized, accessible notes.
-        </p>
-        <a href="/auth/sign_up" class="btn btn-primary btn-lg" target="_blank">Sign Up Now</a>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-      <div class="container text-center">
-        <p>&copy; 2024 NoteWave. All rights reserved.</p>
-        <ul class="list-inline">
-          <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
-          <li class="list-inline-item"><a href="#">Terms of Service</a></li>
-          <li class="list-inline-item"><a href="#">Help</a></li>
-        </ul>
-      </div>
-    </footer>
-
+      </footer>
+      
+      
     <!-- Bootstrap JS and dependencies -->
     <script>
       function updateCharacterCount() {
@@ -434,6 +710,42 @@
 
         charCountElement.textContent = `${currentLength}/${maxLength} characters used`;
       }
+    </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Immediately hide the message container when the page is loaded
+      const messagesContainer = document.querySelector(".messages-container");
+      if (messagesContainer) {
+        messagesContainer.style.display = "none"; // Hide container
+      }
+  
+      // After 3 seconds, show and then remove the alert messages
+      setTimeout(function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert, index) => {
+          alert.classList.remove("show");
+          alert.classList.add("fade");
+  
+          setTimeout(() => {
+            alert.remove();
+            if (index === alerts.length - 1 && messagesContainer) {
+              messagesContainer.remove();
+            }
+          }, 150); // 150ms timeout for the fade transition
+        });
+      }, 3000); // 3-second delay before starting the hide animation
+    });
+  </script>
+  
+    <script>
+      window.onscroll = function () {
+        const nav = document.querySelector(".sticky-nav");
+        if (window.scrollY > 50) {
+          nav.classList.add("scrolled");
+        } else {
+          nav.classList.remove("scrolled");
+        }
+      };
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>

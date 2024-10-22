@@ -96,69 +96,48 @@
               <div class="icon-box">
                 <ion-icon name="person-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Username</p>
                 <span style="color: #fff">{{ current_user.user_name }}</span>
               </div>
             </li>
+
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="mail-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Email</p>
                 <span style="color: #fff">{{ current_user.email }}</span>
               </div>
             </li>
 
+            {% if current_user.phone_number %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="phone-portrait-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Phone</p>
-                {% if current_user.phone_number %}
-                <span style="color: #fff">
-                  {{ current_user.phone_number }}
-                </span>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your phone number
-                </a>
-                {% endif %}
+                <span style="color: #fff">{{ current_user.phone_number }}</span>
               </div>
             </li>
-
+            {% endif %} {% if current_user.date_birth %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="calendar-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Birthday</p>
-                {% if current_user.date_birth %}
                 <time
                   datetime="{{ current_user.date_birth }}"
                   style="color: #fff"
                 >
                   {{ current_user.date_birth }}
                 </time>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your birthday
-                </a>
-                {% endif %}
               </div>
             </li>
+            {% endif %}
           </ul>
 
           <div class="separator"></div>
@@ -367,6 +346,55 @@
           window.location.href = "/notifications";
         });
     </script>
+      <script>
+        "use strict";
+        const elementToggleFunc = function (elem) {
+          elem.classList.toggle("active");
+        };
+        const sidebar = document.querySelector("[data-sidebar]");
+        const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+  
+        sidebarBtn.addEventListener("click", function () {
+          elementToggleFunc(sidebar);
+        });
+        const testimonialsItem = document.querySelectorAll(
+          "[data-testimonials-item]"
+        );
+        const modalContainer = document.querySelector("[data-modal-container]");
+        const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+        const overlay = document.querySelector("[data-overlay]");
+        const modalImg = document.querySelector("[data-modal-img]");
+        const modalTitle = document.querySelector("[data-modal-title]");
+        const modalText = document.querySelector("[data-modal-text]");
+        const testimonialsModalFunc = function () {
+          modalContainer.classList.toggle("active");
+          overlay.classList.toggle("active");
+        };
+        for (let i = 0; i < testimonialsItem.length; i++) {
+          testimonialsItem[i].addEventListener("click", function () {
+            modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
+            modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
+            modalTitle.innerHTML = this.querySelector(
+              "[data-testimonials-title]"
+            ).innerHTML;
+            modalText.innerHTML = this.querySelector(
+              "[data-testimonials-text]"
+            ).innerHTML;
+  
+            testimonialsModalFunc();
+          });
+        }
+        modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+        overlay.addEventListener("click", testimonialsModalFunc);
+      </script>
+      <script
+        type="module"
+        src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+      ></script>
+      <script
+        nomodule
+        src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+      ></script>
     <script src="{{ url_for('static', filename='js/edit_note.js') }}"></script>
   </body>
 </html>

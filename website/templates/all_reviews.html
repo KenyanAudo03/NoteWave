@@ -31,12 +31,123 @@
     href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
     rel="stylesheet"
   />
+  <style>
+    /* General section styling */
+.all-reviews {
+    background-color: #f5f7fa; /* Light background */
+    padding: 0px 0;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.all-reviews h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+/* Section title underline animation */
+.all-reviews h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #007bff; /* Blue underline */
+    margin: 10px auto;
+    transition: width 0.4s ease-in-out;
+}
+
+.all-reviews h2:hover::after {
+    width: 100px;
+}
+
+/* Container holding all reviews */
+.reviews-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    row-gap: 30px;
+}
+
+/* Individual rating box styling */
+.rating-box {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 350px;
+    text-align: left;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(50px); /* Starting position for animation */
+    animation: fadeInUp 0.6s forwards;
+}
+
+/* Smooth appearance animation */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effect on review box */
+.rating-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Username styling */
+.rating-content .username {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Comment styling */
+.rating-content .comment {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Stars styling */
+.rating-content .stars {
+    margin-top: 10px;
+}
+
+.filled-star {
+    color: #f4b400; /* Gold color for filled stars */
+    margin-right: 5px;
+}
+
+.empty-star {
+    color: #ccc; /* Gray color for empty stars */
+    margin-right: 5px;
+}
+@media (max-width: 768px) {
+    .rating-box {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+}
+
+  </style>
 
 </head>
 <body>
-    <section class="all-reviews">
-        <h2>All Reviews</h2>
-        <div id="all-user-ratings"></div>
+    <section class="all-reviews py-5">
+        <h2 class="text-center mb-5">All Reviews</h2>
+        <div id="all-user-ratings" class="reviews-container"></div>
+    
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 const ratings = [
@@ -48,36 +159,37 @@
                     }{% if not loop.last %},{% endif %}
                     {% endfor %}
                 ];
-
+    
                 function generateStars(rating) {
                     let starsHTML = '';
                     for (let i = 1; i <= 5; i++) {
                         if (i <= rating) {
-                            starsHTML += '<i class="fas fa-star"></i>'; 
+                            starsHTML += '<i class="fas fa-star filled-star"></i>'; 
                         } else {
-                            starsHTML += '<i class="far fa-star"></i>'; 
+                            starsHTML += '<i class="far fa-star empty-star"></i>'; 
                         }
                     }
                     return starsHTML;
                 }
-
+    
                 const userRatingsContainer = document.getElementById('all-user-ratings');
                 userRatingsContainer.innerHTML = '';
-
+    
                 ratings.forEach(rating => {
                     const ratingElement = document.createElement('div');
-                    ratingElement.className = 'rating';
+                    ratingElement.className = 'rating-box';
                     ratingElement.innerHTML = `
-                        <p class="username">${rating.username}</p>
-                        <p class="comment">- ${rating.comments}</p>
-                        <div class="stars">${generateStars(rating.rating)}</div>
+                        <div class="rating-content">
+                            <p class="username">@${rating.username}</p>
+                            <p class="comment">"${rating.comments}"</p>
+                            <div class="stars">${generateStars(rating.rating)}</div>
+                        </div>
                     `;
                     userRatingsContainer.appendChild(ratingElement);
-
-                    
                 });
             });
         </script>
     </section>
+    
 </body>
 </html>

@@ -304,7 +304,7 @@
             </form>
           </section>
           <br />
-
+          {% if current_user.email_verified %}
           <header>
             <h2
               class="h2 article-title"
@@ -313,25 +313,29 @@
               Other Options
             </h2>
           </header>
+          
           <section class="about-text options_use">
-            
-            <div class="speech-text">
-              <a
-                href="{{url_for('views.speech_text')}}"
-                style="--background-: {{ current_user.generated_color }}"
-                class="speech-text-toggle-add"
-                ><i class="bx bxs-microphone-alt" title="Speech-Text"></i
-              ></a>
-            </div>
-            <div class="scan-pdf">
-              <a
-                href="{{url_for('views.pdf_text')}}"
-                style="--background-: {{ current_user.generated_color }}"
-                class="speech-text-toggle-add"
-                ><i class="bx bx-scan" title="Scan-Pdf/Docz-Text"></i
-              ></a>
-            </div>
+              <div class="speech-text">
+                  <a
+                      href="{{ url_for('views.speech_text') }}"
+                      style="--background-: {{ current_user.generated_color }}"
+                      class="speech-text-toggle-add"
+                  >
+                      <i class="bx bxs-microphone-alt" title="Speech-Text"></i>
+                  </a>
+              </div>
+              <div class="scan-pdf">
+                  <a
+                      href="{{ url_for('views.pdf_text') }}"
+                      style="--background-: {{ current_user.generated_color }}"
+                      class="speech-text-toggle-add"
+                  >
+                      <i class="bx bx-scan" title="Scan-Pdf/Docz-Text"></i>
+                  </a>
+              </div>
           </section>
+          {% endif %}
+          
         </article>
       </div>
     </main>

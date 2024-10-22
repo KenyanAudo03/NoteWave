@@ -84,69 +84,48 @@
               <div class="icon-box">
                 <ion-icon name="person-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Username</p>
                 <span style="color: #fff">{{ current_user.user_name }}</span>
               </div>
             </li>
+
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="mail-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Email</p>
                 <span style="color: #fff">{{ current_user.email }}</span>
               </div>
             </li>
 
+            {% if current_user.phone_number %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="phone-portrait-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Phone</p>
-                {% if current_user.phone_number %}
-                <span style="color: #fff">
-                  {{ current_user.phone_number }}
-                </span>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your phone number
-                </a>
-                {% endif %}
+                <span style="color: #fff">{{ current_user.phone_number }}</span>
               </div>
             </li>
-
+            {% endif %} {% if current_user.date_birth %}
             <li class="contact-item">
               <div class="icon-box">
                 <ion-icon name="calendar-outline"></ion-icon>
               </div>
-
               <div class="contact-info">
                 <p class="contact-title">Birthday</p>
-                {% if current_user.date_birth %}
                 <time
                   datetime="{{ current_user.date_birth }}"
                   style="color: #fff"
                 >
                   {{ current_user.date_birth }}
                 </time>
-                {% else %}
-                <a
-                  href="{{ url_for('views.settings') }}"
-                  style="color: #f1c40f; text-decoration: underline"
-                >
-                  Add your birthday
-                </a>
-                {% endif %}
               </div>
             </li>
+            {% endif %}
           </ul>
 
           <div class="separator"></div>
